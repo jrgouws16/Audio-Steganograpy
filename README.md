@@ -1,2 +1,4 @@
 # Audio-Steganograpy
-Final year project (BEng Computer Engineering)
+Genetic Algorithm
+
+- This is a genetic algorithm implemented in temporal domain to hide the secret message in the audio cover.
