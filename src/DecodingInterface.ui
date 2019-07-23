@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>905</width>
-    <height>508</height>
+    <width>1001</width>
+    <height>713</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -72,11 +72,22 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="lineEdit_stego">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QLineEdit" name="lineEdit_stego">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_browse_stego">
+             <property name="text">
+              <string>Browse</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
@@ -154,10 +165,21 @@
          </property>
         </widget>
        </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
         <widget class="QLineEdit" name="lineEdit_msgname">
          <property name="text">
           <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_browse_message">
+         <property name="text">
+          <string>Browse</string>
          </property>
         </widget>
        </item>
@@ -263,8 +285,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>905</width>
-     <height>27</height>
+     <width>1001</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>

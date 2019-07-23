@@ -54,7 +54,7 @@ class LSB_encoding:
             self.signalEmbedding.trigger.emit(float(progress) * 100 / len(self.coverSamples))
             
     def writeStegoToFile(self, fileName, parameters):
-        with wave.open('C:/Users/project/Desktop/EPR practical/Media_encoded/' + fileName, 'wb') as fd:
+        with wave.open(fileName, 'wb') as fd:
             fd.setparams(parameters)
         
             for i in range(len(self.stegoSamples)):

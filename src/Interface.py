@@ -1,34 +1,28 @@
 # Import the needed libraries
 from PyQt5 import QtWidgets, uic
 import LSB
-import audioOperations
 import wave
-import fileprocessing
+import fileprocessing as fp
 import SignalsAndSlots
 
 def LSB_encoding(coverFileName, messageFileName, bitToEncode, stegoFileName):
     try:
-        song = wave.open('C:/Users/project/Desktop/EPR practical/Media/' + coverFileName, mode='rb')
-        # Create a object for retrieving samples of audio cover file
-        cover = audioOperations.stegoTools(song, "Cover")
-        cover.extractingSamples.connect(mainWindow.progressBar_reading.setValue)
-        cover.extractSamples()
-        cover_samples = cover.returnSamplesChannelOne()
-        mainWindow.label_cover_size.setText("Cover Samples (16 byte): " + str(len(cover_samples)))
+        song = wave.open(coverFileName, mode='rb')
+        
+        fp.signalExtract.connect(mainWindow.progressBar_reading.setValue)
+        cover_samples = fp.extractWaveSamples(song)
+        mainWindow.label_cover_size.setText("Cover Samples (16 byte): " + str(len(cover_samples[0])))
 
-        # Create a message processing object
-        messageProcessing = fileprocessing.MessageFileEncoding(messageFileName)
-        messageProcessing.signalMessage.connect(mainWindow.progressBar_message.setValue)
-        secret_message = messageProcessing.returnMessageSamples()
+        fp.signalReadMsg.connect(mainWindow.progressBar_message.setValue)
+        secret_message = fp.getMessageBits(messageFileName)
         mainWindow.label_msg_size.setText("Message Size (bits): " + str(len(secret_message)))
 
-        if (len(cover_samples) < len(secret_message)):
+        if (len(cover_samples[0]) < len(secret_message)):
             SignalsAndSlots.showErrorMessage("Cover file too small",
                                              "The cover file is too small to embed the secret message. "
                                              "Either provide a larger cover file or a smaller message")
         else:
-            print(len(secret_message), "bits embedded")
-            LSB_encoding = LSB.LSB_encoding(cover_samples, secret_message)
+            LSB_encoding = LSB.LSB_encoding(cover_samples[0], secret_message)
             LSB_encoding.signalWriting.connect(mainWindow.progressBar_writing.setValue)
             LSB_encoding.signalEmbedding.connect(mainWindow.progressBar_embedding.setValue)
             LSB_encoding.encode(bitToEncode)
@@ -43,13 +37,13 @@ def LSB_encoding(coverFileName, messageFileName, bitToEncode, stegoFileName):
 def encode():
     coverFileName = mainWindow.lineEdit_cover.text()
     messageFileName = mainWindow.lineEdit_message.text()
+    stegoFileName = mainWindow.lineEdit_stegopath.text()
 
     if(mainWindow.radioButton_LSB.isChecked()):
-        print("Least Significant bit steganography is executing")
         if (mainWindow.lineEdit_LSB_nr.text() == ''):
             SignalsAndSlots.showErrorMessage('Invalid LSB embedding position', 'Enter an integer ranging from 1 to 4')
         else:
-            LSB_encoding(coverFileName, messageFileName, int(mainWindow.lineEdit_LSB_nr.text()), mainWindow.lineEdit_stegoname.text())
+            LSB_encoding(coverFileName, messageFileName, int(mainWindow.lineEdit_LSB_nr.text()), stegoFileName)
 
     elif(mainWindow.radioButton_GA.isChecked()):
         print('Genetic Algorithm is executing')
@@ -57,16 +51,31 @@ def encode():
     else:
         SignalsAndSlots.showErrorMessage("Invalid Encoding Algorithm selected",
                          "Select an encoding algorithm by selecting a radio button")
-
+        
+def setCoverPath():
+      mainWindow.lineEdit_cover.setText(fp.openFile())
+      
+def setMessagePath():
+      mainWindow.lineEdit_message.setText(fp.openFile())
+      
+def setStegoPath():
+      mainWindow.lineEdit_stegopath.setText(fp.saveFile() + '.wav')
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
     mainWindow = uic.loadUi("EncodingInterface.ui")
-    mainWindow.lineEdit_cover.setPlaceholderText("filename")
-    mainWindow.lineEdit_message.setPlaceholderText("filename")
+    mainWindow.lineEdit_cover.setPlaceholderText("Path")
+    mainWindow.lineEdit_cover.setReadOnly(True)
+    mainWindow.lineEdit_message.setPlaceholderText("Path")
+    mainWindow.lineEdit_message.setReadOnly(True)
+    mainWindow.lineEdit_stegopath.setPlaceholderText("Path")
+    mainWindow.lineEdit_stegopath.setReadOnly(True)
     mainWindow.lineEdit_LSB_nr.setPlaceholderText("LSB 1-4")
     mainWindow.pushButton_encode.clicked.connect(encode)
+    mainWindow.pushButton_browse_cover.clicked.connect(setCoverPath)
+    mainWindow.pushButton_browse_message.clicked.connect(setMessagePath)
+    mainWindow.pushButton_browse_stego.clicked.connect(setStegoPath)
     mainWindow.progressBar_reading.setValue(0)
     mainWindow.progressBar_embedding.setValue(0)
     mainWindow.progressBar_writing.setValue(0)
