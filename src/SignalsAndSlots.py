@@ -6,10 +6,10 @@ def showErrorMessage(title, message):
     QMessageBox.critical(None, title, message)
 
 class SigSlot(QObject):
-
     # Define a new signal called 'trigger' that has no arguments.
     trigger = pyqtSignal(float)
 
+    # Connect to a slot
     def connect(self, function):
         self.trigger.connect(function)
 

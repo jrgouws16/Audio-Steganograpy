@@ -6,7 +6,7 @@ import fileprocessing as fp
 import SignalsAndSlots
 
 def LSB_decoding(stegoFileName):
-    #try:
+    try:
         song = wave.open(stegoFileName, mode='rb')
 
         # Create a object for retrieving samples of audio cover file
@@ -23,8 +23,8 @@ def LSB_decoding(stegoFileName):
 
         song.close()
 
-    #except:
-     #   SignalsAndSlots.showErrorMessage("Invalid stego filename provided", "The steganographic file name provided does not exist or inserted wrongly")
+    except:
+        SignalsAndSlots.showErrorMessage("Invalid stego filename provided", "The steganographic file name provided does not exist or inserted wrongly")
 
 def decode():
     stegoFileName = mainWindow.lineEdit_stego.text()
