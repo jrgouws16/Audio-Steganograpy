@@ -6,57 +6,77 @@ Created on Tue Jul 23 14:10:15 2019
 """
 
 import geneticAlgorithm as GA
-'''
-print("##################################################")
-print("######      Tesitng generate population     ######")
-print("##################################################")
-      
-song = wave.open('Media/opera.wav', 'rb')
-samples = fp.extractWaveSamples(song)[0]
-
-print("Original Sample: ", "{0:016b}".format(samples[0]))
-
-population = GA.generatePopulation("{0:016b}".format(samples[0]), '1')
-
-print("Population is:")
-
-for i in population:
-    print(i)
-    
-'''
+import numpy as np
 
 print("##################################################")
-print("######    Tesitng generate next generation  ######")
+print("######    Tesitng GA operations with Ei = 1 ######")
 print("##################################################")
       
 sample = '1000000110000010'
-      
+
+print("Original amplitude:", int(sample, 2))
 print("The original sample is: ", sample)
 
 population, replacedBits = GA.generatePopulation(sample, '1')
+    
+print("")
 
-print("Replaced bits are:", replacedBits)
 print("Population after one is inserted:")
 
-population.reverse()
-replacedBits.reverse()
-
 for i in population:
     print(i)
+print("")
+
+print("Replaced bits are:", replacedBits)
+
+print("")
+          
+population = GA.generateNextGeneration(population, replacedBits, '1')
+
+print("Second Generation (GA insertion)")
+for i in population:
+    print(i, "Amplitude:", np.abs(int(i, 2) - int(sample, 2)))
+
+print("")
+print("##################################################")
+print("######    Tesitng determine fittest individual ###")
+print("##################################################")
       
-population = GA.generateNextGeneration(population, replacedBits, 1)
+print(GA.determineFittest(sample, population))
 
-print("Next generation:")
-population.reverse()
+print("##################################################")
+print("######    Tesitng GA operations with Ei = 0 ######")
+print("##################################################")
+      
+sample = '1000000110000010'
+
+print("Original amplitude:", int(sample, 2))
+print("The original sample is: ", sample)
+
+population, replacedBits = GA.generatePopulation(sample, '0')
+    
+print("")
+
+print("Population after one is inserted:")
 
 for i in population:
     print(i)
+print("")
 
-'''    
-population = GA.generatePopulation(sample, '0')
+print("Replaced bits are:", replacedBits)
 
-print("Population after zero is inserted:")
+print("")
+          
+population = GA.generateNextGeneration(population, replacedBits, '0')
 
+print("Second Generation (GA insertion)")
 for i in population:
-    print(i)
-'''
+    print(i, "Amplitude:", np.abs(int(i, 2) - int(sample, 2)))
+    
+print("")
+ 
+print("##################################################")
+print("######    Tesitng determine fittest individual ###")
+print("##################################################")
+      
+print(GA.determineFittest(sample, population))
