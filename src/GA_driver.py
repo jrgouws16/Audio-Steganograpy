@@ -8,6 +8,7 @@ Created on Tue Jul 23 14:10:15 2019
 import geneticAlgorithm as GA
 import numpy as np
 
+'''
 print("##################################################")
 print("######    Tesitng GA operations with Ei = 1 ######")
 print("##################################################")
@@ -80,3 +81,30 @@ print("######    Tesitng determine fittest individual ###")
 print("##################################################")
       
 print(GA.determineFittest(sample, population))
+'''
+
+print("##################################################")
+print("######    Tesitng the insertion algorithm      ###")
+print("##################################################")
+samples = ['1001010001001100','0101010111100111','0000100011110001']      
+
+print("Before insertion")
+for i in samples:
+    print(i)
+    
+message = '1010'
+key = '1001001110100000'
+stego = GA.insertMessage(samples, key, message)
+
+print("Message is:", message)
+print("key is:", key)
+print("")
+
+print("After insertion")
+for i in stego:
+    print(i)
+
+print("##################################################")
+print("######    Tesitng the extraction algorithm     ###")
+print("##################################################")
+print(GA.extractMessage(stego, key, 4))

@@ -140,7 +140,7 @@ def determineFittest(originalSample, population):
     
     # Get all the indexes where the smallest value occurs
     indexes = [i for i,x in enumerate(ampDifference) if x == smallest]
-    
+       
     # Preferred indexes is of fitness value between 0 and 4 exclusive
     # If this is not possible, choose the one with the smallest fitness value
     if 1 in indexes:
@@ -159,4 +159,121 @@ def determineFittest(originalSample, population):
         returnIndex = 4
         
     return returnIndex
+
+def insertMessage(samples, key, message):
+    
+    skipIndex = 0
+    
+    sampleIndex = 0
+    
+    for i in range(0, len(message)):
+        
+        if(skipIndex == 1):
+            skipIndex = 0
+            continue
+        
+        # Get Pi, which will be the index of the sample for determining Ei
+        pi = int(key[sampleIndex % len(key): ((sampleIndex % 16) + 3) % 16 + 1],2)
+        
+    
+        if (pi < 8):
+            pi += 8
+
+        Ei = '0'
+        # If message bit coincides with sample[Pi], then Ei is 1 else Ei = 0
+        if (samples[sampleIndex][-1*pi - 1] == message[i]):
+            Ei = '1'
+            
+        else:
+            Ei = '0'
+        
+        # Create the five chromosomes by inserting Ei at five positions
+        population, replacedBits = generatePopulation(samples[sampleIndex], Ei)
+        
+        # Generate the next generation by performing GA operations
+        population = generateNextGeneration(population, replacedBits, Ei)
+        
+        # Replace sample with the fittest cromosome
+        samples[sampleIndex] = population[determineFittest(samples[sampleIndex], population)]
+        
+        # If fitness value between 0 and 4 exclusive, insert another bit at i = 2
+        if(determineFittest(samples[sampleIndex], population) > 0 and 
+           determineFittest(samples[sampleIndex], population) < 4):
+            
+            # Calculate pi for m(i+1)
+            i = i + 1
+            
+            # If message is not long enough
+            if(i == len(message) -1 or i >= len(message)):
+                break
+            
+            skipIndex = 1
+            pi = int(key[i % len(key): ((i % 16) + 3) % 16 + 1],2)
+        
+            if (pi < 8):
+                pi += 8
+            
+            # Determine Ei            
+            if (samples[sampleIndex][-1*pi - 1] == message[i]):
+                Ei = '1'
+                
+            else:
+                Ei = '0'
+            
+            # Insert the second bit at the third LSB layer
+            samples[sampleIndex] = list(samples[sampleIndex])
+            samples[sampleIndex][-3] = Ei
+            samples[sampleIndex] = "".join(samples[sampleIndex])
+        
+        sampleIndex = sampleIndex + 1
+        
+        
+    return samples
+       
+def extractMessage(samples, key, messageLength):
+    message = ''
+    sampleIndex = 0
+    
+    while (len(message) < messageLength):
+        # Get the fitness value of the stego sample
+        F = int(samples[sampleIndex][13:16], 2)
+
+        if (F != 0 and F != 4):
+            F = int(samples[sampleIndex][14:16], 2)
+
+        pi = int(key[sampleIndex % len(key): ((sampleIndex % 16) + 3) % 16 + 1], 2) 
+        
+        if (pi < 8):
+                pi += 8
+        
+        if (samples[sampleIndex][-1*pi -1] == '1'):
+            message += samples[sampleIndex][-1*F - 4]
+            
+        else:
+            if (samples[sampleIndex][-1*F - 4] == '1'):
+                message += '0'
+                
+            else:
+                message += '1'
+
+        if (F > 0 and F < 4):
+            if (len(message) == messageLength):
+                break
+            
+            if (samples[sampleIndex][-3] == '1'):
+                message += samples[sampleIndex][-1*pi - 1]
+                
+            else:
+                if (samples[sampleIndex][-1*pi - 1] == '1'):
+                    message += '0'
+                    
+                else:
+                    message += '1'
+            
+        sampleIndex += 1
+                
+    return message
+
+
+
 
