@@ -5,8 +5,6 @@ Created on Thu Jul  4 13:28:10 2019
 @author: Johan Gouws
 """
 
-import wave
-import struct
 import SignalsAndSlots
 
 class LSB_encoding:
@@ -15,7 +13,6 @@ class LSB_encoding:
         self.coverSamples = coverSamples
         self.messageSamples = messageSamples
         self.stegoSamples = []
-        self.signalWriting = SignalsAndSlots.SigSlot()
         self.signalEmbedding = SignalsAndSlots.SigSlot()
 
     # Setter for the message samples    
@@ -62,17 +59,6 @@ class LSB_encoding:
             self.stegoSamples.append(self.coverSamples[len(self.stegoSamples)])
             progress += 1
             self.signalEmbedding.trigger.emit(float(progress) * 100 / len(self.coverSamples))
-            
-    # Write the stego samples to the stego file        
-    def writeStegoToFile(self, fileName, parameters):
-        with wave.open(fileName, 'wb') as fd:
-            fd.setparams(parameters)
-        
-            for i in range(len(self.stegoSamples)):
-                fd.writeframes(struct.pack('<h', self.stegoSamples[i]))
-                self.signalWriting.trigger.emit((i+1)*100/(len(self.stegoSamples)))
-            
-        fd.close()
         
 class LSB_decoding:
     # Slot for updating the GUI with progress of the decoding process

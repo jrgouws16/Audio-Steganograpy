@@ -3,6 +3,9 @@ from tkinter import filedialog
 import sys
 import struct
 import SignalsAndSlots
+import wave
+
+signalWriting = SignalsAndSlots.SigSlot()
 
 # Create a signal to emit the progress of extracting samples
 signalExtract = SignalsAndSlots.SigSlot()
@@ -86,7 +89,7 @@ def getMessageBits(file_path):
 
 # Convert an eight bit string to list of eight integers
 def messageToBinary(message):
-    return list(map(int, ''.join('{0:08b}'.format(ord(x), 'b') for x in message)))
+    return ''.join('{0:08b}'.format(ord(x), 'b') for x in message)
 
 # Write the binary message to a file
 def writeMessageBitsToFile(totalMessageBits, file_path):
@@ -158,6 +161,22 @@ def returnParameters(self):
     print("Sample width (bytes per sample):", self.sampwidth)
     print("Framerate (sampling rate):", self.framerate)
     print("Number of samples:", self.nframes)
+
+
+########################################################################################################################
+#####################              For writing steganography samples to a wav file after encoding ######################
+########################################################################################################################
+
+# Write the stego samples to the stego file        
+def writeStegoToFile(fileName, parameters, samples):
+    with wave.open(fileName, 'wb') as fd:
+        fd.setparams(parameters)
+    
+        for i in range(len(samples)):
+            fd.writeframes(struct.pack('<h', samples[i]))
+            signalWriting.trigger.emit((i+1)*100/(len(samples)))
+        
+    fd.close()
 
 ########################################################################################################################
 ########################################################################################################################

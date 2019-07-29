@@ -8,7 +8,7 @@ Created on Tue Jul 23 14:10:15 2019
 import geneticAlgorithm as GA
 import numpy as np
 import random
-'''
+
 print("##################################################")
 print("######    Tesitng GA operations with Ei = 1 ######")
 print("##################################################")
@@ -81,7 +81,7 @@ print("######    Tesitng determine fittest individual ###")
 print("##################################################")
       
 print(GA.determineFittest(sample, population))
-'''
+
 
 print("##################################################")
 print("#    Tesitng the insertion algorithm as in paper #")
@@ -135,5 +135,9 @@ for numberTests in range(0, 1000):
         
     if (message != extractedMsg):
         print("Error")
+        break
+    
+    elif (numberTests == 999):
+        print("Extensive testing: Passed all the tests")
   
 

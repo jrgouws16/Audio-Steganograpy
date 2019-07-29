@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1114</width>
-    <height>525</height>
+    <width>903</width>
+    <height>572</height>
    </rect>
   </property>
   <property name="palette">
@@ -438,10 +438,10 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>0</y>
-      <width>611</width>
-      <height>481</height>
+      <x>130</x>
+      <y>60</y>
+      <width>712</width>
+      <height>404</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -599,13 +599,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_encode">
-         <property name="text">
-          <string>Encode</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
      <item>
@@ -625,55 +618,99 @@
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="radioButton_LSB">
-         <property name="palette">
-          <palette>
-           <active>
-            <colorrole role="Text">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>170</red>
-               <green>0</green>
-               <blue>0</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </active>
-           <inactive>
-            <colorrole role="Text">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>170</red>
-               <green>0</green>
-               <blue>0</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </inactive>
-           <disabled>
-            <colorrole role="Text">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>108</red>
-               <green>108</green>
-               <blue>108</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </disabled>
-          </palette>
-         </property>
-         <property name="text">
-          <string>Least Significant Bit Steganography</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="radioButton_GA">
-         <property name="text">
-          <string>Genetic Algorithm</string>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QRadioButton" name="radioButton_LSB">
+               <property name="palette">
+                <palette>
+                 <active>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>170</red>
+                     <green>0</green>
+                     <blue>0</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </active>
+                 <inactive>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>170</red>
+                     <green>0</green>
+                     <blue>0</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </inactive>
+                 <disabled>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>108</red>
+                     <green>108</green>
+                     <blue>108</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </disabled>
+                </palette>
+               </property>
+               <property name="text">
+                <string>Least Significant Bit Steganography</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <item>
+                <widget class="QLineEdit" name="lineEdit_LSB_nr">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <item>
+              <widget class="QRadioButton" name="radioButton_GA">
+               <property name="text">
+                <string>Genetic Algorithm  </string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEdit_GA_key">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_browse_key">
+           <property name="text">
+            <string>Browse for key file</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QLabel" name="label_type_6">
@@ -714,23 +751,6 @@
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <widget class="QLabel" name="label_type_5">
-         <property name="font">
-          <font>
-           <family>Century Schoolbook L</family>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>LSB number to embed (1-4)</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="lineEdit_LSB_nr"/>
-       </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
@@ -823,6 +843,13 @@
          </item>
         </layout>
        </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_encode">
+         <property name="text">
+          <string>Encode</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>
@@ -833,7 +860,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1114</width>
+     <width>903</width>
      <height>21</height>
     </rect>
    </property>
@@ -843,114 +870,18 @@
  <resources/>
  <connections>
   <connection>
-   <sender>radioButton_LSB</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_LSB_nr</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>249</x>
-     <y>308</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>247</x>
-     <y>452</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_LSB_nr</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>185</x>
-     <y>336</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>187</x>
-     <y>452</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_LSB</sender>
-   <signal>clicked()</signal>
-   <receiver>label_type_5</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>140</x>
-     <y>308</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>140</x>
-     <y>419</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA</sender>
-   <signal>clicked()</signal>
-   <receiver>label_type_5</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>119</x>
-     <y>336</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>119</x>
-     <y>419</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>pushButton_encode</sender>
    <signal>clicked()</signal>
    <receiver>progressBar_reading</receiver>
    <slot>reset()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>99</x>
-     <y>254</y>
+     <x>187</x>
+     <y>465</y>
     </hint>
     <hint type="destinationlabel">
-     <x>113</x>
-     <y>510</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_encode</sender>
-   <signal>clicked()</signal>
-   <receiver>progressBar_embedding</receiver>
-   <slot>reset()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>315</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>370</x>
-     <y>510</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_encode</sender>
-   <signal>clicked()</signal>
-   <receiver>progressBar_writing</receiver>
-   <slot>reset()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>465</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>547</x>
-     <y>510</y>
+     <x>187</x>
+     <y>450</y>
     </hint>
    </hints>
   </connection>
@@ -961,44 +892,140 @@
    <slot>reset()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>215</x>
-     <y>249</y>
+     <x>362</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
-     <x>215</x>
-     <y>487</y>
+     <x>362</x>
+     <y>449</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>pushButton_encode</sender>
    <signal>clicked()</signal>
-   <receiver>label_msg_size</receiver>
-   <slot>clear()</slot>
+   <receiver>progressBar_embedding</receiver>
+   <slot>reset()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>167</x>
-     <y>229</y>
+     <x>547</x>
+     <y>462</y>
     </hint>
     <hint type="destinationlabel">
-     <x>167</x>
-     <y>190</y>
+     <x>548</x>
+     <y>447</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>pushButton_encode</sender>
    <signal>clicked()</signal>
-   <receiver>label_cover_size</receiver>
-   <slot>clear()</slot>
+   <receiver>progressBar_writing</receiver>
+   <slot>reset()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>445</x>
-     <y>230</y>
+     <x>690</x>
+     <y>463</y>
     </hint>
     <hint type="destinationlabel">
-     <x>445</x>
-     <y>193</y>
+     <x>690</x>
+     <y>449</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_LSB</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_LSB_nr</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>326</x>
+     <y>269</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>338</x>
+     <y>273</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>242</x>
+     <y>301</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>254</x>
+     <y>302</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>pushButton_browse_key</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>178</x>
+     <y>304</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>177</x>
+     <y>321</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_LSB</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>272</x>
+     <y>274</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>267</x>
+     <y>297</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_LSB</sender>
+   <signal>clicked()</signal>
+   <receiver>pushButton_browse_key</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>145</x>
+     <y>274</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>155</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_LSB_nr</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>147</x>
+     <y>299</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>275</y>
     </hint>
    </hints>
   </connection>
