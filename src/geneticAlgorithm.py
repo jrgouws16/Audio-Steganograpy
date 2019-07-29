@@ -161,24 +161,26 @@ def determineFittest(originalSample, population):
     return returnIndex
 
 def insertMessage(samples, key, message):
-    
+   
     skipIndex = 0
-    
     sampleIndex = 0
     
+    messageLength = len(message)
+    messageLength = '{0:024b}'.format(messageLength)
+    
+    message = messageLength + message
+    
     for i in range(0, len(message)):
-        
         if(skipIndex == 1):
             skipIndex = 0
             continue
-        
+
         # Get Pi, which will be the index of the sample for determining Ei
-        pi = int(key[sampleIndex % len(key): ((sampleIndex % 16) + 3) % 16 + 1],2)
-        
-    
+        pi = int(key[sampleIndex % len(key): ((sampleIndex % len(key)) + 3) % len(key) + 1],2)
+            
         if (pi < 8):
             pi += 8
-
+        
         Ei = '0'
         # If message bit coincides with sample[Pi], then Ei is 1 else Ei = 0
         if (samples[sampleIndex][-1*pi - 1] == message[i]):
@@ -186,7 +188,7 @@ def insertMessage(samples, key, message):
             
         else:
             Ei = '0'
-        
+                    
         # Create the five chromosomes by inserting Ei at five positions
         population, replacedBits = generatePopulation(samples[sampleIndex], Ei)
         
@@ -200,18 +202,15 @@ def insertMessage(samples, key, message):
         if(determineFittest(samples[sampleIndex], population) > 0 and 
            determineFittest(samples[sampleIndex], population) < 4):
             
+            
             # Calculate pi for m(i+1)
             i = i + 1
             
-            # If message is not long enough
-            if(i == len(message) -1 or i >= len(message)):
+            # If message is already inserted
+            if(i >= len(message)):
                 break
             
             skipIndex = 1
-            pi = int(key[i % len(key): ((i % 16) + 3) % 16 + 1],2)
-        
-            if (pi < 8):
-                pi += 8
             
             # Determine Ei            
             if (samples[sampleIndex][-1*pi - 1] == message[i]):
@@ -219,43 +218,59 @@ def insertMessage(samples, key, message):
                 
             else:
                 Ei = '0'
-            
+
             # Insert the second bit at the third LSB layer
             samples[sampleIndex] = list(samples[sampleIndex])
             samples[sampleIndex][-3] = Ei
             samples[sampleIndex] = "".join(samples[sampleIndex])
+            
         
         sampleIndex = sampleIndex + 1
         
         
     return samples
        
-def extractMessage(samples, key, messageLength):
+def extractMessage(samples, key):
     message = ''
     sampleIndex = 0
     
+    # This is the amount of bits that will determine the message length
+    messageLength = 24
+    
+    # While the full message has not been extracted
     while (len(message) < messageLength):
+        
         # Get the fitness value of the stego sample
         F = int(samples[sampleIndex][13:16], 2)
 
+        # If F not zero or four, then F = decimal of first two LSBs of sample
         if (F != 0 and F != 4):
             F = int(samples[sampleIndex][14:16], 2)
 
-        pi = int(key[sampleIndex % len(key): ((sampleIndex % 16) + 3) % 16 + 1], 2) 
+        # Calculate the decimal value of Bi
+        pi = int(key[sampleIndex % len(key): ((sampleIndex % len(key)) + 3) % len(key) + 1], 2) 
         
+        # Make it a value between 8 and 15 inclusive
         if (pi < 8):
                 pi += 8
         
-        if (samples[sampleIndex][-1*pi -1] == '1'):
-            message += samples[sampleIndex][-1*F - 4]
+        # If the bit at S[F] is one, extract the bit at pi
+        if (samples[sampleIndex][-1*F - 4] == '1'):
+            message += samples[sampleIndex][-1*pi - 1]
             
+        # Else extract the opposite of the bit at pi    
         else:
-            if (samples[sampleIndex][-1*F - 4] == '1'):
+            if (samples[sampleIndex][-1*pi - 1] == '1'):
                 message += '0'
                 
             else:
                 message += '1'
 
+        # If the message size is determined, add it to the total message length
+        if (len(message) == 24):
+            messageLength = int(message, 2) + 24
+
+        # Extract the second sample for the case where F is 1/2/3
         if (F > 0 and F < 4):
             if (len(message) == messageLength):
                 break
@@ -269,10 +284,13 @@ def extractMessage(samples, key, messageLength):
                     
                 else:
                     message += '1'
+                    
+            if (len(message) == 24):
+                messageLength = int(message, 2) + 24
             
         sampleIndex += 1
                 
-    return message
+    return message[24:]
 
 
 

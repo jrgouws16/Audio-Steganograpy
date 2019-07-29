@@ -7,7 +7,7 @@ Created on Tue Jul 23 14:10:15 2019
 
 import geneticAlgorithm as GA
 import numpy as np
-
+import random
 '''
 print("##################################################")
 print("######    Tesitng GA operations with Ei = 1 ######")
@@ -84,18 +84,18 @@ print(GA.determineFittest(sample, population))
 '''
 
 print("##################################################")
-print("######    Tesitng the insertion algorithm      ###")
+print("#    Tesitng the insertion algorithm as in paper #")
 print("##################################################")
-samples = ['1001010001001100','0101010111100111','0000100011110001']      
+samples = ['1001010001001100','0101010111100111','0000100011110001'] * 10
 
 print("Before insertion")
 for i in samples:
     print(i)
     
 message = '1010'
-key = '1001001110100000'
+key = '1001001110100000'*2
 stego = GA.insertMessage(samples, key, message)
-
+print(stego)
 print("Message is:", message)
 print("key is:", key)
 print("")
@@ -105,6 +105,35 @@ for i in stego:
     print(i)
 
 print("##################################################")
-print("######    Tesitng the extraction algorithm     ###")
+print("#   Tesitng the extraction algorithm as in paper #")
 print("##################################################")
-print(GA.extractMessage(stego, key, 4))
+print(GA.extractMessage(stego, key))
+
+
+print("##################################################")
+print("#  Extensive testing of insertion and extraction #")
+print("##################################################")
+          
+# Generate the samples, key, and message      
+items = ['1','0']
+
+for numberTests in range(0, 1000):
+    samples = []
+    message = ''
+    key = "".join(random.choices(items, k = 24))
+    
+    for messageLength in range(0,100):
+        samples.append("".join(random.choices(items, k = 16)))
+        message += random.choice(items)
+        key += random.choice(items)
+        
+    for i in range(0, 24):
+        samples.append("".join(random.choices(items, k = 16)))
+        
+    stego = GA.insertMessage(samples, key, message)
+    extractedMsg = GA.extractMessage(stego, key)
+        
+    if (message != extractedMsg):
+        print("Error")
+  
+
