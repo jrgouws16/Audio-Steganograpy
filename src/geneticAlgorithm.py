@@ -8,6 +8,7 @@ import numpy as np
 import SignalsAndSlots as SS
 
 signalEmbedding = SS.SigSlot()
+signalExtractingMessage = SS.SigSlot()
 
 # Function that takes a 16-bit audio sample and generates 5 chromosomes
 # of the sample, by inserting the bit in LSB positions 4 - 8
@@ -292,8 +293,13 @@ def extractMessage(samples, key):
                     
             if (len(message) == 24):
                 messageLength = int(message, 2) + 24
+                key = key * (int(float(messageLength)/len(key)) + 1)
             
         sampleIndex += 1
+        
+        if (sampleIndex > 24):
+            signalExtractingMessage.trigger.emit(float(len(message)) * 100 / messageLength)
+
                 
     return message[24:]
 
