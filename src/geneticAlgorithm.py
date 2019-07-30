@@ -253,6 +253,7 @@ def extractMessage(samples, key):
         if (F != 0 and F != 4):
             F = int(samples[sampleIndex][14:16], 2)
 
+        print(sampleIndex, key, sampleIndex % len(key), ':', ((sampleIndex % len(key)) + 3) % len(key) + 1)
         # Calculate the decimal value of Bi
         pi = int(key[sampleIndex % len(key): ((sampleIndex % len(key)) + 3) % len(key) + 1], 2) 
         
@@ -275,6 +276,7 @@ def extractMessage(samples, key):
         # If the message size is determined, add it to the total message length
         if (len(message) == 24):
             messageLength = int(message, 2) + 24
+            key = key * (int(float(messageLength)/len(key)) + 1)
 
         # Extract the second sample for the case where F is 1/2/3
         if (F > 0 and F < 4):
