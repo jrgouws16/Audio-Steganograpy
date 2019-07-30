@@ -55,6 +55,7 @@ def getMessageBits(file_path):
     # Open the file to be read and get the length
     file = open(file_path, 'rb')                   
     messageLength = len(file.read())
+    progress = 0
     
     # Reopen file to read from beginning
     file = open(file_path, 'rb') 
@@ -70,7 +71,9 @@ def getMessageBits(file_path):
         totalBytes += 1
         
         # Transmit signal to display progress on GUI
-        signalReadMsg.trigger.emit((totalBytes+1)*100/messageLength)
+        if ((totalBytes+1)*100/messageLength > progress):
+            progress = (totalBytes+1)*100/messageLength
+            signalReadMsg.trigger.emit(progress)
 
         # Break if the end of the file is reached
         if (len(byte) == 0):                       
@@ -93,7 +96,8 @@ def messageToBinary(message):
 
 # Write the binary message to a file
 def writeMessageBitsToFile(totalMessageBits, file_path):
-    file = open(file_path, 'wb')                       
+    file = open(file_path, 'wb')  
+    progress = 0                     
 
     # Number of messsage bits to keep track of progress on GUI
     originalSize = len(totalMessageBits)
@@ -107,7 +111,10 @@ def writeMessageBitsToFile(totalMessageBits, file_path):
         totalMessageBits = totalMessageBits[8:]
         
         # Send signal to update GUI
-        signalWriteMsg.trigger.emit(100-100.0*len(totalMessageBits)/originalSize)
+        if (100-100.0*len(totalMessageBits)/originalSize > progress):
+            progress = 100-100.0*len(totalMessageBits)/originalSize
+            signalWriteMsg.trigger.emit(progress)
+        
 
     file.close()
 
@@ -122,6 +129,7 @@ def writeMessageBitsToFile(totalMessageBits, file_path):
 def extractWaveSamples(waveObject):
     samplesChannelOne = []
     samplesChannelTwo = []
+    progress = 0
     
     # Get the wave file parameters
     nchannels, sampwidth, framerate, nframes, comptype, compname = waveObject.getparams()
@@ -150,8 +158,10 @@ def extractWaveSamples(waveObject):
 
             if (samplesChannelTwo[-1] == -32768):
                 samplesChannelTwo[-1] += 1
-
-        signalExtract.trigger.emit((index+1) * 100 / nframes)
+       
+        if ((index+1) * 100 / nframes > progress):
+            progress = (index+1) * 100 / nframes
+            signalExtract.trigger.emit(progress)
 
     return samplesChannelOne, samplesChannelTwo
 
@@ -169,13 +179,17 @@ def returnParameters(self):
 
 # Write the stego samples to the stego file        
 def writeStegoToFile(fileName, parameters, samples):
+    progress = 0
     with wave.open(fileName, 'wb') as fd:
         fd.setparams(parameters)
     
         for i in range(len(samples)):
             fd.writeframes(struct.pack('<h', samples[i]))
-            signalWriting.trigger.emit((i+1)*100/(len(samples)))
-        
+            
+            if ((i+1)*100/(len(samples)) > progress):
+                progress = (i+1)*100/(len(samples))
+                signalWriting.trigger.emit(progress)
+            
     fd.close()
 
 ########################################################################################################################

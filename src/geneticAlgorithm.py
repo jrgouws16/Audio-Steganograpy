@@ -165,7 +165,7 @@ def determineFittest(originalSample, population):
     return returnIndex
 
 def insertMessage(samples, key, message):
-   
+    progress = 0
     skipIndex = 0
     sampleIndex = 0
     
@@ -175,7 +175,10 @@ def insertMessage(samples, key, message):
     message = messageLength + message
         
     for i in range(0, len(message)):
-        signalEmbedding.trigger.emit(float(i + 1) * 100 / len(message))
+        
+        if (float(i + 1) * 100 / len(message) > progress):
+            progress = float(i + 1) * 100 / len(message)
+            signalEmbedding.trigger.emit(progress)
         
         if(skipIndex == 1):
             skipIndex = 0
@@ -243,6 +246,7 @@ def extractMessage(samples, key):
     
     message = ''
     sampleIndex = 0
+    progress = 0
     
     # This is the amount of bits that will determine the message length
     messageLength = 24
@@ -307,10 +311,12 @@ def extractMessage(samples, key):
         sampleIndex += 1
         
         if (sampleIndex > 24):
-            signalExtractingMessage.trigger.emit(float(len(message)) * 100 / messageLength)
+            if (float(len(message)) * 100 / messageLength > progress):
+                progress = float(len(message)) * 100 / messageLength
+                signalExtractingMessage.trigger.emit(progress)
             
     return message[24:]
 
-
+            
 
 

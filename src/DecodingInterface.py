@@ -43,25 +43,47 @@ def decode():
     # Get the filename of the stego audio file
     stegoFileName = mainWindow.lineEdit_stego.text()
 
-    #try:
-    # Open the steganography file
-    song = wave.open(stegoFileName, mode='rb')
-
-    # Connect the reading stego file to the progress bar
-    fp.signalExtract.connect(mainWindow.progressBar_reading.setValue)
+    try:
+        # Open the steganography file
+        song = wave.open(stegoFileName, mode='rb')
     
-    # Extract the samples from the stego file
-    stegoSamples = fp.extractWaveSamples(song)
-
-    # Standard Least Significant Bit Decoding
-    if (mainWindow.radioButton_LSB.isChecked()):
-        # User must provide LSB number to extract, otherwise provide error box
-        if (mainWindow.lineEdit_LSB_nr.text() == '1' or 
-            mainWindow.lineEdit_LSB_nr.text() == '2' or
-            mainWindow.lineEdit_LSB_nr.text() == '3' or
-            mainWindow.lineEdit_LSB_nr.text() == '4'):
+        # Connect the reading stego file to the progress bar
+        fp.signalExtract.connect(mainWindow.progressBar_reading.setValue)
+        
+        # Extract the samples from the stego file
+        stegoSamples = fp.extractWaveSamples(song)
+    
+        # Standard Least Significant Bit Decoding
+        if (mainWindow.radioButton_LSB.isChecked()):
+            # User must provide LSB number to extract, otherwise provide error box
+            if (mainWindow.lineEdit_LSB_nr.text() == '1' or 
+                mainWindow.lineEdit_LSB_nr.text() == '2' or
+                mainWindow.lineEdit_LSB_nr.text() == '3' or
+                mainWindow.lineEdit_LSB_nr.text() == '4'):
+                
+                secretMessage = LSB_decoding(stegoSamples)
+                
+                # Connect the writing message to file to the progress bar
+                fp.signalWriteMsg.connect(mainWindow.progressBar_writing.setValue)
+                
+                # Write the message bits to a file and close the steganography file
+                fp.writeMessageBitsToFile(secretMessage, mainWindow.lineEdit_msgname.text())
+                song.close()
+                
+            else:
+                SignalsAndSlots.showErrorMessage('Invalid LSB embedding position', 
+                                                 'Enter an integer ranging from 1 to 4')
             
-            secretMessage = LSB_decoding(stegoSamples)
+        # Genetic Algorithm decoding
+        elif(mainWindow.radioButton_GA.isChecked()):
+            keyString = mainWindow.lineEdit_GA_key.text()
+            binaryKey = fp.messageToBinary(keyString)
+            secretMessage = GA_decoding(stegoSamples, binaryKey)
+            
+            # Secret message length cannot exceed 24 bits
+            if (len(secretMessage) > 16777200):
+                SignalsAndSlots.showErrorMessage('Message too long', 
+                                                 'Enter a message of length smaller than 16777200 bits')
             
             # Connect the writing message to file to the progress bar
             fp.signalWriteMsg.connect(mainWindow.progressBar_writing.setValue)
@@ -70,33 +92,16 @@ def decode():
             fp.writeMessageBitsToFile(secretMessage, mainWindow.lineEdit_msgname.text())
             song.close()
             
-        else:
-            SignalsAndSlots.showErrorMessage('Invalid LSB embedding position', 
-                                             'Enter an integer ranging from 1 to 4')
-        
-    # Genetic Algorithm decoding
-    elif(mainWindow.radioButton_GA.isChecked()):
-        keyString = mainWindow.lineEdit_GA_key.text()
-        binaryKey = fp.messageToBinary(keyString)
-        secretMessage = GA_decoding(stegoSamples, binaryKey)
-        
-        # Connect the writing message to file to the progress bar
-        fp.signalWriteMsg.connect(mainWindow.progressBar_writing.setValue)
-        
-        # Write the message bits to a file and close the steganography file
-        fp.writeMessageBitsToFile(secretMessage, mainWindow.lineEdit_msgname.text())
-        song.close()
-        
-        
-    # No radio button selected
-    else:
-        SignalsAndSlots.showErrorMessage("Invalid Encoding Algorithm selected",
-                         "Select an encoding algorithm by selecting a radio button")
             
+        # No radio button selected
+        else:
+            SignalsAndSlots.showErrorMessage("Invalid Encoding Algorithm selected",
+                             "Select an encoding algorithm by selecting a radio button")
+                
     # Throw an exception if the file does not exist
-    #except:
-     #   SignalsAndSlots.showErrorMessage("Invalid stego filename provided", 
-      #                                   "The steganographic file name provided does not exist or inserted wrongly")
+    except:
+        SignalsAndSlots.showErrorMessage("Invalid stego filename provided", 
+                                         "The steganographic file name provided does not exist or inserted wrongly")
 
 
 # Slot to set the file path to save the secret message in
