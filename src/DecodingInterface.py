@@ -78,7 +78,14 @@ def decode():
     elif(mainWindow.radioButton_GA.isChecked()):
         keyString = mainWindow.lineEdit_GA_key.text()
         binaryKey = fp.messageToBinary(keyString)
-        GA_decoding(stegoSamples, binaryKey)
+        secretMessage = GA_decoding(stegoSamples, binaryKey)
+        
+        # Connect the writing message to file to the progress bar
+        fp.signalWriteMsg.connect(mainWindow.progressBar_writing.setValue)
+        
+        # Write the message bits to a file and close the steganography file
+        fp.writeMessageBitsToFile(secretMessage, mainWindow.lineEdit_msgname.text())
+        song.close()
         
         
     # No radio button selected

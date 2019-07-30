@@ -102,7 +102,6 @@ def encode():
     
             # Else embed the secret message    
             else:
-                print(type(mainWindow.lineEdit_LSB_nr.text()))
                 SignalsAndSlots.showErrorMessage('Invalid LSB embedding position', 'Enter an integer ranging from 1 to 4')
                 
         # Second method = Genetic Algorithm

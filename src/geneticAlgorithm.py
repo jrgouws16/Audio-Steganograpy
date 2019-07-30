@@ -173,7 +173,7 @@ def insertMessage(samples, key, message):
     messageLength = '{0:024b}'.format(messageLength)
     
     message = messageLength + message
-    
+        
     for i in range(0, len(message)):
         signalEmbedding.trigger.emit(float(i + 1) * 100 / len(message))
         
@@ -186,6 +186,9 @@ def insertMessage(samples, key, message):
             
         if (pi < 8):
             pi += 8
+            
+        if (pi > 14):
+            pi = 14
         
         Ei = '0'
         # If message bit coincides with sample[Pi], then Ei is 1 else Ei = 0
@@ -237,6 +240,7 @@ def insertMessage(samples, key, message):
     return samples
        
 def extractMessage(samples, key):
+    
     message = ''
     sampleIndex = 0
     
@@ -253,13 +257,16 @@ def extractMessage(samples, key):
         if (F != 0 and F != 4):
             F = int(samples[sampleIndex][14:16], 2)
 
-        print(sampleIndex, key, sampleIndex % len(key), ':', ((sampleIndex % len(key)) + 3) % len(key) + 1)
         # Calculate the decimal value of Bi
         pi = int(key[sampleIndex % len(key): ((sampleIndex % len(key)) + 3) % len(key) + 1], 2) 
         
         # Make it a value between 8 and 15 inclusive
         if (pi < 8):
                 pi += 8
+                
+        if (pi > 14):
+            pi = 14
+
         
         # If the bit at S[F] is one, extract the bit at pi
         if (samples[sampleIndex][-1*F - 4] == '1'):
@@ -275,6 +282,7 @@ def extractMessage(samples, key):
 
         # If the message size is determined, add it to the total message length
         if (len(message) == 24):
+            print(message)
             messageLength = int(message, 2) + 24
             key = key * (int(float(messageLength)/len(key)) + 1)
 
@@ -294,6 +302,7 @@ def extractMessage(samples, key):
                     message += '1'
                     
             if (len(message) == 24):
+                print(message)
                 messageLength = int(message, 2) + 24
                 key = key * (int(float(messageLength)/len(key)) + 1)
             
@@ -301,8 +310,7 @@ def extractMessage(samples, key):
         
         if (sampleIndex > 24):
             signalExtractingMessage.trigger.emit(float(len(message)) * 100 / messageLength)
-
-                
+            
     return message[24:]
 
 
