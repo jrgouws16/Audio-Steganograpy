@@ -282,7 +282,6 @@ def extractMessage(samples, key):
 
         # If the message size is determined, add it to the total message length
         if (len(message) == 24):
-            print(message)
             messageLength = int(message, 2) + 24
             key = key * (int(float(messageLength)/len(key)) + 1)
 
@@ -302,7 +301,6 @@ def extractMessage(samples, key):
                     message += '1'
                     
             if (len(message) == 24):
-                print(message)
                 messageLength = int(message, 2) + 24
                 key = key * (int(float(messageLength)/len(key)) + 1)
             
