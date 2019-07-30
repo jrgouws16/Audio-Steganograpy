@@ -315,6 +315,7 @@ def extractMessage(samples, key):
                 progress = float(len(message)) * 100 / messageLength
                 signalExtractingMessage.trigger.emit(progress)
             
+    signalExtractingMessage.trigger.emit(100)
     return message[24:]
 
             
