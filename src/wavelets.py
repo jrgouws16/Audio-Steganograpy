@@ -164,7 +164,87 @@ plt.show()
 
 '''
 
+'''
+import pywt
+import numpy as np
+import matplotlib.pyplot as plt
 
+# Create wavelet and extract the filters
+wavelet_name = 'bior6.8'
+wavelet = pywt.Wavelet(wavelet_name)
+dec_lo, dec_hi, rec_lo, rec_hi = wavelet.filter_bank
+
+# Filter coefficients
+plt.figure()
+plt.subplot(221)
+plt.stem(dec_lo)
+plt.grid()
+plt.title('{} low-pass decomposition filter'.format(wavelet_name))
+plt.subplot(222)
+plt.stem(dec_hi)
+plt.grid()
+plt.title('{} high-pass decomposition filter'.format(wavelet_name))
+plt.subplot(223)
+plt.stem(rec_lo)
+plt.grid()
+plt.title('{} low-pass reconstruction filter'.format(wavelet_name))
+plt.subplot(224)
+plt.stem(rec_hi)
+plt.grid()
+plt.title('{} high-pass reconstruction filter'.format(wavelet_name))
+
+# Frequency responses
+dec_lo_fr = np.abs(np.fft.rfft(dec_lo, 128))
+dec_hi_fr = np.abs(np.fft.rfft(dec_hi, 128))
+rec_lo_fr = np.abs(np.fft.rfft(rec_lo, 128))
+rec_hi_fr = np.abs(np.fft.rfft(rec_hi, 128))
+
+plt.figure()
+plt.subplot(211)
+plt.plot(dec_lo_fr, label='Low-pass')
+#plt.hold(True)
+plt.plot(dec_hi_fr, label='High-pass')
+plt.grid()
+plt.legend()
+plt.title('Frequency responses of {} decomposition filters'.format(wavelet_name))
+plt.subplot(212)
+plt.plot(rec_lo_fr, label='Low-pass')
+#plt.hold(True)
+plt.plot(rec_hi_fr, label='High-pass')
+plt.grid()
+plt.legend()
+plt.title('Frequency responses of {} reconstruction filters'.format(wavelet_name))
+
+plt.show()
+
+#y = lfilter(dec_lo, 1, x)
+#y = convolve(x, dec_lo)
+
+t = np.linspace(0, 1.0, 128*2*2*2)
+#x = np.sin(2*np.pi*10*t)
+x = pywt.data.ecg()
+
+plt.figure()
+plt.plot(t,x)
+plt.figure()
+
+# Perform manual DWT and decimate
+cA = np.convolve(x, dec_lo)[1::2]
+cD = np.convolve(x, dec_hi)[1::2]
+
+plt.figure()
+plt.subplot(211)
+plt.plot(cA)
+plt.grid()
+plt.title('Approximation coefficients')
+
+plt.subplot(212)
+plt.plot(cD)
+plt.grid()
+plt.title('Detail coefficients')
+
+plt.show()
+'''
 '''
 message = "1111111111111111111111"*50
 
