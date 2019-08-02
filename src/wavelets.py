@@ -35,7 +35,7 @@ def hideMessage(audioName, message, stegoPath):
     
     # This carries the most amount of information, while cD_6 carries the least
     for i in range(0, len(message)):
-        cD_1[i] = message[i]
+        cD_6[i] = message[i] * 10
 
     modSignal = map(int, pywt.waverec([cA_6, cD_6, cD_5, cD_4, cD_3, cD_2, cD_1], wavletType))
     fp.writeStegoToFile(stegoPath, waveObject.getparams(), list(modSignal))
@@ -48,12 +48,13 @@ def extractedMessage(stegoName, messageLen):
     
     cA_6, cD_6, cD_5, cD_4, cD_3, cD_2, cD_1 = pywt.wavedec(signal, wavletType, level=6)
     message = []
+    decimalMessage = []
     
     for i in range(0, messageLen):
-        decimalMessage.append(round_school(cD_1[i]))
+        decimalMessage.append(round_school(cD_6[i]/10))
     
-    for i in range(0,38):    
-        message.append(chr(round_school(decimalMessage[i])))
+    for i in range(0,messageLen): 
+        message.append(chr(decimalMessage[i]))
     
     message = "".join(message)
 
@@ -84,6 +85,8 @@ print("Length of cD_5", len(cD_5))
 print("Length of cD_6", len(cD_6))
 print("Length of cA_6", len(cA_6))
 
+
+'''
 xmax = signal.max()
 
 plt.figure()
@@ -121,10 +124,49 @@ reconstruction_plot(signal)
 reconstruction_plot(pywt.waverec([cA_6, cD_6, cD_5, cD_4, cD_3, cD_2, cD_1] + [None] * 0, wavletType))
 reconstruction_stem(cD_1, xmax, markerfmt ='none', linefmt='r-')
 plt.legend(['Original', ('Rec to lvl 1'),  ('Details for lvl 1')])
+'''
 
 
+'''
+import pywt
+import numpy as np
+import matplotlib.pyplot as plt
+ 
+x = np.linspace(0, 1, num=2048)
+chirp_signal = np.sin(250 * np.pi * x**2)
+    
+fig, ax = plt.subplots(figsize=(6,1))
+ax.set_title("Original Chirp Signal: ")
+ax.plot(chirp_signal)
+plt.show()
+    
+data = chirp_signal
+waveletname = 'haar'
 
-message = "My First DWT based embedding technique"
+fig, axarr = plt.subplots(nrows=5, ncols=2, figsize=(6,6))
+figR, axarrR = plt.subplots(nrows=5, ncols=1,figsize=(6,6))
+
+for ii in range(5):
+    (data, coeff_d) = pywt.dwt(data, waveletname)
+    axarr[ii, 0].plot(data, 'r')
+    axarr[ii, 1].plot(coeff_d, 'g')
+    axarr[ii, 0].set_ylabel("Level {}".format(ii + 1), fontsize=14, rotation=90)
+    axarr[ii, 0].set_yticklabels([])
+    axarrR[ii].plot(pywt.idwt(data, coeff_d, waveletname))
+    axarrR[ii].set_title("Reconstruction of level " + str(ii+1) + " coefficients")
+    if ii == 0:
+        axarr[ii, 0].set_title("Approximation coefficients", fontsize=14)
+        axarr[ii, 1].set_title("Detail coefficients", fontsize=14)
+    axarr[ii, 1].set_yticklabels([])
+plt.tight_layout()
+plt.show()
+
+
+'''
+
+
+'''
+message = "1111111111111111111111"*50
 
 message = fp.messageToBinary(message)
 
@@ -133,9 +175,7 @@ decimalMessage = []
 for i in range(0, len(message), 8):
     decimalMessage.append(int(message[i:i+8],2))
     
-print("Embedding", decimalMessage)
-
 hideMessage('Media/opera.wav', decimalMessage, 'C:/Users/project/Desktop/DWT_stego.wav')
 
 extractedMessage('C:/Users/project/Desktop/DWT_stego.wav', len(decimalMessage))
-
+'''
