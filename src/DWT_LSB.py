@@ -87,7 +87,7 @@ samplesOne, samplesTwo = fp.extractWaveSamples(song)
 cA_1, cD_1 = pywt.wavedec(samplesOne, wavletType, level=1)
 
 # Write the message that is to be embedded
-message = "Goodness gracious"
+message = "Good day"
 
 # Add the length of the message to be encoded as the first 24 bits of the msg
 
@@ -135,8 +135,43 @@ stegoSamples = list(map(int, stegoSamples))
 fp.writeStegoToFile('Media/DWT.wav',song.getparams(), stegoSamples)
 
 
+####################   From stego file   ######################################
+
+# Open the cover audio
+song = wave.open('Media/DWT.wav', mode='rb')
+
+# Extract the wave samples from the host signal
+samplesOne, samplesTwo = fp.extractWaveSamples(song)
+
+# Get the approximate coefficients and detail coefficients of the signal
+cA_1_new, cD_1_new = pywt.wavedec(samplesOne, wavletType, level=1)
+
+
+    
+extractedLength = 0
+
+for i in range(0, len(cD_1_new)):
+    replaceBits = calcPower(cD_1_new[i]) - OBH
+    
+    if (replaceBits <= 0):
+        continue
+    
+    else:
+        print("{0:016b}".format(int(cD_1_new[i])), end = ' ')
+        #print(replaceBits, end = ' ')
+        extractMessage += decodeCoefficient(cD_1_new[i], replaceBits)
+        #print(cD_1_new[i], end = ' ')
+        if (len(extractMessage) == 24):
+            extractedLength = int(extractMessage, 2)
+            break
+            
+
+print("")
+print("")
+#####################   From current  #########################################
 
 extractedLength = 0
+extractMessage = ''
 
 for i in range(0, len(cD_1)):    
     replaceBits = calcPower(cD_1[i]) - OBH
@@ -145,12 +180,15 @@ for i in range(0, len(cD_1)):
         continue
     
     else:
+        #print(replaceBits, end = ' ')
+
         extractMessage += decodeCoefficient(cD_1[i], replaceBits)
         
         if (len(extractMessage) == 24):
             extractedLength = int(extractMessage, 2)
             
         else:
+            print("{0:016b}".format(int(cD_1[i])), end = ' ')
             if (len(extractMessage) == extractedLength + 24):
                 extractMessage = extractMessage[24:]
                 break
@@ -162,7 +200,6 @@ for i in range(int(len(extractMessage)/8)):
         
         
 print(temp)
-
 
 
 
