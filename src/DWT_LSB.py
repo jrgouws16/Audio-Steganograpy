@@ -10,6 +10,7 @@ import fileprocessing as fp
 import wave
 import binascii
 import numpy as np
+import math
 
 def text_from_bits(bits, encoding='utf-8', errors='surrogatepass'):
     n = int(bits, 2)
@@ -53,6 +54,9 @@ def calcPower(coefficient):
             p = i - 1
             break
         
+    if (p == -1):
+        p = 0
+        
     return p
 
 # Function to embed a message within a single sample. Will start at 3rd LSB 
@@ -88,70 +92,98 @@ def decodeCoefficient(sample, bits):
         
     return msg
 
+# Fucntion to split song into 2048 bit block samples and returns coefficients
+# Takes in integer samples and returns coefficients in form 
+# [cA_1[...], cD_1[...]], thus [0][0] will return first list of cA coefficients
+#                              [1][5] will return sixth list of cD coefficients    
+# Depth is at level one
+def getCoefficients(samples, blockLength):
+    blocks = int(len(samples) / blockLength)
+    
+    coefficients = [[],[]]
+    wavletType = pywt.Wavelet('haar')
+
+
+    for i in range(0, math.floor(blocks)):     
+        cA_1, cD_1 = pywt.wavedec(samples[i * blockLength: i * blockLength + blockLength], wavletType, level=1)
+        coefficients[0].append(cA_1)
+        coefficients[1].append(cD_1)
+            
+    return coefficients
+    
+
+
+
+
+
+
+
 # Type of wavelet to use
 wavletType = pywt.Wavelet('haar')
 
 # Open the cover audio
-song = wave.open('Media/opera.wav', mode='rb')
+song = wave.open('Media/song.wav', mode='rb')
 
 # Extract the wave samples from the host signal
 samplesOne, samplesTwo = fp.extractWaveSamples(song)
 
 # Get the approximate coefficients and detail coefficients of the signal
-cA_1, cD_1 = pywt.wavedec(samplesOne, wavletType, level=1)
+coefficiets = getCoefficients(samplesOne, 2048)
 
-# Write the message that is to be embedded
-message = fp.getMessageBits('Media/text.txt')
+# Message to embed
+message = fp.getMessageBits('Media/cat.jpeg')
 message = "".join(list(map(str, message)))
 
-message = 'First DWT Text steganography encoded and extracted successufully\n'*400
-
-
-# Convert the message to a binary sequence
-message = fp.messageToBinary(message)
-
 messageLength = len(message)
+
+originalMessage = message
+
 messageLength = '{0:024b}'.format(messageLength)
 message = messageLength + message
 
-print(len(message), "Message bits encoded within", len(samplesOne), "samples")
-print(len(message)/8, "bits/second encoding")
-print("Capacity (%) =",len(message)/(len(samplesOne)*16)*100)
-
-extractMessage = ''
 
 # Amount of bits to keep of the coefficient
-OBH = 6
-
+OBH = 2
 print("############ EMBEDDING   #################")
 # Embed the message
-for i in range(0, len(cD_1)):
-    # Calculate the amount of bits that can possibly hidden
-    replaceBits = calcPower(cD_1[i]) - OBH
-   
-    if (len(message) > 1 and i == len(cD_1) - 1):
-          print("Message is too long")
-          break
-    
-    
-    # If it returns as a negative amount, skip the sample
-    if (replaceBits <= 0):
-        continue
-    
-    else:
-        # Get the amount of message bits that will be embedded
-        embedMessage = message[:replaceBits]
-        message = message[replaceBits:]
-        cD_1[i] = encodeCoefficient(int(cD_1[i]), embedMessage)
-        
 
-        # If the message is embedded, break
-        if (len(message) == 0):
-            break
+blockNumber = 0      
+while(len(message) > 0):      
+    for i in range(0, len(coefficiets[1][blockNumber])):
+        # Calculate the amount of bits that can possibly hidden
+        replaceBits = calcPower(coefficiets[1][blockNumber][i]) - OBH - 3
+            
+        if (len(message) > 1 and blockNumber == len(samplesOne)/2048 -1 and i == len(coefficiets[1][blockNumber]) - 5):
+              print("Message is too long")
+              print("Unembedded message bits =", len(message))
+              break
+    
+        # If it returns as a negative amount, skip the sample
+        if (replaceBits <= 0):
+            continue
+        
+        else:
+            # Get the amount of message bits that will be embedded
+            embedMessage = message[:replaceBits]
+            message = message[replaceBits:]
+            coefficiets[1][blockNumber][i] = encodeCoefficient(int(coefficiets[1][blockNumber][i]), embedMessage)
+            
+    
+            # If the message is embedded, break
+            if (len(message) == 0):
+                break
+    
+    blockNumber+=1
+
 
 # Reconstruct the signal
-stegoSamples = pywt.waverec([cA_1, cD_1], wavletType)
-stegoSamples = list(map(int, stegoSamples))
+stegoSamples = []
+for i in range(0, len(coefficiets[1])):
+    temp = pywt.waverec([coefficiets[0][i], coefficiets[1][i]], wavletType)
+    temp = list(map(int, temp))
+    stegoSamples += temp
+
+
 
 for i in range(len(stegoSamples)):
       if (stegoSamples[i] > 32767):
@@ -165,12 +197,10 @@ print("############ WRITING   #################")
 # Write to the stego song file
 fp.writeStegoToFile('Media/DWT.wav',song.getparams(), stegoSamples)
 
-print("############ Reading   #################")
 
-
-print("############ EXTRACTING 1   #################")
+print("############ EXTRACTING   #################")
 ####################   From stego file   ######################################
-
+extractMessage = ''
 # Open the cover audio
 stego = wave.open('Media/DWT.wav', mode='rb')
 
@@ -178,121 +208,40 @@ stego = wave.open('Media/DWT.wav', mode='rb')
 samplesOneStego, samplesTwoStego = fp.extractWaveSamples(stego)
 
 # Get the approximate coefficients and detail coefficients of the signal
-cA_1_new, cD_1_new = pywt.wavedec(samplesOneStego, wavletType, level=1)
+newCoeff = getCoefficients(samplesOneStego, 2048)
     
 extractedLength = 0
 foundMsgLength = False
 
 extractMessage = ''
 
-for i in range(0, len(cD_1_new)):    
-    replaceBits = calcPower(cD_1_new[i]) - OBH
-       
-    if (replaceBits <= 0):
-        continue
-    
-    else:
-        extractMessage += decodeCoefficient(cD_1_new[i], replaceBits)
+blockNumber = 0      
+doBreak = 0
 
-        if (len(extractMessage) >= 24 and foundMsgLength == False):
-            extractedLength = int(extractMessage[0:24], 2)
-            foundMsgLength = True
-            
+while(1):
+    for i in range(0, len(coefficiets[1][blockNumber])):    
+        
+        replaceBits = calcPower(coefficiets[1][blockNumber][i]) - OBH - 3
+           
+        if (replaceBits <= 0):
+            continue
+        
         else:
-            if (len(extractMessage) >= extractedLength + 24 and foundMsgLength == True):
-                extractMessage = extractMessage[24:]
-                break
-        
-temp = ''
-
-while(len(extractMessage) >= 8):
-    temp += text_from_bits(extractMessage[:8])
-    extractMessage = extractMessage[8:]        
-        
-        
-print(temp)
-
-print("############ EXTRACTING 2   #################")
-#####################   From current  #########################################
-'''
-extractedLength = 0
-foundMsgLength = False
-
-extractMessage = ''
-
-for i in range(0, len(cD_1)):    
-    replaceBits = calcPower(cD_1[i]) - OBH
-       
-    if (replaceBits <= 0):
-        continue
+            extractMessage += decodeCoefficient(coefficiets[1][blockNumber][i], replaceBits)
     
-    else:
-        extractMessage += decodeCoefficient(cD_1[i], replaceBits)
-
-        if (len(extractMessage) >= 24 and foundMsgLength == False):
-            extractedLength = int(extractMessage[0:24], 2)
-            foundMsgLength = True
-            
-        else:
-            if (len(extractMessage) >= extractedLength + 24 and foundMsgLength == True):
-                extractMessage = extractMessage[24:]
-                break
-        
-temp = ''
-
-while(len(extractMessage) >= 8):
-    temp += text_from_bits(extractMessage[:8])
-    extractMessage = extractMessage[8:]        
+            if (len(extractMessage) >= 24 and foundMsgLength == False):
+                extractedLength = int(extractMessage[0:24], 2)
+                foundMsgLength = True
+                
+            else:
+                if (len(extractMessage) >= extractedLength + 24 and foundMsgLength == True):
+                    extractMessage = extractMessage[24:24 + extractedLength]
+                    
+                    doBreak = 1
+                    break
+             
+    blockNumber += 1
+    if(doBreak == 1):
+        break
     
-#print(temp)
-
-
-'''
-        
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-        
+fp.writeMessageBitsToFile(extractMessage, 'Media/ck.jpeg')
