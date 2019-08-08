@@ -61,14 +61,11 @@ def calcPower(coefficient):
 
 # Function to embed a message within a single sample. Will start at 3rd LSB 
 def encodeCoefficient(sample, message):
-        
-    
+
     sample = replaceBit(sample, 1, '1')  
     sample = replaceBit(sample, 2, '0')  
     sample = replaceBit(sample, 3, '1')  
     
-        
-      
     for i in range(4, 4 + len(message)):
         sample = replaceBit(sample, i, message[i - 4])
         
@@ -111,12 +108,6 @@ def getCoefficients(samples, blockLength):
             
     return coefficients
     
-
-
-
-
-
-
 
 # Type of wavelet to use
 wavletType = pywt.Wavelet('haar')
