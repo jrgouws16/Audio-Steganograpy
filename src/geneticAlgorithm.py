@@ -175,7 +175,7 @@ def insertMessage(samples, key, message):
     message = messageLength + message
         
     for i in range(0, len(message)):
-        
+                
         if (float(i + 1) * 100 / len(message) > progress):
             progress = float(i + 1) * 100 / len(message)
             signalEmbedding.trigger.emit(progress)
@@ -236,8 +236,11 @@ def insertMessage(samples, key, message):
             samples[sampleIndex][-3] = Ei
             samples[sampleIndex] = "".join(samples[sampleIndex])
             
-        
         sampleIndex = sampleIndex + 1
+        
+        if (sampleIndex == len(samples)):
+            print("File is too small to embed the message, breaking for loop")
+            break
         
         
     return samples
