@@ -90,7 +90,6 @@ def decode():
             
             # Write the message bits to a file and close the steganography file
             fp.writeMessageBitsToFile(secretMessage, mainWindow.lineEdit_msgname.text())
-            print(secretMessage)
             song.close()
             
             

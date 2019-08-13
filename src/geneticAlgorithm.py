@@ -168,12 +168,13 @@ def insertMessage(samples, key, message):
     progress = 0
     skipIndex = 0
     sampleIndex = 0
+    messageBitsEmbedded = 0
     
     messageLength = len(message)
     messageLength = '{0:024b}'.format(messageLength)
     
     message = messageLength + message
-        
+    
     for i in range(0, len(message)):
                 
         if (float(i + 1) * 100 / len(message) > progress):
@@ -209,11 +210,13 @@ def insertMessage(samples, key, message):
         
         # Replace sample with the fittest cromosome
         samples[sampleIndex] = population[determineFittest(samples[sampleIndex], population)]
+        messageBitsEmbedded += 1
         
         # If fitness value between 0 and 4 exclusive, insert another bit at i = 2
         if(determineFittest(samples[sampleIndex], population) > 0 and 
            determineFittest(samples[sampleIndex], population) < 4):
             
+            messageBitsEmbedded += 1    
             
             # Calculate pi for m(i+1)
             i = i + 1
@@ -242,8 +245,7 @@ def insertMessage(samples, key, message):
             print("File is too small to embed the message, breaking for loop")
             break
         
-        
-    return samples
+    return samples, sampleIndex, messageBitsEmbedded
        
 def extractMessage(samples, key):
     

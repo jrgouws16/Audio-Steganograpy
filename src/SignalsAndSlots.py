@@ -4,6 +4,10 @@ from PyQt5.QtWidgets import *
 # Function to display custom error message
 def showErrorMessage(title, message):
     QMessageBox.critical(None, title, message)
+    
+# Function to display custom error message
+def showInfoMessage(title, message):
+    QMessageBox.information(None, title, message)
 
 class SigSlot(QObject):
     # Define a new signal called 'trigger' that has no arguments.
