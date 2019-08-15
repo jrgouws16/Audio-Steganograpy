@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import fileprocessing as fp
 import wave
+import scipy.fftpack
 
 
 def round_school(x):
@@ -60,7 +61,7 @@ def extractedMessage(stegoName, messageLen):
 
     print(message)
 
-
+'''
 signal = pywt.data.ecg()
 wavletType = pywt.Wavelet('haar')
 levels = 6
@@ -86,7 +87,7 @@ print("Length of cD_6", len(cD_6))
 print("Length of cA_6", len(cA_6))
 
 
-'''
+
 xmax = signal.max()
 
 plt.figure()
@@ -124,10 +125,10 @@ reconstruction_plot(signal)
 reconstruction_plot(pywt.waverec([cA_6, cD_6, cD_5, cD_4, cD_3, cD_2, cD_1] + [None] * 0, wavletType))
 reconstruction_stem(cD_1, xmax, markerfmt ='none', linefmt='r-')
 plt.legend(['Original', ('Rec to lvl 1'),  ('Details for lvl 1')])
-'''
 
 
-'''
+
+
 import pywt
 import numpy as np
 import matplotlib.pyplot as plt
@@ -162,42 +163,54 @@ plt.tight_layout()
 plt.show()
 
 
-'''
 
 '''
-import pywt
-import numpy as np
-import matplotlib.pyplot as plt
+
 
 # Create wavelet and extract the filters
-wavelet_name = 'bior6.8'
+wavelet_name = 'haar'
 wavelet = pywt.Wavelet(wavelet_name)
 dec_lo, dec_hi, rec_lo, rec_hi = wavelet.filter_bank
 
+print("######################################################################")
+print("#########  Step one: Get the filter coefficients for haar:   #########")
+print("######################################################################")
+print("")
+print("Decomposing coefficients low .....", dec_lo)
+print("Decomposing coefficients high ....", dec_hi)
+print("Reconstruction coefficients low ..", rec_lo)
+print("Reconstruction coefficients low ..", rec_hi)
+
+'''
 # Filter coefficients
 plt.figure()
 plt.subplot(221)
-plt.stem(dec_lo)
+plt.stem(dec_lo, use_line_collection=True)
 plt.grid()
 plt.title('{} low-pass decomposition filter'.format(wavelet_name))
+
 plt.subplot(222)
-plt.stem(dec_hi)
+plt.stem(dec_hi, use_line_collection=True)
 plt.grid()
 plt.title('{} high-pass decomposition filter'.format(wavelet_name))
 plt.subplot(223)
-plt.stem(rec_lo)
+plt.stem(rec_lo, use_line_collection=True)
 plt.grid()
 plt.title('{} low-pass reconstruction filter'.format(wavelet_name))
 plt.subplot(224)
-plt.stem(rec_hi)
+plt.stem(rec_hi, use_line_collection=True)
 plt.grid()
 plt.title('{} high-pass reconstruction filter'.format(wavelet_name))
+'''
 
+'''
 # Frequency responses
-dec_lo_fr = np.abs(np.fft.rfft(dec_lo, 128))
-dec_hi_fr = np.abs(np.fft.rfft(dec_hi, 128))
-rec_lo_fr = np.abs(np.fft.rfft(rec_lo, 128))
-rec_hi_fr = np.abs(np.fft.rfft(rec_hi, 128))
+dec_lo_fr = np.abs(np.fft.fft(dec_lo, 128))
+dec_hi_fr = np.abs(np.fft.fft(dec_hi, 128))
+rec_lo_fr = np.abs(np.fft.fft(rec_lo, 128))
+rec_hi_fr = np.abs(np.fft.fft(rec_hi, 128))
+
+
 
 plt.figure()
 plt.subplot(211)
@@ -216,6 +229,7 @@ plt.legend()
 plt.title('Frequency responses of {} reconstruction filters'.format(wavelet_name))
 
 plt.show()
+'''
 
 #y = lfilter(dec_lo, 1, x)
 #y = convolve(x, dec_lo)
@@ -226,12 +240,21 @@ x = pywt.data.ecg()
 
 plt.figure()
 plt.plot(t,x)
-plt.figure()
+
+wavletType = pywt.Wavelet('haar')
+cA_1, cD_1 = pywt.wavedec(x, wavletType, level=1)
+print("Library                          Self")
+
+
+    
 
 # Perform manual DWT and decimate
 cA = np.convolve(x, dec_lo)[1::2]
 cD = np.convolve(x, dec_hi)[1::2]
 
+for i in range(0,10):
+    print(cD_1[i], "      ", cD[i])
+    
 plt.figure()
 plt.subplot(211)
 plt.plot(cA)
@@ -244,9 +267,8 @@ plt.grid()
 plt.title('Detail coefficients')
 
 plt.show()
-'''
-'''
-message = "1111111111111111111111"*50
+
+message = "Is this actually working"
 
 message = fp.messageToBinary(message)
 
@@ -258,4 +280,4 @@ for i in range(0, len(message), 8):
 hideMessage('Media/opera.wav', decimalMessage, 'C:/Users/project/Desktop/DWT_stego.wav')
 
 extractedMessage('C:/Users/project/Desktop/DWT_stego.wav', len(decimalMessage))
-'''
+
