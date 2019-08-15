@@ -171,7 +171,7 @@ plt.show()
 wavelet_name = 'haar'
 wavelet = pywt.Wavelet(wavelet_name)
 dec_lo, dec_hi, rec_lo, rec_hi = wavelet.filter_bank
-
+'''
 print("######################################################################")
 print("#########  Step one: Get the filter coefficients for haar:   #########")
 print("######################################################################")
@@ -179,8 +179,8 @@ print("")
 print("Decomposing coefficients low .....", dec_lo)
 print("Decomposing coefficients high ....", dec_hi)
 print("Reconstruction coefficients low ..", rec_lo)
-print("Reconstruction coefficients low ..", rec_hi)
-
+print("Reconstruction coefficients high ..", rec_hi)
+'''
 '''
 # Filter coefficients
 plt.figure()
@@ -238,22 +238,26 @@ t = np.linspace(0, 1.0, 128*2*2*2)
 #x = np.sin(2*np.pi*10*t)
 x = pywt.data.ecg()
 
+
+print("xxxxxxxx", x[0:10])
+
 plt.figure()
 plt.plot(t,x)
 
 wavletType = pywt.Wavelet('haar')
 cA_1, cD_1 = pywt.wavedec(x, wavletType, level=1)
-print("Library                          Self")
-
 
     
+print("Convolved")
+convolved = np.convolve([-86, -87, -87, -89, -89, -90, -91, -93, -96, -97], [-1/np.sqrt(2), 1/np.sqrt(2)])
+
+for i in convolved:
+    print(i)
 
 # Perform manual DWT and decimate
 cA = np.convolve(x, dec_lo)[1::2]
 cD = np.convolve(x, dec_hi)[1::2]
 
-for i in range(0,10):
-    print(cD_1[i], "      ", cD[i])
     
 plt.figure()
 plt.subplot(211)
