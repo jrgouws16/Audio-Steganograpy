@@ -5,9 +5,11 @@ Created on Thu Aug 15 13:19:34 2019
 @author: project
 """
 
+# https://dsp.stackexchange.com/questions/45758/programming-the-idwt-for-image-processing
+# https://dsp.stackexchange.com/questions/47437/discrete-wavelet-transform-visualizing-relation-between-decomposed-detail-coef
+# https://dsp.stackexchange.com/questions/48138/how-to-implement-a-filter-associated-to-a-specific-wavelet
+
 import numpy as np
-import fileprocessing as fp
-import wave
 
 # Convolve signal x with signal y
 def convolve(x, y):
@@ -51,6 +53,7 @@ def getCoeff(signal):
     detail = detail[1::2]
     return approx, detail
 
+# One level reconstruction of signal from coefficients
 def getSignal(approx, detail):
     # Haar coefficients for low pass filter reconstruction
     coefLowRec  = [0.7071067811865476,  0.7071067811865476]
@@ -58,23 +61,22 @@ def getSignal(approx, detail):
     # Haar coefficients for high pass filter reconstruction
     coefHighRec = [0.7071067811865476, -0.7071067811865476]
     
-    # using itertool.chain() 
-    # inserting K after every Nth number  
+    # Insert zero's every second index, for upsampling, starting at index 0
     for b in range (0,len(approx)):
         approx.insert(b*2,0)
 
     for b in range (0,len(detail)):
         detail.insert(b*2,0)
 
+    # First index should not be a zero
     del detail[0]
     del approx[0]
-
-    #detail.append(0)
-    #approx.append(0)    
-
+ 
+    # Convolve the coefficients with the filter coefficients
     approxSignal = convolve(approx, coefLowRec)
     detailSignal = convolve(detail, coefHighRec)
     
+    # If they are of different lengths, make them of equal lengths
     while (len(approxSignal) < len(detailSignal)):
         approxSignal.append(0)
         
@@ -84,11 +86,12 @@ def getSignal(approx, detail):
     approxSignal = np.asarray(approxSignal)
     detailSignal = np.asarray(detailSignal)
     
-    
+    # Add the results and return the result
     returnList   = list(map(int, list(approxSignal + detailSignal)))
+    
     return returnList
     
-    
+# Function able to perform Haar DWT of level greater than one
 def getLevelCoefficients(levels, signal):
     approx = signal
     detail = []
@@ -98,6 +101,9 @@ def getLevelCoefficients(levels, signal):
         detail.insert(0, det)
     return approx, detail
 
+# Function able to perform Haar IDWT of level greater than one
+# Takes approximation coefficients list as first parameter and list of 
+# detailed coefficients lists as the second paramenter
 def getLevelSignal(approx, detail):
     signal = approx
     
