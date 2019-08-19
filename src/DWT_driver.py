@@ -7,17 +7,20 @@ Created on Fri Aug 16 13:51:31 2019
 
 import pywt
 import numpy as np
-import DWT_first_principles as firstP
 import wave
 import fileprocessing as fp
 import matplotlib.pyplot as plt
+import dwtFirstPrinciples as firstP
+import dwtLibrary
 
 testConvolution     = False
 testLevelOneDWT     = False
 testLevelsDWT       = False
 plotDiffLevelCoeff  = False
 plotUnderstanding   = False
-plotCorrectImplemnt = True
+plotCorrectImplemnt = False
+firstPrinciplesImplement = True
+libraryImplement = True
 
 def reconstruction_plot(yyy, **kwargs):
     """Plot signal vector on x [0,1] independently of amount of values it contains."""
@@ -295,3 +298,81 @@ if (plotCorrectImplemnt == True):
     x = pywt.data.ecg()
     plt.figure()
     plt.plot(t,x)
+    
+    
+    
+if (firstPrinciplesImplement == True):
+      # Open the cover audio
+      song = wave.open('Media/song.wav', mode='rb')
+      
+      print("Getting cover samples")
+      
+      # Extract the wave samples from the host signal
+      samplesOne, samplesTwo = fp.extractWaveSamples(song)
+      
+      print("Getting message samples")
+      
+      # Message to embed
+      message = fp.getMessageBits('Media/cat.jpeg')
+      message = "".join(list(map(str, message)))
+      
+      print("Encoding")
+      
+      stegoSamples = firstP.dwtHaarEncode(samplesOne, message, 4, 2048)
+            
+      print("Writing to stego")
+      
+      # Write to the stego song file
+      fp.writeStegoToFile('Media/DWT.wav',song.getparams(), stegoSamples)
+      
+      print("Reading from stego")
+      # Open the cover audio
+      stego = wave.open('Media/DWT.wav', mode='rb')
+      
+      # Extract the wave samples from the host signal
+      samplesOneStego, samplesTwoStego = fp.extractWaveSamples(stego)
+      
+      print("Extracting")
+      
+      extractMessage = firstP.dwtHaarDecode(samplesOneStego, 4, 2048)
+          
+      print("Writing to message file")
+      fp.writeMessageBitsToFile(extractMessage, 'Media/dwtFirstPrinciplesMessageExtract.jpeg')
+      
+if (libraryImplement == True):
+      # Open the cover audio
+      song = wave.open('Media/song.wav', mode='rb')
+      
+      print("Getting cover samples")
+      
+      # Extract the wave samples from the host signal
+      samplesOne, samplesTwo = fp.extractWaveSamples(song)
+      
+      print("Getting message samples")
+      
+      # Message to embed
+      message = fp.getMessageBits('Media/cat.jpeg')
+      message = "".join(list(map(str, message)))
+      
+      print("Encoding")
+      
+      stegoSamples = dwtLibrary.dwtHaarEncodingLibrary(samplesOne, message, 4, 2048)
+            
+      print("Writing to stego")
+      
+      # Write to the stego song file
+      fp.writeStegoToFile('Media/DWT.wav',song.getparams(), stegoSamples)
+      
+      print("Reading from stego")
+      # Open the cover audio
+      stego = wave.open('Media/DWT.wav', mode='rb')
+      
+      # Extract the wave samples from the host signal
+      samplesOneStego, samplesTwoStego = fp.extractWaveSamples(stego)
+      
+      print("Extracting")
+      
+      extractMessage = dwtLibrary.dwtHaarDecodeLibrary(samplesOneStego, 4, 2048)
+          
+      print("Writing to message file")
+      fp.writeMessageBitsToFile(extractMessage, 'Media/dwtLibraryMessageExtract.jpeg')
