@@ -318,7 +318,7 @@ if (firstPrinciplesImplement == True):
       
       print("Encoding")
       
-      stegoSamples = firstP.dwtHaarEncode(samplesOne, message, 4, 2048)
+      stegoSamples, samplesUsed = firstP.dwtHaarEncode(samplesOne, message, 4, 2048)
             
       print("Writing to stego")
       
@@ -356,7 +356,7 @@ if (libraryImplement == True):
       
       print("Encoding")
       
-      stegoSamples = dwtLibrary.dwtHaarEncodingLibrary(samplesOne, message, 4, 2048)
+      stegoSamples, numEmbedded = dwtLibrary.dwtHaarEncodingLibrary(samplesOne, message, 4, 2048)
             
       print("Writing to stego")
       
@@ -376,3 +376,6 @@ if (libraryImplement == True):
           
       print("Writing to message file")
       fp.writeMessageBitsToFile(extractMessage, 'Media/dwtLibraryMessageExtract.jpeg')
+      
+
+      

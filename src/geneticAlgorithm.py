@@ -171,7 +171,7 @@ def insertMessage(samples, key, message):
     messageBitsEmbedded = 0
     
     messageLength = len(message)
-    messageLength = '{0:024b}'.format(messageLength)
+    messageLength = '{0:026b}'.format(messageLength)
     
     message = messageLength + message
     
@@ -254,7 +254,7 @@ def extractMessage(samples, key):
     progress = 0
     
     # This is the amount of bits that will determine the message length
-    messageLength = 24
+    messageLength = 26
     
     # While the full message has not been extracted
     while (len(message) < messageLength):
@@ -290,8 +290,8 @@ def extractMessage(samples, key):
                 message += '1'
 
         # If the message size is determined, add it to the total message length
-        if (len(message) == 24):
-            messageLength = int(message, 2) + 24
+        if (len(message) == 26):
+            messageLength = int(message, 2) + 26
             key = key * (int(float(messageLength)/len(key)) + 1)
 
         # Extract the second sample for the case where F is 1/2/3
@@ -309,19 +309,19 @@ def extractMessage(samples, key):
                 else:
                     message += '1'
                     
-            if (len(message) == 24):
-                messageLength = int(message, 2) + 24
+            if (len(message) == 26):
+                messageLength = int(message, 2) + 26
                 key = key * (int(float(messageLength)/len(key)) + 1)
             
         sampleIndex += 1
         
-        if (sampleIndex > 24):
+        if (sampleIndex > 26):
             if (float(len(message)) * 100 / messageLength > progress):
                 progress = float(len(message)) * 100 / messageLength
                 signalExtractingMessage.trigger.emit(progress)
             
     signalExtractingMessage.trigger.emit(100)
-    return message[24:]
+    return message[26:]
 
             
 

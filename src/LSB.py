@@ -14,6 +14,7 @@ class LSB_encoding:
         self.messageSamples = messageSamples
         self.stegoSamples = []
         self.signalEmbedding = SignalsAndSlots.SigSlot()
+        self.numberSamplesUsed = 0       # Samples used to embed secret message
 
     # Setter for the message samples    
     def setMessageSamples(self, messageSamples):
@@ -42,6 +43,7 @@ class LSB_encoding:
         
     # Replaces LSB of each byte of the audio data by one bit from the text bit array
     def encode(self, LSB):
+        self.numberSamplesUsed = 0
         
         # value to update the GUI
         progress = 0
@@ -50,6 +52,7 @@ class LSB_encoding:
         # update the GUI
         for i, bit in enumerate(self.messageSamples):
             self.stegoSamples.append(self.replaceBit(self.coverSamples[i], LSB , bit))
+            self.numberSamplesUsed += 1
             progress += 1
             self.signalEmbedding.trigger.emit(float(progress)*100/len(self.coverSamples))
 

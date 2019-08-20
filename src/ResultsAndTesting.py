@@ -37,6 +37,11 @@ def getSNR(originalSamples, embeddedSamples):
     
     return SNR
     
+# Give only the message bits that were encoded as well as the amount of samples 
+# used to embed the message. The framerate is from the wave file 
+def getCapacity(secretMessage, samplesUsed, frameRate):
+      return round((len(secretMessage)/(samplesUsed/frameRate))/1000, 2)
+
 ###############################################################################
 ######################          Test the GA      ##############################              
 ###############################################################################
@@ -65,5 +70,8 @@ def testGA(song, key):
     
     print("SNR",getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed]))
     plotAmpDifference(originalCoverSamples, stegoSamples)
-    
+
+
+
+
 #testGA('Media/opera.wav', 'DDDDDDDDD')

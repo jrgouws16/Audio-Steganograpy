@@ -80,11 +80,6 @@ def decode():
             binaryKey = fp.messageToBinary(keyString)
             secretMessage = GA_decoding(stegoSamples, binaryKey)
             
-            # Secret message length cannot exceed 24 bits
-            if (len(secretMessage) > 16777200):
-                SignalsAndSlots.showErrorMessage('Message too long', 
-                                                 'Enter a message of length smaller than 16777200 bits')
-            
             # Connect the writing message to file to the progress bar
             fp.signalWriteMsg.connect(mainWindow.progressBar_writing.setValue)
             

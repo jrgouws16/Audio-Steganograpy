@@ -197,12 +197,14 @@ def decodeCoefficient(sample, bits):
 # performed each time.
 # Returns a list of integer stego file samples
 def dwtHaarEncode(coverSamples, message, OBH, blockLength):
+      samplesUsed = 0
+      
       # Get the approximate coefficients and detail coefficients of the signal
       coefficiets = getCoefficients(coverSamples, blockLength)
       
       # Embed the messagelength within the message
       messageLength = len(message)
-      messageLength = '{0:024b}'.format(messageLength)
+      messageLength = '{0:026b}'.format(messageLength)
       message = messageLength + message
           
       blockNumber = 0      
@@ -225,7 +227,8 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength):
                   embedMessage = message[:replaceBits]
                   message = message[replaceBits:]
                   coefficiets[1][blockNumber][i] = encodeCoefficient(int(coefficiets[1][blockNumber][i]), embedMessage)
-                  
+                  samplesUsed = blockNumber * blockLength + (i + 1)*2
+
           
                   # If the message is embedded, break
                   if (len(message) == 0):
@@ -249,7 +252,7 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength):
                   stegoSamples[i] = -32767
 
       
-      return stegoSamples
+      return stegoSamples, samplesUsed
       
 # Function to decode a message from a stego audio file using the Haar DWT transform
 # Takes in list of integer stego file samples
@@ -281,13 +284,13 @@ def dwtHaarDecode(stegoSamples, OBH, blockLength):
               else:
                   extractMessage += decodeCoefficient(newCoeff[1][blockNumber][i], replaceBits)
           
-                  if (len(extractMessage) >= 24 and foundMsgLength == False):
-                      extractedLength = int(extractMessage[0:24], 2)
+                  if (len(extractMessage) >= 26 and foundMsgLength == False):
+                      extractedLength = int(extractMessage[0:26], 2)
                       foundMsgLength = True
                       
                   else:
-                      if (len(extractMessage) >= extractedLength + 24 and foundMsgLength == True):
-                          extractMessage = extractMessage[24:24 + extractedLength]
+                      if (len(extractMessage) >= extractedLength + 26 and foundMsgLength == True):
+                          extractMessage = extractMessage[26:26 + extractedLength]
                           
                           doBreak = 1
                           break

@@ -89,15 +89,8 @@ def encode():
     
     # Display the size of the secret message
     mainWindow.label_msg_size.setText("Message Size (bits): " + str(len(secretMessage)))
-
-    # If the cover file was too small/message too large, display an error message
-    if (len(coverSamples[0]) < len(secretMessage)):
-        SignalsAndSlots.showErrorMessage("Cover file too small",
-                                         "The cover file is too small to embed the secret message. "
-                                         "Either provide a larger cover file or a smaller message")
         
-        # Get the method of encoding by seeing which radio button is checked
-
+    # Get the method of encoding by seeing which radio button is checked
     # First method = Standard Least Significant Bit encoding
     if(mainWindow.radioButton_LSB.isChecked()):
         

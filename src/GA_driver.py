@@ -120,14 +120,14 @@ items = ['1','0']
 for numberTests in range(0, 1000):
     samples = []
     message = ''
-    key = "".join(random.choices(items, k = 24))
+    key = "".join(random.choices(items, k = 26))
     
     for messageLength in range(0,100):
         samples.append("".join(random.choices(items, k = 16)))
         message += random.choice(items)
         key += random.choice(items)
         
-    for i in range(0, 24):
+    for i in range(0, 26):
         samples.append("".join(random.choices(items, k = 16)))
         
     stego, samplesUsed, bitsInserted = GA.insertMessage(samples, key, message)
