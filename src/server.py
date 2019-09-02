@@ -43,66 +43,76 @@ def threaded_client(conn):
         
         elif (message.decode() == 'RECFILE'):
               mainWindow.listWidget_log.addItem("Server receiving file")
-              f = open("received.pdf", "wb")
+              f = open("Media/received.pdf", "wb")
               data = recv_one_message(conn)
               f.write(data)
               f.close()
               mainWindow.listWidget_log.addItem("Server receiving file success")
+              
+        elif (message.decode() == "Disconnect"):
+              break
                             
         else:
               mainWindow.listWidget_log.addItem("Server receiving command")
               mainWindow.listWidget_log.addItem("Command -> " + message.decode())
             
-            
+    mainWindow.listWidget_log.addItem("Client", str(conn.getsockname()[0]), "Disconnecting")
     conn.close()
+    mainWindow.listWidget_log.addItem("Client", str(conn.getsockname()[0]), "Disconnected successfully")
+    
     print("[-] Client disconnected")
 
 
 def startServer(param):
-      print(param)
       HOST = ""
+      mainWindow.listWidget_log.addItem("Server started")
       
-      try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            mainWindow.listWidget_log.addItem("Server started")
-            print(int(mainWindow.lineEdit_port.text()))
-            s.bind((HOST, int(mainWindow.lineEdit_port.text())))
-            mainWindow.listWidget_log.addItem("Port opened")
-            s.listen(1)
-            mainWindow.listWidget_log.addItem("Server listening for clients")
-    
-            try:
-                  conn, addr = s.accept()
-                  mainWindow.listWidget_log.addItem("Client " + str(addr) + " connected on port " + mainWindow.lineEdit_port.text())
-                  threaded_client(conn)
-                  
-                  
-            except Exception:
-                  s.close()
+      while (mainWindow.label_server_status.text() == "Server Status: On"):
+          print("HI")
+          try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.bind((HOST, int(mainWindow.lineEdit_port.text())))
+                s.listen(5)
+                
+                try:
+                      conn, addr = s.accept()
+                      print("NOW here", conn, addr)
+                      mainWindow.listWidget_log.addItem("Client " + str(addr) + " connected on port " + mainWindow.lineEdit_port.text())
+                      threaded_client(conn)
+                      
+                except Exception:
+                      s.close()
             
-      except Exception:
-            SS.showErrorMessage("Error opening port.", "Check if port provided is valid.")
-      
+          except Exception:
+                SS.showErrorMessage("Error opening port.", "Check if port provided is valid.")
+                
+      mainWindow.listWidget_log.addItem("Server ended")      
+        
 def startServerThread():
       x = threading.Thread(target=startServer, args=(1,))
+      mainWindow.label_server_status.setText("Server Status: On")
       x.start()
-    
-      
+      return x
+            
+def endServer():
+      mainWindow.label_server_status.setText("Server Status: Off")
+
+
 if __name__ == "__main__":
     # Create a QtWidget application
-    app = QtWidgets.QApplication([])
+    app = QtWidgets.QApplication(sys.argv)
     
     # Load the user interface designed on Qt Designer
     mainWindow = uic.loadUi("ServerGUI.ui")
-
     mainWindow.pushButton_start.clicked.connect(startServerThread)
-   
+    mainWindow.pushButton_stop.clicked.connect(endServer)
+    
     # Set the GUI background to specified image
     mainWindow.setStyleSheet("QMainWindow {border-image: url(Media/music.jpg) 0 0 0 0 stretch stretch}")
     
     # Execute and show the user interface
     mainWindow.show()
-    app.exec()
+    sys.exit(app.exec_())
       
       
       

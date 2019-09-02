@@ -551,7 +551,7 @@
      <string>Event logs</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>170</x>
@@ -645,6 +645,13 @@
         <widget class="QPushButton" name="pushButton_stop">
          <property name="text">
           <string>Stop Server</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_server_status">
+         <property name="text">
+          <string>Server Status: Off</string>
          </property>
         </widget>
        </item>
