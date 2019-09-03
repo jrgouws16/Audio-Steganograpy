@@ -87,7 +87,44 @@ def getMessageBits(file_path):
     file.close()
 
     # Return integer list of samples
-    return list(map(int, totalSamples))                                             
+    return list(map(int, totalSamples))    
+
+
+# Takes any message file and returns a integer list of the bits
+def getMessageBits2(file):
+    # Open the file to be read and get the length
+    messageLength = len(file.read())
+    progress = 0
+    
+    file.seek(0)
+    # Samples to be returned                  
+    totalSamples = '' 
+    
+    totalBytes = 0
+
+    while (1):
+        # Read one byte of the file
+        byte = file.read(1)                        
+        totalBytes += 1
+        
+        # Transmit signal to display progress on GUI
+        if ((totalBytes+1)*100/messageLength > progress):
+            progress = (totalBytes+1)*100/messageLength
+            signalReadMsg.trigger.emit(progress)
+
+        # Break if the end of the file is reached
+        if (len(byte) == 0):                       
+            break
+
+        # Format in 8-bit string samples
+        sample = "{0:08b}".format(int.from_bytes(byte, byteorder=sys.byteorder))
+        
+        totalSamples += sample                                                     
+
+    file.close()
+
+    # Return integer list of samples
+    return list(map(int, totalSamples))                                           
 
 
 # Convert an eight bit string to list of eight integers
