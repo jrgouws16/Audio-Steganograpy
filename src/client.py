@@ -1,99 +1,104 @@
-import socket
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Aug 26 20:47:41 2019
+
+@author: Johan Gouws
+"""
+
 from PyQt5 import QtWidgets, uic
+import socket
+import sockets
+import threading
 import fileprocessing as fp
 import SignalsAndSlots as SS
-import time
- 
+import wave
 
+server = []
 
 '''
-# Connect with the server
+
+
+HOST = 'localhost'
+
+s = socket.socket(socket.AF_INET,   socket.SOCK_STREAM)
+# Port to connect to
+PORT = 3000
+
 try:
-      s.settimeout(1)
-      s.connect((HOST, PORT))
-      print("[+] Connected with Server")
+    s.connect((HOST, PORT))
+    print("[+] Connected with Server")
+    
+    sockets.send_one_message(s, "My name is Johan")
       
-      # get file name to send
-      f_send = "Media/PDF_2.pdf"
+    sockets.send_one_message(s, "RECFILE")
       
-      # open file
-      with open(f_send, "rb") as f:
-          # send file
-          print("[+] Sending file...")
-          data = f.read()
-          s.send("Hello from Windows".encode())
-          s.sendall(data)
-          # close connection
-          s.close()
-          print("[-] Disconnected")
-          f.close()
+    f_send = "Media/send.pdf"
       
+    # open file
+    with open(f_send, "rb") as f:
+        print("[+] Sending file...")
+        data = f.read()
+        sockets.send_one_file(s, data)
+        f.close()
       
-      s.close()    
-      
+     
+    sockets.send_one_message(s, "Disconnect")
+
+
+    s.close()
+    
+except Exception:
+      print("Client Socket Error")
+      s.close()
 '''
 
+def connectToServer():
+    HOST = mainWindow.lineEdit_server_ip.text()
+    PORT = int(mainWindow.lineEdit_server_port.text())
 
 def encode():
-      # Server to connect to
-      HOST = mainWindow.lineEdit_server_ip.text()
-      
-      s = socket.socket(socket.AF_INET,   socket.SOCK_STREAM)
-      # Port to connect to
-      PORT = 9000
-   
-      # Connect with the server
-      try:
-            s.settimeout(1)
-            s.connect((HOST, PORT))
-            mainWindow.label_server_status.setText("Server Status: Connected")
-                        
-            s.send("Hell".encode())
-            s.send("Seco".encode())
+    stegoSamples = []
+    
+    # Get the cover file name from the line edit box
+    coverFileName = mainWindow.lineEdit_cover.text()
+    
+    # Get the message file name from the line edit box
+    messageFileName = mainWindow.lineEdit_message.text()
+    
+    # Get the stego file name to be saved to from the line edit box
+    stegoFileName = mainWindow.lineEdit_stegopath.text()
+    
+    if(mainWindow.radioButton_DWT.isChecked()):
+        
+        # User must provide OBH, otherwise provide error box
+        if (mainWindow.lineEdit_OBH.text() != ''):
+            OBH = int(mainWindow.lineEdit_OBH.text())
             
-            s.send("COVR".encode())
-            # get file name to send
-            f_send = "Media/PDF_1.pdf"
+        # Else embed the secret message    
+        else:
+            SS.showErrorMessage('Invalid OBH', 'Enter an integer')
             
-            # open file
-            with open(f_send, "rb") as f:
-                # send file
-                print("[+] Sending file...")
-                data = f.read()
-                s.sendall(data)
-                f.close()
-            time.sleep(1)
-            s.send("DISK".encode())
-            s.close()
-            mainWindow.label_server_status.setText("Server Status: Disconnected")
-
-            
-      except Exception:
-            SS.showErrorMessage("Connection Error", "Check whether host IP and port is correctly specified")
-
-def setCoverPath():
-      mainWindow.lineEdit_cover.setText(fp.openFile())
-      
-def setMessagePath():
-      mainWindow.lineEdit_message.setText(fp.openFile())
-      
-def setStegoPath():
-      mainWindow.lineEdit_stegopath.setText(fp.saveFile())
-      
-def setKey():
-    fileName = fp.openFile()
-    fileContent = open(fileName, 'r', encoding = 'utf-8')
-    mainWindow.lineEdit_GA_key.setText(fileContent.read())
+    # Second method = Genetic Algorithm
+    elif(mainWindow.radioButton_GA.isChecked()):
+        # Get the string representation of the key in ASCII
+        keyString = mainWindow.lineEdit_GA_key.text()
+        
+        # Convert ASCII to binary 
+        binaryKey = fp.messageToBinary(keyString) 
+        binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
+        
+    # If no encoding algorithm is selected, throw an erro message 
+    else:
+        SS.showErrorMessage("Invalid Encoding Algorithm selected",
+                         "Select an encoding algorithm by selecting a radio button")    
+        
 
 if __name__ == "__main__":
     # Create a QtWidget application
     app = QtWidgets.QApplication([])
 
     # Load the user interface designed on Qt Designer
-    mainWindow = uic.loadUi("ClientEncodingInterface.ui")
-    
-    # Set to connection family and SOCK_STREAM is for TCP connection
-    s = socket.socket(socket.AF_INET,   socket.SOCK_STREAM)
+    mainWindow = uic.loadUi("ClientGUI.ui")
     
     # Set the placeholder that will display the cover file path selected
     mainWindow.lineEdit_cover.setPlaceholderText("Path")
@@ -114,20 +119,14 @@ if __name__ == "__main__":
     mainWindow.lineEdit_GA_key.hide()
     mainWindow.pushButton_browse_key.hide()
     mainWindow.lineEdit_LSB_nr.hide()
+    mainWindow.label_type_receiver_IP.hide()
+    mainWindow.lineEdit_receiver_IP.hide()
+    
+    # Connect the buttons to the appropriate slots
+    mainWindow.pushButton_connect.clicked.connect(connectToServer)
     
     # Guide user to provide values 1, 2, 3 or 4
-    mainWindow.lineEdit_LSB_nr.setPlaceholderText("LSB 1-4")
-    
-    # Connect the browse key to the setKey function
-    mainWindow.pushButton_browse_key.clicked.connect(setKey)
-    
-    # Connect the encode pushbutton to the encode function when clicked
-    mainWindow.pushButton_encode.clicked.connect(encode)
-    
-    # Connect the browse cover, message and stego file to slots
-    mainWindow.pushButton_browse_cover.clicked.connect(setCoverPath)
-    mainWindow.pushButton_browse_message.clicked.connect(setMessagePath)
-    mainWindow.pushButton_browse_stego.clicked.connect(setStegoPath)
+    mainWindow.lineEdit_OBH.setPlaceholderText("OBH")
     
     # Set the progress on the progress bars to 0 to start with
     mainWindow.progressBar_reading.setValue(0)
@@ -137,7 +136,7 @@ if __name__ == "__main__":
     
     # Set the GUI background to specified image
     mainWindow.setStyleSheet("QMainWindow {border-image: url(Media/music.jpg) 0 0 0 0 stretch stretch}")
-    
+    mainWindow.tabWidget.setStyleSheet("QWidget {background-color: grey }")
     # Execute and show the user interface
     mainWindow.show()
     app.exec()
