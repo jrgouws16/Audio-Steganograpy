@@ -11,9 +11,30 @@ import sockets
 import fileprocessing as fp
 import SignalsAndSlots as SS
 import threading
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal
+import time
 
-fileOpenSave = SS.files()
+class fileSaveSigSlot(QObject):
+
+    # Define a new signal called 'trigger' that has no arguments.
+    trigger = pyqtSignal()
+    filePath = ""
+    setPath = False
+
+    def connect(self):
+        # Connect the trigger signal to a slot.
+        self.trigger.connect(self.handle_trigger)
+
+    def emit(self):
+        # Emit the signal.
+        self.trigger.emit()
+
+    def handle_trigger(self):
+          self.filePath = fp.saveFile()
+          self.setPath = True
+
+signalSaveFile = fileSaveSigSlot()
+
 
 server = []
 
@@ -47,11 +68,20 @@ def disconnectFromServer():
     mainWindow.label_server_status.setText("Status: Disonnected")
 
 def fileReceiveThread():
-    while True:
+      
+      
+      while True:
         if (len(server) > 0):
             data = sockets.recv_one_message(server[-1])
-            fileName = fileOpenSave.openFileNamesDialog()
-            f = open(fileName, "wb")
+            signalSaveFile.emit()
+            
+            while (signalSaveFile.setPath == False):
+                  continue
+            
+            filepath = signalSaveFile.filePath
+            signalSaveFile.setPath = False
+            print("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",filepath)
+            f = open(filepath, "wb")
             f.write(data)
             f.close()
 
@@ -132,6 +162,7 @@ def setCoverPath():
       
 def setMessagePath():
       mainWindow.lineEdit_message.setText(fp.openFile())
+
       
 def setKey():
     fileName = fp.openFile()
@@ -169,8 +200,8 @@ if __name__ == "__main__":
     mainWindow.pushButton_browse_message.clicked.connect(setMessagePath)
     mainWindow.pushButton_disconnect.clicked.connect(disconnectFromServer)
     
-    fileOpenSave.my_signal.connect(fileOpenSave.saveFileDialog)
-    
+    signalSaveFile.connect()
+
     # Guide user to provide values 1, 2, 3 or 4
     mainWindow.lineEdit_OBH.setPlaceholderText("OBH")
     

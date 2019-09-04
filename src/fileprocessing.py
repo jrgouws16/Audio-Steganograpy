@@ -6,23 +6,6 @@ import SignalsAndSlots
 import wave
 from PyQt5.QtWidgets import QFileDialog
 
-def openFileNamesDialog():
-    options = QFileDialog.Options()
-    options |= QFileDialog.DontUseNativeDialog
-    files, _ = QFileDialog.getOpenFileNames("QFileDialog.getOpenFileNames()", "","All Files (*);;Python Files (*.py)", options=options)
-    if files:
-        return files
-
-def saveFileDialog():
-    options = QFileDialog.Options()
-    options |= QFileDialog.DontUseNativeDialog
-    fileName, _ = QFileDialog.getSaveFileName("QFileDialog.getSaveFileName()","","All Files (*);;Text Files (*.wav)", options=options)
-    if fileName:
-        return fileName
-
-
-
-
 signalWriting = SignalsAndSlots.SigSlot()
 
 # Create a signal to emit the progress of extracting samples
