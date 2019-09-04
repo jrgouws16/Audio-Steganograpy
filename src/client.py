@@ -80,7 +80,6 @@ def fileReceiveThread():
             
             filepath = signalSaveFile.filePath
             signalSaveFile.setPath = False
-            print("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",filepath)
             f = open(filepath, "wb")
             f.write(data)
             f.close()
@@ -121,22 +120,24 @@ def encode():
         
         receivers = []
         
-        if (mainWindow.lineEdit_receiver_IP_1 != ""):
-            receivers.append(mainWindow.lineEdit_receiver_IP_1)
+        if (mainWindow.lineEdit_receiver_IP_1.text() != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_1.text())
 
-        if (mainWindow.lineEdit_receiver_IP_2 != ""):
-            receivers.append(mainWindow.lineEdit_receiver_IP_2)
+        if (mainWindow.lineEdit_receiver_IP_2.text() != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_2.text())
             
-        if (mainWindow.lineEdit_receiver_IP_3 != ""):
-            receivers.append(mainWindow.lineEdit_receiver_IP_3)
+        if (mainWindow.lineEdit_receiver_IP_3.text() != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_3.text())
 
-        if (mainWindow.lineEdit_receiver_IP_4 != ""):
-            receivers.append(mainWindow.lineEdit_receiver_IP_4)
+        if (mainWindow.lineEdit_receiver_IP_4.text() != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_4.text())
         
         if (mainWindow.checkBox_peer.isChecked() and mainWindow.checkBox_local.isChecked()):
             # Send to client and peers
             sockets.send_one_message(server[-1], "CP")
-            
+
+            sockets.send_one_message(server[-1], str(len(receivers)))            
+                        
             for i in range(0, len(receivers)):
                 sockets.send_one_message(server[-1], receivers[i])
             
@@ -144,6 +145,7 @@ def encode():
             # Send to peers
             sockets.send_one_message(server[-1], "P")
             
+            sockets.send_one_message(server[-1], str(len(receivers)))
             
             for i in range(0, len(receivers)):
                 sockets.send_one_message(server[-1], receivers[i])

@@ -58,7 +58,6 @@ def threaded_client(conn, clientNum):
     mainWindow.listWidget_log.addItem("Client thread created successfully")  
     while True:
         message = sockets.recv_one_message(conn)
-        print("Message", message)
         
         if (message == None):
               break
@@ -135,13 +134,13 @@ def threaded_client(conn, clientNum):
                 
                 if (toWhom == "P"):
                     howMuch = sockets.recv_one_message(conn)
-                    howMuch = int(toWhom.decode())
+                    howMuch = int(howMuch)
                     
                     for i in range(howMuch):
                         ip = sockets.recv_one_message(conn)
                         
                         for j in range(0, len(addresses)):
-                            if (addresses[j][0] == ip):
+                            if (addresses[j][0] == ip.decode()):
                                 connToSendTo.append(connections[j])
                     
                 elif (toWhom == "C"):
@@ -151,14 +150,15 @@ def threaded_client(conn, clientNum):
                     connToSendTo.append(conn)
                     
                     howMuch = sockets.recv_one_message(conn)
-                    howMuch = int(toWhom.decode())
+                    howMuch = int(howMuch)
                     
                     for i in range(howMuch):
                         ip = sockets.recv_one_message(conn)
                         
                         for j in range(0, len(addresses)):
-                            if (addresses[j][0] == ip):
+                            if (addresses[j][0] == ip.decode()):
                                 connToSendTo.append(connections[j])
+                                
                 
                 for i in connToSendTo:
                     with open(f_send, "rb") as f:
