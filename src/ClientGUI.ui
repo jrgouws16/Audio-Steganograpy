@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>794</width>
-    <height>654</height>
+    <width>705</width>
+    <height>491</height>
    </rect>
   </property>
   <property name="palette">
@@ -457,7 +457,7 @@
          <enum>QTabWidget::Rounded</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -519,88 +519,6 @@
              </widget>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <item>
-               <widget class="QLabel" name="label_type_5">
-                <property name="font">
-                 <font>
-                  <family>Century Schoolbook L</family>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Server IP address      </string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="lineEdit_server_ip">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_14">
-                <item>
-                 <widget class="QLabel" name="label_type_12">
-                  <property name="font">
-                   <font>
-                    <family>Century Schoolbook L</family>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Port to connect           </string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lineEdit_server_port">
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_15">
-              <item>
-               <widget class="QLabel" name="label_server_status">
-                <property name="font">
-                 <font>
-                  <family>MS Shell Dlg 2</family>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Status: Disconnected</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_connect">
-                <property name="text">
-                 <string>Connect</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_disconnect">
-                <property name="text">
-                 <string>Disconnect</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
                <widget class="QLabel" name="label_type_3">
@@ -659,24 +577,6 @@
                <widget class="QPushButton" name="pushButton_browse_cover">
                 <property name="text">
                  <string>Browse</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
-              <item>
-               <widget class="QLabel" name="label_msg_size">
-                <property name="text">
-                 <string>Message Size (bits):</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_cover_size">
-                <property name="text">
-                 <string>Cover Samples (16 byte):</string>
                 </property>
                </widget>
               </item>
@@ -778,91 +678,6 @@
                <string>Browse for key file</string>
               </property>
              </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_type_6">
-              <property name="font">
-               <font>
-                <family>Century Schoolbook L</family>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Steganographic file name</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_7">
-              <item>
-               <widget class="QLineEdit" name="lineEdit_stegopath">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_browse_stego">
-                <property name="text">
-                 <string>Browse</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_12">
-              <item>
-               <widget class="QLabel" name="label_type_11">
-                <property name="font">
-                 <font>
-                  <family>Century Schoolbook L</family>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Stego File Receiver:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkBox_oeer">
-                <property name="text">
-                 <string>Send to peer</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkBox_local">
-                <property name="text">
-                 <string>Return to me</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_13">
-              <item>
-               <widget class="QLabel" name="label_type_receiver_IP">
-                <property name="font">
-                 <font>
-                  <family>Century Schoolbook L</family>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Receiver IP address :</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="lineEdit_receiver_IP"/>
-              </item>
-             </layout>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -1259,6 +1074,299 @@
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="tab_3">
+         <attribute name="title">
+          <string>Network Settings</string>
+         </attribute>
+         <widget class="QWidget" name="layoutWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>529</width>
+            <height>273</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QLabel" name="label_title_2">
+             <property name="palette">
+              <palette>
+               <active>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>46</red>
+                   <green>255</green>
+                   <blue>14</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </active>
+               <inactive>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>46</red>
+                   <green>255</green>
+                   <blue>14</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </inactive>
+               <disabled>
+                <colorrole role="Text">
+                 <brush brushstyle="SolidPattern">
+                  <color alpha="255">
+                   <red>108</red>
+                   <green>108</green>
+                   <blue>108</blue>
+                  </color>
+                 </brush>
+                </colorrole>
+               </disabled>
+              </palette>
+             </property>
+             <property name="font">
+              <font>
+               <family>Century Schoolbook L</family>
+               <pointsize>24</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Network Settings</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QLabel" name="label_type_5">
+               <property name="font">
+                <font>
+                 <family>Century Schoolbook L</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Server IP address      </string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEdit_server_ip">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_14">
+               <item>
+                <widget class="QLabel" name="label_type_12">
+                 <property name="font">
+                  <font>
+                   <family>Century Schoolbook L</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Port to connect           </string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_server_port">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <item>
+              <widget class="QLabel" name="label_server_status">
+               <property name="font">
+                <font>
+                 <family>MS Shell Dlg 2</family>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Status: Disconnected</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_connect">
+               <property name="text">
+                <string>Connect</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_disconnect">
+               <property name="text">
+                <string>Disconnect</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_12">
+             <item>
+              <widget class="QLabel" name="label_type_11">
+               <property name="font">
+                <font>
+                 <family>Century Schoolbook L</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Stego File Receiver:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_peer">
+               <property name="text">
+                <string>Send to peer</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_local">
+               <property name="text">
+                <string>Return to me</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_13">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item>
+                <widget class="QLabel" name="label_type_receiver_IP">
+                 <property name="font">
+                  <font>
+                   <family>Century Schoolbook L</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Receiver IP addresses :</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_5">
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_3">
+                   <item>
+                    <widget class="QLabel" name="label_type_receiver_IP_2">
+                     <property name="font">
+                      <font>
+                       <family>Century Schoolbook L</family>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Receiver 1:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="lineEdit_receiver_IP_1"/>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_16">
+                   <item>
+                    <widget class="QLabel" name="label_type_receiver_IP_3">
+                     <property name="font">
+                      <font>
+                       <family>Century Schoolbook L</family>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Receiver 2:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="lineEdit_receiver_IP_2"/>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_17">
+                   <item>
+                    <widget class="QLabel" name="label_type_receiver_IP_4">
+                     <property name="font">
+                      <font>
+                       <family>Century Schoolbook L</family>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Receiver 3:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="lineEdit_receiver_IP_3"/>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_18">
+                   <item>
+                    <widget class="QLabel" name="label_type_receiver_IP_5">
+                     <property name="font">
+                      <font>
+                       <family>Century Schoolbook L</family>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Receiver 4:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="lineEdit_receiver_IP_4"/>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -1270,7 +1378,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>794</width>
+     <width>705</width>
      <height>21</height>
     </rect>
    </property>
@@ -1286,12 +1394,12 @@
    <slot>reset()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>896</x>
-     <y>609</y>
+     <x>680</x>
+     <y>446</y>
     </hint>
     <hint type="destinationlabel">
-     <x>895</x>
-     <y>576</y>
+     <x>679</x>
+     <y>414</y>
     </hint>
    </hints>
   </connection>
@@ -1302,12 +1410,12 @@
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>417</x>
-     <y>303</y>
+     <x>316</x>
+     <y>224</y>
     </hint>
     <hint type="destinationlabel">
-     <x>426</x>
-     <y>372</y>
+     <x>611</x>
+     <y>289</y>
     </hint>
    </hints>
   </connection>
@@ -1318,12 +1426,12 @@
    <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>598</x>
-     <y>303</y>
+     <x>316</x>
+     <y>224</y>
     </hint>
     <hint type="destinationlabel">
-     <x>809</x>
-     <y>304</y>
+     <x>679</x>
+     <y>226</y>
     </hint>
    </hints>
   </connection>
@@ -1334,12 +1442,12 @@
    <slot>reset()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>633</x>
-     <y>609</y>
+     <x>680</x>
+     <y>446</y>
     </hint>
     <hint type="destinationlabel">
-     <x>650</x>
-     <y>576</y>
+     <x>434</x>
+     <y>414</y>
     </hint>
    </hints>
   </connection>
@@ -1350,12 +1458,12 @@
    <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>514</x>
-     <y>337</y>
+     <x>316</x>
+     <y>256</y>
     </hint>
     <hint type="destinationlabel">
-     <x>645</x>
-     <y>339</y>
+     <x>679</x>
+     <y>257</y>
     </hint>
    </hints>
   </connection>
@@ -1366,12 +1474,12 @@
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>544</x>
-     <y>303</y>
+     <x>316</x>
+     <y>224</y>
     </hint>
     <hint type="destinationlabel">
-     <x>658</x>
-     <y>339</y>
+     <x>679</x>
+     <y>257</y>
     </hint>
    </hints>
   </connection>
@@ -1382,12 +1490,12 @@
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>419</x>
-     <y>337</y>
+     <x>316</x>
+     <y>256</y>
     </hint>
     <hint type="destinationlabel">
-     <x>813</x>
-     <y>304</y>
+     <x>679</x>
+     <y>226</y>
     </hint>
    </hints>
   </connection>
@@ -1398,12 +1506,12 @@
    <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>450</x>
-     <y>337</y>
+     <x>316</x>
+     <y>256</y>
     </hint>
     <hint type="destinationlabel">
-     <x>448</x>
-     <y>372</y>
+     <x>633</x>
+     <y>289</y>
     </hint>
    </hints>
   </connection>
@@ -1414,12 +1522,12 @@
    <slot>reset()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>818</x>
-     <y>609</y>
+     <x>680</x>
+     <y>446</y>
     </hint>
     <hint type="destinationlabel">
-     <x>772</x>
-     <y>576</y>
+     <x>556</x>
+     <y>414</y>
     </hint>
    </hints>
   </connection>
@@ -1430,44 +1538,12 @@
    <slot>reset()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>609</y>
+     <x>643</x>
+     <y>446</y>
     </hint>
     <hint type="destinationlabel">
-     <x>459</x>
-     <y>576</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBox_oeer</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>label_type_receiver_IP</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>582</x>
-     <y>462</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>516</x>
-     <y>485</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBox_oeer</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>lineEdit_receiver_IP</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>671</x>
-     <y>465</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>671</x>
-     <y>497</y>
+     <x>311</x>
+     <y>414</y>
     </hint>
    </hints>
   </connection>

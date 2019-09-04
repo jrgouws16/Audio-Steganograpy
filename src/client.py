@@ -10,50 +10,13 @@ import socket
 import sockets
 import fileprocessing as fp
 import SignalsAndSlots as SS
+import threading
+from PyQt5.QtCore import pyqtSignal
+
+fileOpenSave = SS.files()
 
 server = []
 
-'''
-
-  
-f_send = "Media/send.pdf"
-  
-# open file
-with open(f_send, "rb") as f:
-    print("[+] Sending file...")
-    data = f.read()
-    sockets.send_one_file(server[0], data)
-    f.close()
-
-'''
-
-def sendMessageToServer(message):
-    try:
-        sockets.send_one_message(server[0], message)
-      
-    except Exception:
-          SS.showErrorMessage("Connection Error", "Cannot communicate with the server")
-          server[0].close()
-          del server[:]
-          mainWindow.label_server_status.setText("Status: Disonnected")
-          
-def sendFileToServer(filePath):
-    try:
-        with open(filePath, "rb") as f:
-            data = f.read()
-            
-    except:
-        SS.showErrorMessage("File error.", filePath + " does not exist.")
-    
-    try:
-        sockets.send_one_file(server[0], data)
-        f.close() 
-            
-    except Exception:
-          SS.showErrorMessage("Connection Error", "Cannot communicate with the server")
-          server[0].close()
-          del server[:]
-          mainWindow.label_server_status.setText("Status: Disonnected")
 
 def connectToServer():
     global server
@@ -78,61 +41,97 @@ def connectToServer():
               del server[:]
      
 def disconnectFromServer():
-    sendMessageToServer("Disconnect")
+    sockets.send_one_message(server[-1], "Disconnect")
     server[-1].close()
     del server[:]
     mainWindow.label_server_status.setText("Status: Disonnected")
 
+def fileReceiveThread():
+    while True:
+        if (len(server) > 0):
+            data = sockets.recv_one_message(server[-1])
+            fileName = fileOpenSave.openFileNamesDialog()
+            f = open(fileName, "wb")
+            f.write(data)
+            f.close()
 
 def encode():
-    # Get the cover file name from the line edit box
-    coverFileName = mainWindow.lineEdit_cover.text()
-    sendMessageToServer(coverFileName)
-    
-    # Get the message file name from the line edit box
-    messageFileName = mainWindow.lineEdit_message.text()
-    sendMessageToServer(messageFileName)
-    
-    # Get the stego file name to be saved to from the line edit box
-    stegoFileName = mainWindow.lineEdit_stegopath.text()
-    sendMessageToServer(stegoFileName)
-    
-    if(mainWindow.radioButton_DWT.isChecked()):
-        sendMessageToServer("DWT selected")
+    # Send the encode command to the server
+    sockets.send_one_message(server[-1], "Encode")    
         
-        # User must provide OBH, otherwise provide error box
-        if (mainWindow.lineEdit_OBH.text() != ''):
-            OBH = int(mainWindow.lineEdit_OBH.text())
-            sendMessageToServer("OBH of "+ str(OBH) + " selected.")
-            
-        # Else embed the secret message    
-        else:
-            SS.showErrorMessage('Invalid OBH', 'Enter an integer')
+    # Get the cover file name from the line edit box and send to server
+    coverFileName = mainWindow.lineEdit_cover.text()
+    
+    with open(coverFileName, "rb") as f:
+        data = f.read()
+        sockets.send_one_file(server[0], data)
+        f.close()
+    
+    # Get the message file name from the line edit box and send to server
+    messageFileName = mainWindow.lineEdit_message.text()
+    
+    with open(messageFileName, "rb") as f:
+        data = f.read()
+        sockets.send_one_file(server[0], data)
+        f.close()
+
+    if(mainWindow.radioButton_DWT.isChecked()):
+        print("")
             
     # Second method = Genetic Algorithm
     elif(mainWindow.radioButton_GA.isChecked()):
         # Get the string representation of the key in ASCII
         keyString = mainWindow.lineEdit_GA_key.text()
-        sendMessageToServer("GA selected")
-        sendMessageToServer("Key is "+ keyString)
-        # Convert ASCII to binary 
-        # binaryKey = fp.messageToBinary(keyString) 
-        # binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
+              
+        # Send that Genetic algorithm was chosen
+        sockets.send_one_message(server[-1], "GA")
         
+        # Send the secret key
+        sockets.send_one_message(server[-1], keyString)
+        
+        receivers = []
+        
+        if (mainWindow.lineEdit_receiver_IP_1 != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_1)
+
+        if (mainWindow.lineEdit_receiver_IP_2 != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_2)
+            
+        if (mainWindow.lineEdit_receiver_IP_3 != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_3)
+
+        if (mainWindow.lineEdit_receiver_IP_4 != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_4)
+        
+        if (mainWindow.checkBox_peer.isChecked() and mainWindow.checkBox_local.isChecked()):
+            # Send to client and peers
+            sockets.send_one_message(server[-1], "CP")
+            
+            for i in range(0, len(receivers)):
+                sockets.send_one_message(server[-1], receivers[i])
+            
+        elif (mainWindow.checkBox_peer.isChecked()):
+            # Send to peers
+            sockets.send_one_message(server[-1], "P")
+            
+            
+            for i in range(0, len(receivers)):
+                sockets.send_one_message(server[-1], receivers[i])
+            
+        else:
+            # Send to client
+            sockets.send_one_message(server[-1], "C")
+            
     # If no encoding algorithm is selected, throw an erro message 
     else:
         SS.showErrorMessage("Invalid Encoding Algorithm selected",
-                         "Select an encoding algorithm by selecting a radio button")    
-        
-   
+                         "Select an encoding algorithm by selecting a radio button")        
+
 def setCoverPath():
       mainWindow.lineEdit_cover.setText(fp.openFile())
       
 def setMessagePath():
       mainWindow.lineEdit_message.setText(fp.openFile())
-      
-def setStegoPath():
-      mainWindow.lineEdit_stegopath.setText(fp.saveFile())
       
 def setKey():
     fileName = fp.openFile()
@@ -154,10 +153,6 @@ if __name__ == "__main__":
     mainWindow.lineEdit_message.setPlaceholderText("Path")
     mainWindow.lineEdit_message.setReadOnly(True)
     
-    # Set the placeholder that will display the steganography file path selected
-    mainWindow.lineEdit_stegopath.setPlaceholderText("Path")
-    mainWindow.lineEdit_stegopath.setReadOnly(True)
-    
     # Set the placeholder for the key of the GA
     mainWindow.lineEdit_GA_key.setPlaceholderText("Insert Key or browse for key file (.txt)")
     
@@ -165,8 +160,6 @@ if __name__ == "__main__":
     mainWindow.lineEdit_GA_key.hide()
     mainWindow.pushButton_browse_key.hide()
     mainWindow.lineEdit_OBH.hide()
-    mainWindow.label_type_receiver_IP.hide()
-    mainWindow.lineEdit_receiver_IP.hide()
     
     # Connect the buttons to the appropriate slots
     mainWindow.pushButton_connect.clicked.connect(connectToServer)
@@ -174,8 +167,9 @@ if __name__ == "__main__":
     mainWindow.pushButton_browse_key.clicked.connect(setKey)
     mainWindow.pushButton_browse_cover.clicked.connect(setCoverPath)
     mainWindow.pushButton_browse_message.clicked.connect(setMessagePath)
-    mainWindow.pushButton_browse_stego.clicked.connect(setStegoPath)
     mainWindow.pushButton_disconnect.clicked.connect(disconnectFromServer)
+    
+    fileOpenSave.my_signal.connect(fileOpenSave.saveFileDialog)
     
     # Guide user to provide values 1, 2, 3 or 4
     mainWindow.lineEdit_OBH.setPlaceholderText("OBH")
@@ -185,6 +179,10 @@ if __name__ == "__main__":
     mainWindow.progressBar_embedding.setValue(0)
     mainWindow.progressBar_writing.setValue(0)
     mainWindow.progressBar_message.setValue(0)
+    
+    recFileThread = threading.Thread(target=fileReceiveThread, args=())
+    recFileThread.isDaemon = True
+    recFileThread.start()
     
     # Set the GUI background to specified image
     mainWindow.setStyleSheet("QMainWindow {border-image: url(Media/music.jpg) 0 0 0 0 stretch stretch}")

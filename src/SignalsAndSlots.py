@@ -1,5 +1,23 @@
 from PyQt5.QtCore import QObject, pyqtSignal
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QMessageBox
+
+
+class files(QObject):
+    my_signal = pyqtSignal()
+    
+    def openFileNamesDialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        files, _ = QFileDialog.getOpenFileNames(self,"QFileDialog.getOpenFileNames()", "","All Files (*);;Python Files (*.py)", options=options)
+        if files:
+            print(files)
+    
+    def saveFileDialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","All Files (*);;Text Files (*.txt)", options=options)
+        if fileName:
+            print(fileName)
 
 # Function to display custom error message
 def showErrorMessage(title, message):

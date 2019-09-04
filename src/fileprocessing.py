@@ -4,6 +4,24 @@ import sys
 import struct
 import SignalsAndSlots
 import wave
+from PyQt5.QtWidgets import QFileDialog
+
+def openFileNamesDialog():
+    options = QFileDialog.Options()
+    options |= QFileDialog.DontUseNativeDialog
+    files, _ = QFileDialog.getOpenFileNames("QFileDialog.getOpenFileNames()", "","All Files (*);;Python Files (*.py)", options=options)
+    if files:
+        return files
+
+def saveFileDialog():
+    options = QFileDialog.Options()
+    options |= QFileDialog.DontUseNativeDialog
+    fileName, _ = QFileDialog.getSaveFileName("QFileDialog.getSaveFileName()","","All Files (*);;Text Files (*.wav)", options=options)
+    if fileName:
+        return fileName
+
+
+
 
 signalWriting = SignalsAndSlots.SigSlot()
 
@@ -88,44 +106,6 @@ def getMessageBits(file_path):
 
     # Return integer list of samples
     return list(map(int, totalSamples))    
-
-
-# Takes any message file and returns a integer list of the bits
-def getMessageBits2(file):
-    # Open the file to be read and get the length
-    messageLength = len(file.read())
-    progress = 0
-    
-    file.seek(0)
-    # Samples to be returned                  
-    totalSamples = '' 
-    
-    totalBytes = 0
-
-    while (1):
-        # Read one byte of the file
-        byte = file.read(1)                        
-        totalBytes += 1
-        
-        # Transmit signal to display progress on GUI
-        if ((totalBytes+1)*100/messageLength > progress):
-            progress = (totalBytes+1)*100/messageLength
-            signalReadMsg.trigger.emit(progress)
-
-        # Break if the end of the file is reached
-        if (len(byte) == 0):                       
-            break
-
-        # Format in 8-bit string samples
-        sample = "{0:08b}".format(int.from_bytes(byte, byteorder=sys.byteorder))
-        
-        totalSamples += sample                                                     
-
-    file.close()
-
-    # Return integer list of samples
-    return list(map(int, totalSamples))                                           
-
 
 # Convert an eight bit string to list of eight integers
 def messageToBinary(message):
@@ -217,15 +197,19 @@ def returnParameters(self):
 # Write the stego samples to the stego file        
 def writeStegoToFile(fileName, parameters, samples):
     progress = 0
+    byteSamples = []
     with wave.open(fileName, 'wb') as fd:
         fd.setparams(parameters)
     
         for i in range(len(samples)):
-            fd.writeframes(struct.pack('<h', samples[i]))
+            byteSamples.append(struct.pack('<h', samples[i]))
             
             if ((i+1)*100/(len(samples)) > progress):
                 progress = (i+1)*100/(len(samples))
                 signalWriting.trigger.emit(progress)
+                
+        fd.writeframes(b''.join(byteSamples))
+
             
     fd.close()
 
