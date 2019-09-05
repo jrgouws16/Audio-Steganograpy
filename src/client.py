@@ -168,10 +168,6 @@ def encode():
         # Send to client
         sockets.send_one_message(server[-1], "C")
             
-      
-
-
-
 # Function for extracting the message using different stegangography algorithms
 def decode():
     
@@ -191,6 +187,12 @@ def decode():
     if (mainWindow.radioButton_DWT_3.isChecked()):
         # Send the DWT method
         sockets.send_one_message(server[-1], "DWT") 
+        
+        # Get the order of bits to hold in the coefficients
+        OBH = mainWindow.lineEdit_OBH_nr_3.text()
+        
+        # Send the order of bits to hold
+        sockets.send_one_message(server[-1], OBH)
         
     # Genetic Algorithm decoding
     elif(mainWindow.radioButton_GA_3.isChecked()):
