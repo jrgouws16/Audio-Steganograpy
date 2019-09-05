@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>697</width>
-    <height>394</height>
+    <height>396</height>
    </rect>
   </property>
   <property name="palette">
@@ -877,7 +877,7 @@
            <enum>QTabWidget::Rounded</enum>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1751,5 +1751,102 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>radioButton_DWT</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lineEdit_OBH</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>304</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>316</x>
+     <y>203</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>301</x>
+     <y>231</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>315</x>
+     <y>230</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_3</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_nr_3</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>275</x>
+     <y>192</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>308</x>
+     <y>192</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_3</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key_3</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>193</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>221</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA_3</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_nr_3</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>223</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>330</x>
+     <y>200</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA_3</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key_3</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>216</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>316</x>
+     <y>227</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

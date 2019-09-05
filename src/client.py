@@ -107,7 +107,15 @@ def encode():
         f.close()
 
     if(mainWindow.radioButton_DWT.isChecked()):
-        print("")
+        # Send that Genetic algorithm was chosen
+        sockets.send_one_message(server[-1], "DWT")
+                
+        # Get the order of bits to hold in the coefficients
+        OBH = mainWindow.lineEdit_OBH.text()
+        
+        # Send the order of bits to hold
+        sockets.send_one_message(server[-1], OBH)
+        
             
     # Second method = Genetic Algorithm
     elif(mainWindow.radioButton_GA.isChecked()):
@@ -119,46 +127,48 @@ def encode():
         
         # Send the secret key
         sockets.send_one_message(server[-1], keyString)
-        
-        receivers = []
-        
-        if (mainWindow.lineEdit_receiver_IP_1.text() != ""):
-            receivers.append(mainWindow.lineEdit_receiver_IP_1.text())
-
-        if (mainWindow.lineEdit_receiver_IP_2.text() != ""):
-            receivers.append(mainWindow.lineEdit_receiver_IP_2.text())
-            
-        if (mainWindow.lineEdit_receiver_IP_3.text() != ""):
-            receivers.append(mainWindow.lineEdit_receiver_IP_3.text())
-
-        if (mainWindow.lineEdit_receiver_IP_4.text() != ""):
-            receivers.append(mainWindow.lineEdit_receiver_IP_4.text())
-        
-        if (mainWindow.checkBox_peer.isChecked() and mainWindow.checkBox_local.isChecked()):
-            # Send to client and peers
-            sockets.send_one_message(server[-1], "CP")
-
-            sockets.send_one_message(server[-1], str(len(receivers)))            
-                        
-            for i in range(0, len(receivers)):
-                sockets.send_one_message(server[-1], receivers[i])
-            
-        elif (mainWindow.checkBox_peer.isChecked()):
-            # Send to peers
-            sockets.send_one_message(server[-1], "P")
-            sockets.send_one_message(server[-1], str(len(receivers)))
-            
-            for i in range(0, len(receivers)):
-                sockets.send_one_message(server[-1], receivers[i])
-            
-        else:
-            # Send to client
-            sockets.send_one_message(server[-1], "C")
-            
+    
     # If no encoding algorithm is selected, throw an erro message 
     else:
         SS.showErrorMessage("Invalid Encoding Algorithm selected",
-                         "Select an encoding algorithm by selecting a radio button")        
+                         "Select an encoding algorithm by selecting a radio button")  
+    
+    receivers = []
+    
+    if (mainWindow.lineEdit_receiver_IP_1.text() != ""):
+        receivers.append(mainWindow.lineEdit_receiver_IP_1.text())
+
+    if (mainWindow.lineEdit_receiver_IP_2.text() != ""):
+        receivers.append(mainWindow.lineEdit_receiver_IP_2.text())
+        
+    if (mainWindow.lineEdit_receiver_IP_3.text() != ""):
+        receivers.append(mainWindow.lineEdit_receiver_IP_3.text())
+
+    if (mainWindow.lineEdit_receiver_IP_4.text() != ""):
+        receivers.append(mainWindow.lineEdit_receiver_IP_4.text())
+    
+    if (mainWindow.checkBox_peer.isChecked() and mainWindow.checkBox_local.isChecked()):
+        # Send to client and peers
+        sockets.send_one_message(server[-1], "CP")
+
+        sockets.send_one_message(server[-1], str(len(receivers)))            
+                    
+        for i in range(0, len(receivers)):
+            sockets.send_one_message(server[-1], receivers[i])
+        
+    elif (mainWindow.checkBox_peer.isChecked()):
+        # Send to peers
+        sockets.send_one_message(server[-1], "P")
+        sockets.send_one_message(server[-1], str(len(receivers)))
+        
+        for i in range(0, len(receivers)):
+            sockets.send_one_message(server[-1], receivers[i])
+        
+    else:
+        # Send to client
+        sockets.send_one_message(server[-1], "C")
+            
+      
 
 
 
@@ -171,20 +181,23 @@ def decode():
     # Get the filename of the stego audio file
     stegoFileName = mainWindow.lineEdit_stego.text()
 
+    # Send the stego file
     with open(stegoFileName, "rb") as f:
         data = f.read()
         sockets.send_one_file(server[-1], data)
         f.close()
     
+    # Discrete haar wavelet transform decoding
     if (mainWindow.radioButton_DWT_3.isChecked()):
-        print("")
+        # Send the DWT method
+        sockets.send_one_message(server[-1], "DWT") 
         
     # Genetic Algorithm decoding
     elif(mainWindow.radioButton_GA_3.isChecked()):
         sockets.send_one_message(server[-1], "GA") 
         
+        # Send the key
         keyString = mainWindow.lineEdit_GA_key_3.text()
-        
         sockets.send_one_message(server[-1], keyString) 
         
     # No radio button selected
@@ -240,6 +253,8 @@ if __name__ == "__main__":
     mainWindow.lineEdit_GA_key.hide()
     mainWindow.pushButton_browse_key.hide()
     mainWindow.lineEdit_OBH.hide()
+    mainWindow.lineEdit_OBH_nr_3.hide()
+    mainWindow.lineEdit_GA_key_3.hide()
     
     # Connect the buttons to the appropriate slots
     mainWindow.pushButton_connect.clicked.connect(connectToServer)
