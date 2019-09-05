@@ -4,7 +4,6 @@ import sys
 import struct
 import SignalsAndSlots
 import wave
-from PyQt5.QtWidgets import QFileDialog
 
 signalWriting = SignalsAndSlots.SigSlot()
 
