@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>697</width>
-    <height>396</height>
+    <height>431</height>
    </rect>
   </property>
   <property name="palette">
@@ -1102,34 +1102,6 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_8">
                 <item>
-                 <widget class="QLabel" name="label_type_9">
-                  <property name="font">
-                   <font>
-                    <family>Century Schoolbook L</family>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Reading cover</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_type_10">
-                  <property name="font">
-                   <font>
-                    <family>Century Schoolbook L</family>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Reading message</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <widget class="QLabel" name="label_type_8">
                   <property name="font">
                    <font>
@@ -1143,47 +1115,12 @@
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <widget class="QLabel" name="label_type_7">
-                  <property name="font">
-                   <font>
-                    <family>Century Schoolbook L</family>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Writing to stego file</string>
-                  </property>
-                 </widget>
-                </item>
                </layout>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_9">
                 <item>
-                 <widget class="QProgressBar" name="progressBar_reading">
-                  <property name="value">
-                   <number>24</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QProgressBar" name="progressBar_message">
-                  <property name="value">
-                   <number>24</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <widget class="QProgressBar" name="progressBar_embedding">
-                  <property name="value">
-                   <number>24</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QProgressBar" name="progressBar_writing">
                   <property name="value">
                    <number>24</number>
                   </property>
@@ -1346,29 +1283,7 @@
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_28">
                     <item>
-                     <layout class="QVBoxLayout" name="verticalLayout_20">
-                      <item>
-                       <widget class="QLabel" name="label_type_23">
-                        <property name="font">
-                         <font>
-                          <family>Century Schoolbook L</family>
-                          <weight>75</weight>
-                          <bold>true</bold>
-                         </font>
-                        </property>
-                        <property name="text">
-                         <string>Reading Stego File</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QProgressBar" name="progressBar_reading_3">
-                        <property name="value">
-                         <number>24</number>
-                        </property>
-                       </widget>
-                      </item>
-                     </layout>
+                     <layout class="QVBoxLayout" name="verticalLayout_20"/>
                     </item>
                     <item>
                      <layout class="QVBoxLayout" name="verticalLayout_21">
@@ -1388,31 +1303,6 @@
                       </item>
                       <item>
                        <widget class="QProgressBar" name="progressBar_extracting">
-                        <property name="value">
-                         <number>24</number>
-                        </property>
-                       </widget>
-                      </item>
-                     </layout>
-                    </item>
-                    <item>
-                     <layout class="QVBoxLayout" name="verticalLayout_22">
-                      <item>
-                       <widget class="QLabel" name="label_type_25">
-                        <property name="font">
-                         <font>
-                          <family>Century Schoolbook L</family>
-                          <weight>75</weight>
-                          <bold>true</bold>
-                         </font>
-                        </property>
-                        <property name="text">
-                         <string>Writing to message file</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QProgressBar" name="progressBar_writing_3">
                         <property name="value">
                          <number>24</number>
                         </property>
@@ -1753,38 +1643,6 @@
  <resources/>
  <connections>
   <connection>
-   <sender>radioButton_DWT</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>lineEdit_OBH</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>304</x>
-     <y>203</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>316</x>
-     <y>203</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>lineEdit_GA_key</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>301</x>
-     <y>231</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>315</x>
-     <y>230</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>radioButton_DWT_3</sender>
    <signal>clicked()</signal>
    <receiver>lineEdit_OBH_nr_3</receiver>
@@ -1845,6 +1703,102 @@
     <hint type="destinationlabel">
      <x>316</x>
      <y>227</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>301</x>
+     <y>202</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>316</x>
+     <y>202</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>242</x>
+     <y>202</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>234</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>296</x>
+     <y>228</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>208</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>237</x>
+     <y>228</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>335</x>
+     <y>241</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>pushButton_browse_key</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>216</x>
+     <y>236</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>216</x>
+     <y>263</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT</sender>
+   <signal>clicked()</signal>
+   <receiver>pushButton_browse_key</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>207</x>
+     <y>261</y>
     </hint>
    </hints>
   </connection>

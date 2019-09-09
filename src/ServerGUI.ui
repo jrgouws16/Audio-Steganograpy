@@ -620,19 +620,6 @@
              <widget class="QLineEdit" name="lineEdit_port"/>
             </item>
             <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
              <widget class="QPushButton" name="pushButton_start">
               <property name="text">
                <string>Start Server</string>
@@ -656,6 +643,13 @@
            </layout>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_num_clients">
+          <property name="text">
+           <string>Clients connected: 0</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

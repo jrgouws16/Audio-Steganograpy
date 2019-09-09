@@ -94,7 +94,7 @@ for i in samples:
     
 message = '1010'
 key = '1001001110100000'*2
-stego, samplesUsed, bitsInserted = GA.insertMessage(samples, key, message)
+stego, samplesUsed, bitsInserted = GA.insertMessage(samples, key, message, 'txt')
 print(stego)
 print("Message is:", message)
 print("key is:", key)
@@ -130,9 +130,11 @@ for numberTests in range(0, 1000):
     for i in range(0, 26):
         samples.append("".join(random.choices(items, k = 16)))
         
-    stego, samplesUsed, bitsInserted = GA.insertMessage(samples, key, message)
-    extractedMsg = GA.extractMessage(stego, key)
-        
+    stego, samplesUsed, bitsInserted = GA.insertMessage(samples, key, message, "txt")
+    extractedMsg, fileType = GA.extractMessage(stego, key)
+       
+
+    
     if (message != extractedMsg):
         print("Error")
         break

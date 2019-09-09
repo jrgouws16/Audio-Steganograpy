@@ -21,23 +21,16 @@ def saveFile():
     root.withdraw()
     return filedialog.asksaveasfilename(initialdir = "/",
                                         title = "Select file",
-                                        filetypes = (("(.wav) files","*.wav"),
-                                                     ("all files","*.*")))
+                                        filetypes = (("(.wav)","*.wav"),
+                                                     ("(.txt)","*.txt")))
 
 def saveMessage():
     root = tk.Tk()
     root.withdraw()
     return filedialog.asksaveasfilename(initialdir = "/",
                                         title = "Select file",
-                                        filetypes = (("(.txt) files","*.txt"), 
-                                                     (".pdf) files","*.pdf"),
-                                                     ("all files","*.*")))
-
-
-
-
-
-
+                                        filetypes = (("(.wav)","*.wav"),
+                                                     ("(.txt)","*.txt")))
 
 class SigSlot(QObject):
     # Define a new signal called 'trigger' that has no arguments.
@@ -91,6 +84,22 @@ class showInfoSigSlot(QObject):
 
     def handle_trigger(self):
           showInfoMessage(self.title, self.info)
+
+class progressSigSlot(QObject):
+    # Define a new signal called 'trigger' that has no arguments.
+    trigger = pyqtSignal(int)
+    value = 0
+
+    # Connect to a slot
+    def connect(self):
+        self.trigger.connect(self.handle_trigger)
+        
+    def emit(self, val):
+        self.trigger.emit(val)
+        
+    def handle_trigger(self, value):
+        self.value = value
+        
 
 # Exaple Usage
 # app = QtWidgets.QApplication([])

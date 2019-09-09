@@ -20,7 +20,7 @@ plotDiffLevelCoeff  = False
 plotUnderstanding   = False
 plotCorrectImplemnt = False
 firstPrinciplesImplement = True
-libraryImplement = True
+libraryImplement = False
 
 def reconstruction_plot(yyy, **kwargs):
     """Plot signal vector on x [0,1] independently of amount of values it contains."""
@@ -313,12 +313,12 @@ if (firstPrinciplesImplement == True):
       print("Getting message samples")
       
       # Message to embed
-      message = fp.getMessageBits('Media/cat.jpeg')
+      message = fp.getMessageBits('Media/opera.wav')
       message = "".join(list(map(str, message)))
       
       print("Encoding")
       
-      stegoSamples, samplesUsed = firstP.dwtHaarEncode(samplesOne, message, 4, 2048)
+      stegoSamples, samplesUsed = firstP.dwtHaarEncode(samplesOne, message, 0, 2048, ".wav")
             
       print("Writing to stego")
       
@@ -334,10 +334,10 @@ if (firstPrinciplesImplement == True):
       
       print("Extracting")
       
-      extractMessage = firstP.dwtHaarDecode(samplesOneStego, 4, 2048)
+      extractMessage, fileType = firstP.dwtHaarDecode(samplesOneStego, 0, 2048)
           
       print("Writing to message file")
-      fp.writeMessageBitsToFile(extractMessage, 'Media/dwtFirstPrinciplesMessageExtract.jpeg')
+      fp.writeMessageBitsToFile(extractMessage, 'Media/dwtFirstPrinciplesMessageExtract.wav')
       
 if (libraryImplement == True):
       # Open the cover audio

@@ -18,6 +18,8 @@ msgDelivered = SS.showInfoSigSlot()
 msgDelivered.title = "Sent stego success."
 msgDelivered.info = "Message was delivered to all clients successfully."
 
+errorMsg = SS.showInfoSigSlot()
+
 server = []
 connectedToServer = False
 
@@ -80,6 +82,14 @@ def fileReceiveThread():
                         del server[:]
                         mainWindow.label_server_status.setText("Status: Disonnected")
                         
+                    elif (data.decode() == "ProgressEmbed"):
+                        percentage = sockets.recv_one_message(server[-1])
+                        mainWindow.progressBar_embedding.setValue(int(percentage))
+                        
+                    elif (data.decode() == "ProgressExtract"):
+                        percentage = sockets.recv_one_message(server[-1])
+                        mainWindow.progressBar_extracting.setValue(int(percentage))
+                        
                     elif (data.decode() == "SENT_SUCCESS"):
                         msgDelivered.emit()
                 
@@ -87,125 +97,185 @@ def fileReceiveThread():
                 continue
 
 def encode():
-    # Send the encode command to the server
-    sockets.send_one_message(server[-1], "Encode")    
-        
-    # Get the cover file name from the line edit box and send to server
-    coverFileName = mainWindow.lineEdit_cover.text()
     
-    with open(coverFileName, "rb") as f:
-        data = f.read()
-        sockets.send_one_file(server[0], data)
-        f.close()
-    
-    # Get the message file name from the line edit box and send to server
-    messageFileName = mainWindow.lineEdit_message.text()
-    
-    with open(messageFileName, "rb") as f:
-        data = f.read()
-        sockets.send_one_file(server[0], data)
-        f.close()
-
-    if(mainWindow.radioButton_DWT.isChecked()):
-        # Send that Genetic algorithm was chosen
-        sockets.send_one_message(server[-1], "DWT")
-                
-        # Get the order of bits to hold in the coefficients
-        OBH = mainWindow.lineEdit_OBH.text()
+    try:
         
-        # Send the order of bits to hold
-        sockets.send_one_message(server[-1], OBH)
+        # Get the cover file name from the line edit box and send to server
+        coverFileName = mainWindow.lineEdit_cover.text()
         
+        # Error checking if files for cover file. Valid and file type.
+        if (coverFileName.split('.')[-1] != "wav"):
+            raise Exception('The cover file is invalid. Only wave files allowed.')
+        
+        # Get the message file name from the line edit box and send to server
+        messageFileName = mainWindow.lineEdit_message.text()
+        
+        # Error checking if files for message file. Valid and file type.
+        if (messageFileName.split('.')[-1] != "wav" and messageFileName.split('.')[-1] != "txt" ):
+            raise Exception('The message file is invalid. Only .txt and .wav files allowed.')
             
-    # Second method = Genetic Algorithm
-    elif(mainWindow.radioButton_GA.isChecked()):
-        # Get the string representation of the key in ASCII
-        keyString = mainWindow.lineEdit_GA_key.text()
-              
-        # Send that Genetic algorithm was chosen
-        sockets.send_one_message(server[-1], "GA")
+        # Error checking if a valid method was selected
+        if (not (mainWindow.radioButton_DWT.isChecked() or mainWindow.radioButton_GA.isChecked())):
+            raise Exception('Select an encoding method.')
         
-        # Send the secret key
-        sockets.send_one_message(server[-1], keyString)
-    
-    # If no encoding algorithm is selected, throw an erro message 
-    else:
-        SS.showErrorMessage("Invalid Encoding Algorithm selected",
-                         "Select an encoding algorithm by selecting a radio button")  
-    
-    receivers = []
-    
-    if (mainWindow.lineEdit_receiver_IP_1.text() != ""):
-        receivers.append(mainWindow.lineEdit_receiver_IP_1.text())
-
-    if (mainWindow.lineEdit_receiver_IP_2.text() != ""):
-        receivers.append(mainWindow.lineEdit_receiver_IP_2.text())
+        # Check if the order of bits or key was supplied
+        if (mainWindow.radioButton_DWT.isChecked() and mainWindow.lineEdit_OBH.text() == ""):
+            raise Exception('Provide a valid OBH for DWT encoding.')
         
-    if (mainWindow.lineEdit_receiver_IP_3.text() != ""):
-        receivers.append(mainWindow.lineEdit_receiver_IP_3.text())
-
-    if (mainWindow.lineEdit_receiver_IP_4.text() != ""):
-        receivers.append(mainWindow.lineEdit_receiver_IP_4.text())
+        if (mainWindow.radioButton_GA.isChecked() and mainWindow.lineEdit_GA_key.text() == ""):
+            raise Exception('Provide a valid key for GA encoding.')
+        
+        # Send the encode command to the server
+        sockets.send_one_message(server[-1], "Encode")    
+        
+        # Send the cover file
+        with open(coverFileName, "rb") as f:
+            data = f.read()
+            sockets.send_one_file(server[0], data)
+            f.close()
+        
+        # Send the message file
+        if (messageFileName.split('.')[-1] == "wav"):
+            sockets.send_one_message(server[-1], ".wav")
+            
+        elif (messageFileName.split('.')[-1] == "txt"):
+            sockets.send_one_message(server[-1], ".txt")
+        
+        with open(messageFileName, "rb") as f:
+            data = f.read()
+            sockets.send_one_file(server[0], data)
+            f.close()
     
-    if (mainWindow.checkBox_peer.isChecked() and mainWindow.checkBox_local.isChecked()):
-        # Send to client and peers
-        sockets.send_one_message(server[-1], "CP")
-
-        sockets.send_one_message(server[-1], str(len(receivers)))            
+        if(mainWindow.radioButton_DWT.isChecked()):
+            # Send that Genetic algorithm was chosen
+            sockets.send_one_message(server[-1], "DWT")
                     
-        for i in range(0, len(receivers)):
-            sockets.send_one_message(server[-1], receivers[i])
-        
-    elif (mainWindow.checkBox_peer.isChecked()):
-        # Send to peers
-        sockets.send_one_message(server[-1], "P")
-        sockets.send_one_message(server[-1], str(len(receivers)))
-        
-        for i in range(0, len(receivers)):
-            sockets.send_one_message(server[-1], receivers[i])
-        
-    else:
-        # Send to client
-        sockets.send_one_message(server[-1], "C")
+            # Get the order of bits to hold in the coefficients
+            OBH = mainWindow.lineEdit_OBH.text()
             
+            # Send the order of bits to hold
+            sockets.send_one_message(server[-1], OBH)
+            
+                
+        # Second method = Genetic Algorithm
+        elif(mainWindow.radioButton_GA.isChecked()):
+            # Get the string representation of the key in ASCII
+            keyString = mainWindow.lineEdit_GA_key.text()
+                  
+            # Send that Genetic algorithm was chosen
+            sockets.send_one_message(server[-1], "GA")
+            
+            # Send the secret key
+            sockets.send_one_message(server[-1], keyString)
+        
+        # If no encoding algorithm is selected, throw an erro message 
+        else:
+            SS.showErrorMessage("Invalid Encoding Algorithm selected",
+                             "Select an encoding algorithm by selecting a radio button")  
+        
+        receivers = []
+        
+        if (mainWindow.lineEdit_receiver_IP_1.text() != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_1.text())
+    
+        if (mainWindow.lineEdit_receiver_IP_2.text() != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_2.text())
+            
+        if (mainWindow.lineEdit_receiver_IP_3.text() != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_3.text())
+    
+        if (mainWindow.lineEdit_receiver_IP_4.text() != ""):
+            receivers.append(mainWindow.lineEdit_receiver_IP_4.text())
+        
+        if (mainWindow.checkBox_peer.isChecked() and mainWindow.checkBox_local.isChecked()):
+            # Send to client and peers
+            sockets.send_one_message(server[-1], "CP")
+    
+            sockets.send_one_message(server[-1], str(len(receivers)))            
+                        
+            for i in range(0, len(receivers)):
+                sockets.send_one_message(server[-1], receivers[i])
+            
+        elif (mainWindow.checkBox_peer.isChecked()):
+            # Send to peers
+            sockets.send_one_message(server[-1], "P")
+            sockets.send_one_message(server[-1], str(len(receivers)))
+            
+            for i in range(0, len(receivers)):
+                sockets.send_one_message(server[-1], receivers[i])
+            
+        else:
+            # Send to client
+            sockets.send_one_message(server[-1], "C")
+              
+        
+    except Exception as error:
+        errorMsg.title = "Invalid user input."
+        errorMsg.info = str(error)
+        
+        if (str(error) == "list index out of range"):
+            errorMsg.title = "Server error."
+            errorMsg.info = "Connect to a valid server."
+        
+        errorMsg.emit()
+
+        
+        
 # Function for extracting the message using different stegangography algorithms
 def decode():
     
-    # Send the encode command to the server
-    sockets.send_one_message(server[-1], "Decode") 
-    
-    # Get the filename of the stego audio file
-    stegoFileName = mainWindow.lineEdit_stego.text()
+    try:
+        # Get the filename of the stego audio file
+        stegoFileName = mainWindow.lineEdit_stego.text()
 
-    # Send the stego file
-    with open(stegoFileName, "rb") as f:
-        data = f.read()
-        sockets.send_one_file(server[-1], data)
-        f.close()
-    
-    # Discrete haar wavelet transform decoding
-    if (mainWindow.radioButton_DWT_3.isChecked()):
-        # Send the DWT method
-        sockets.send_one_message(server[-1], "DWT") 
+        # Error checking of file for stego file. Valid and file type.
+        if (stegoFileName.split('.')[-1] != "wav"):
+            raise Exception('The stego file is invalid. Only wave files allowed.')
+            
+        # Error checking if a valid method was selected
+        if (not (mainWindow.radioButton_DWT_3.isChecked() or mainWindow.radioButton_GA_3.isChecked())):
+            raise Exception('Select a decoding method.')
         
-        # Get the order of bits to hold in the coefficients
-        OBH = mainWindow.lineEdit_OBH_nr_3.text()
+        # Check if the order of bits or key was supplied
+        if (mainWindow.radioButton_DWT_3.isChecked() and mainWindow.lineEdit_OBH_nr_3.text() == ""):
+            raise Exception('Provide a valid OBH for DWT decoding.')
         
-        # Send the order of bits to hold
-        sockets.send_one_message(server[-1], OBH)
+        if (mainWindow.radioButton_GA_3.isChecked() and mainWindow.lineEdit_GA_key_3.text() == ""):
+            raise Exception('Provide a valid key for GA decoding.')
         
-    # Genetic Algorithm decoding
-    elif(mainWindow.radioButton_GA_3.isChecked()):
-        sockets.send_one_message(server[-1], "GA") 
+        # Send the encode command to the server
+        sockets.send_one_message(server[-1], "Decode") 
+                
+        # Send the stego file
+        with open(stegoFileName, "rb") as f:
+            data = f.read()
+            sockets.send_one_file(server[-1], data)
+            f.close()
         
-        # Send the key
-        keyString = mainWindow.lineEdit_GA_key_3.text()
-        sockets.send_one_message(server[-1], keyString) 
-        
-    # No radio button selected
-    else:
-        SS.showErrorMessage("Invalid Encoding Algorithm selected",
-                         "Select an encoding algorithm by selecting a radio button")
+        # Discrete haar wavelet transform decoding
+        if (mainWindow.radioButton_DWT_3.isChecked()):
+            # Send the DWT method
+            sockets.send_one_message(server[-1], "DWT") 
+            
+            # Get the order of bits to hold in the coefficients
+            OBH = mainWindow.lineEdit_OBH_nr_3.text()
+            
+            # Send the order of bits to hold
+            sockets.send_one_message(server[-1], OBH)
+            
+        # Genetic Algorithm decoding
+        elif(mainWindow.radioButton_GA_3.isChecked()):
+            sockets.send_one_message(server[-1], "GA") 
+            
+            # Send the key
+            keyString = mainWindow.lineEdit_GA_key_3.text()
+            sockets.send_one_message(server[-1], keyString) 
+            
+    except Exception as error:
+        errorMsg.title = "Invalid user input."
+        errorMsg.info = str(error)
+        errorMsg.emit()
+
 
 def setCoverPath():
       mainWindow.lineEdit_cover.setText(fp.openFile())
@@ -270,18 +340,14 @@ if __name__ == "__main__":
     
     signalSaveFile.connect()
     msgDelivered.connect()
+    errorMsg.connect()
 
     # Guide user to provide values 1, 2, 3 or 4
     mainWindow.lineEdit_OBH.setPlaceholderText("OBH")
     
     # Set the progress on the progress bars to 0 to start with
-    mainWindow.progressBar_reading.setValue(0)
     mainWindow.progressBar_embedding.setValue(0)
-    mainWindow.progressBar_writing.setValue(0)
-    mainWindow.progressBar_message.setValue(0)
-    mainWindow.progressBar_reading_3.setValue(0)
     mainWindow.progressBar_extracting.setValue(0)
-    mainWindow.progressBar_writing_3.setValue(0)    
 
     recFileThread = threading.Thread(target=fileReceiveThread, args=())
     recFileThread.isDaemon = True

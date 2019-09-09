@@ -196,7 +196,7 @@ def decodeCoefficient(sample, bits):
 # Blocklenght is the length of the block on which the DWT Haar transform is 
 # performed each time.
 # Returns a list of integer stego file samples
-def dwtHaarEncode(coverSamples, message, OBH, blockLength):
+def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
       samplesUsed = 0
       
       # Get the approximate coefficients and detail coefficients of the signal
@@ -205,8 +205,17 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength):
       # Embed the messagelength within the message
       messageLength = len(message)
       messageLength = '{0:026b}'.format(messageLength)
-      message = messageLength + message
-          
+      
+      typeMessage = '{0:02b}'.format(0)
+    
+      if (messageType == ".txt"):
+          typeMessage = '{0:02b}'.format(0)
+        
+      elif (messageType == ".wav"):
+          typeMessage = '{0:02b}'.format(1)
+                
+      message = messageLength + typeMessage + message
+      
       blockNumber = 0      
       while(len(message) > 0):      
           for i in range(0, len(coefficiets[1][blockNumber])):
@@ -269,7 +278,7 @@ def dwtHaarDecode(stegoSamples, OBH, blockLength):
       foundMsgLength = False
       
       extractMessage = ''
-      
+      fileType = ''
       blockNumber = 0      
       doBreak = 0
       
@@ -284,13 +293,19 @@ def dwtHaarDecode(stegoSamples, OBH, blockLength):
               else:
                   extractMessage += decodeCoefficient(newCoeff[1][blockNumber][i], replaceBits)
           
-                  if (len(extractMessage) >= 26 and foundMsgLength == False):
+                  if (len(extractMessage) >= 28 and foundMsgLength == False):
                       extractedLength = int(extractMessage[0:26], 2)
                       foundMsgLength = True
                       
+                      if (extractMessage[26:28] == '00'):
+                          fileType = '.txt'
+    
+                      elif (extractMessage[26:28] == '01'):
+                          fileType = '.wav'
+                      
                   else:
-                      if (len(extractMessage) >= extractedLength + 26 and foundMsgLength == True):
-                          extractMessage = extractMessage[26:26 + extractedLength]
+                      if (len(extractMessage) >= extractedLength + 28 and foundMsgLength == True):
+                          extractMessage = extractMessage[28:28 + extractedLength]
                           
                           doBreak = 1
                           break
@@ -299,7 +314,7 @@ def dwtHaarDecode(stegoSamples, OBH, blockLength):
           if(doBreak == 1):
               break
         
-      return extractMessage
+      return extractMessage, fileType
       
       
 

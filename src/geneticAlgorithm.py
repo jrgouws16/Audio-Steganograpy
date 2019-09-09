@@ -5,10 +5,6 @@ Created on Tue Jul 23 14:10:15 2019
 @author: project
 """
 import numpy as np
-import SignalsAndSlots as SS
-
-signalEmbedding = SS.SigSlot()
-signalExtractingMessage = SS.SigSlot()
 
 # Function that takes a 16-bit audio sample and generates 5 chromosomes
 # of the sample, by inserting the bit in LSB positions 4 - 8
@@ -164,8 +160,7 @@ def determineFittest(originalSample, population):
         
     return returnIndex
 
-def insertMessage(samples, key, message):
-    progress = 0
+def insertMessage(samples, key, message, messageType):
     skipIndex = 0
     sampleIndex = 0
     messageBitsEmbedded = 0
@@ -173,14 +168,18 @@ def insertMessage(samples, key, message):
     messageLength = len(message)
     messageLength = '{0:026b}'.format(messageLength)
     
-    message = messageLength + message
+    typeMessage = '{0:02b}'.format(0)
+    
+    if (messageType == "txt"):
+        typeMessage = '{0:02b}'.format(0)
+        
+    elif (messageType == "wav"):
+        typeMessage = '{0:02b}'.format(1)
+        
+    message = messageLength + typeMessage + message
     
     for i in range(0, len(message)):
                 
-        if (float(i + 1) * 100 / len(message) > progress):
-            progress = float(i + 1) * 100 / len(message)
-            signalEmbedding.trigger.emit(progress)
-        
         if(skipIndex == 1):
             skipIndex = 0
             continue
@@ -251,10 +250,10 @@ def extractMessage(samples, key):
     
     message = ''
     sampleIndex = 0
-    progress = 0
+    fileType = ''
     
-    # This is the amount of bits that will determine the message length
-    messageLength = 26
+    # This is the amount of bits that will determine the message length (26 bits) and file type (2 bits)
+    messageLength = 28
     
     # While the full message has not been extracted
     while (len(message) < messageLength):
@@ -290,8 +289,15 @@ def extractMessage(samples, key):
                 message += '1'
 
         # If the message size is determined, add it to the total message length
-        if (len(message) == 26):
-            messageLength = int(message, 2) + 26
+        if (len(message) == 28):
+            messageLength = int(message[0:26], 2) + 28
+            
+            if (message[26:28] == '00'):
+                fileType = '.txt'
+            
+            elif (message[26:28] == '01'):
+                fileType = '.wav'
+            
             key = key * (int(float(messageLength)/len(key)) + 1)
 
         # Extract the second sample for the case where F is 1/2/3
@@ -309,19 +315,14 @@ def extractMessage(samples, key):
                 else:
                     message += '1'
                     
-            if (len(message) == 26):
-                messageLength = int(message, 2) + 26
+            if (len(message) == 28):
+                messageLength = int(message[0:26], 2) + 28
                 key = key * (int(float(messageLength)/len(key)) + 1)
             
         sampleIndex += 1
-        
-        if (sampleIndex > 26):
-            if (float(len(message)) * 100 / messageLength > progress):
-                progress = float(len(message)) * 100 / messageLength
-                signalExtractingMessage.trigger.emit(progress)
+
             
-    signalExtractingMessage.trigger.emit(100)
-    return message[26:]
+    return message[28:], fileType
 
             
 
