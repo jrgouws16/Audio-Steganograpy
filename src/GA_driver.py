@@ -136,6 +136,9 @@ for numberTests in range(0, 1000):
 
     
     if (message != extractedMsg):
+        print("Failed at test", numberTests)
+        print("Message", message)
+        print("Extract", extractedMsg)
         print("Error")
         break
     

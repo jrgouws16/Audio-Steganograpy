@@ -27,8 +27,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Function for encoding using the standard LSB encoding algorithm
 def GA_encoding(coverSamples, secretMessage, key, songObj, fileType):
-        print(len(coverSamples[0]), len(secretMessage))
-    
+   
         originalCoverSamples = deepcopy(coverSamples[0])
 
         for i in range(0, len(coverSamples[0])):
@@ -48,8 +47,7 @@ def GA_encoding(coverSamples, secretMessage, key, songObj, fileType):
         infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
         
         frameRate = songObj.getframerate() 
-        
-        infoMessage += ".\nCapacity of " + str(round((len(secretMessage)/(samplesUsed/frameRate))/1000, 2)) + " kbps."       
+        infoMessage += ".\nCapacity of " + str(RT.getCapacity(secretMessage, samplesUsed, frameRate)) + " kbps."       
             
         # Show the results of the stego quality of the stego file
         mainWindow.listWidget_log.addItem(infoMessage)

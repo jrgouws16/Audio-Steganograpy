@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Jul 23 14:10:15 2019
-
 @author: project
 """
 import numpy as np
+from copy import deepcopy
+import LSB
 
 # Function that takes a 16-bit audio sample and generates 5 chromosomes
 # of the sample, by inserting the bit in LSB positions 4 - 8
@@ -161,22 +162,12 @@ def determineFittest(originalSample, population):
     return returnIndex
 
 def insertMessage(samples, key, message, messageType):
+    messageSamples = deepcopy(samples[28:])
+    infoSamples    = deepcopy(samples[0:28])
+    
     skipIndex = 0
     sampleIndex = 0
     messageBitsEmbedded = 0
-    
-    messageLength = len(message)
-    messageLength = '{0:026b}'.format(messageLength)
-    
-    typeMessage = '{0:02b}'.format(0)
-    
-    if (messageType == "txt"):
-        typeMessage = '{0:02b}'.format(0)
-        
-    elif (messageType == "wav"):
-        typeMessage = '{0:02b}'.format(1)
-        
-    message = messageLength + typeMessage + message
     
     for i in range(0, len(message)):
                 
@@ -195,27 +186,25 @@ def insertMessage(samples, key, message, messageType):
         
         Ei = '0'
         # If message bit coincides with sample[Pi], then Ei is 1 else Ei = 0
-        if (samples[sampleIndex][-1*pi - 1] == message[i]):
+        if (messageSamples[sampleIndex][-1*pi - 1] == message[i]):
             Ei = '1'
             
         else:
             Ei = '0'
                     
         # Create the five chromosomes by inserting Ei at five positions
-        population, replacedBits = generatePopulation(samples[sampleIndex], Ei)
+        population, replacedBits = generatePopulation(messageSamples[sampleIndex], Ei)
         
         # Generate the next generation by performing GA operations
         population = generateNextGeneration(population, replacedBits, Ei)
         
         # Replace sample with the fittest cromosome
-        samples[sampleIndex] = population[determineFittest(samples[sampleIndex], population)]
+        messageSamples[sampleIndex] = population[determineFittest(messageSamples[sampleIndex], population)]
         messageBitsEmbedded += 1
         
         # If fitness value between 0 and 4 exclusive, insert another bit at i = 2
-        if(determineFittest(samples[sampleIndex], population) > 0 and 
-           determineFittest(samples[sampleIndex], population) < 4):
-            
-            messageBitsEmbedded += 1    
+        if(determineFittest(messageSamples[sampleIndex], population) > 0 and 
+           determineFittest(messageSamples[sampleIndex], population) < 4):
             
             # Calculate pi for m(i+1)
             i = i + 1
@@ -224,46 +213,89 @@ def insertMessage(samples, key, message, messageType):
             if(i >= len(message)):
                 break
             
+            messageBitsEmbedded += 1
+            
             skipIndex = 1
             
             # Determine Ei            
-            if (samples[sampleIndex][-1*pi - 1] == message[i]):
+            if (messageSamples[sampleIndex][-1*pi - 1] == message[i]):
                 Ei = '1'
                 
             else:
                 Ei = '0'
 
             # Insert the second bit at the third LSB layer
-            samples[sampleIndex] = list(samples[sampleIndex])
-            samples[sampleIndex][-3] = Ei
-            samples[sampleIndex] = "".join(samples[sampleIndex])
+            messageSamples[sampleIndex] = list(messageSamples[sampleIndex])
+            messageSamples[sampleIndex][-3] = Ei
+            messageSamples[sampleIndex] = "".join(messageSamples[sampleIndex])
             
         sampleIndex = sampleIndex + 1
         
-        if (sampleIndex == len(samples)):
+        if (sampleIndex == len(messageSamples)):
             print("File is too small to embed the message, breaking for loop")
             break
         
-    return samples, sampleIndex, messageBitsEmbedded
+    messageLength = '{0:026b}'.format(messageBitsEmbedded)
+    
+    typeMessage = ''
+    
+    if (messageType == ".txt"):
+        typeMessage = '{0:02b}'.format(0)
+        
+    elif (messageType == ".wav"):
+        typeMessage = '{0:02b}'.format(1)
+        
+    infoMessage = messageLength + typeMessage  
+    infoMessage = list(map(int, list(infoMessage)))
+    
+    for i in range(0, len(infoSamples)):
+        infoSamples[i] = int(infoSamples[i], 2)
+
+    infoEmbedding = LSB.LSB_encoding(infoSamples, infoMessage)    
+    infoEmbedding.encode(4)
+    stegoInfoSamples = infoEmbedding.stegoSamples    
+    
+    for i in range(0, len(stegoInfoSamples)):
+        stegoInfoSamples[i] = "{0:016b}".format(stegoInfoSamples[i])
+
+    return stegoInfoSamples + messageSamples, sampleIndex, messageBitsEmbedded
        
 def extractMessage(samples, key):
-    
+    messageSamples = deepcopy(samples[28:])
+    infoSamples    = deepcopy(samples[0:28])
     message = ''
     sampleIndex = 0
     fileType = ''
     
-    # This is the amount of bits that will determine the message length (26 bits) and file type (2 bits)
-    messageLength = 28
     
+    for i in range(0, len(infoSamples)):
+        infoSamples[i] = int(infoSamples[i], 2)
+        
+    messageInfoExtractor = LSB.LSB_decoding(infoSamples)
+    infoMessage = messageInfoExtractor.decode(28,4)
+    
+    # This is the amount of bits that will determine the message length (26 bits) and file type (2 bits)
+    messageLength = int(infoMessage[0:26],2)
+    
+    
+    if (infoMessage[26:28] == '00'):
+        fileType = '.txt'
+
+    elif (infoMessage[26:28] == '01'):
+        fileType = '.wav'            
+
+    key = key * (int(float(messageLength)/len(key)) + 1)
+
+     
     # While the full message has not been extracted
     while (len(message) < messageLength):
         
         # Get the fitness value of the stego sample
-        F = int(samples[sampleIndex][13:16], 2)
+        F = int(messageSamples[sampleIndex][13:16], 2)
 
         # If F not zero or four, then F = decimal of first two LSBs of sample
         if (F != 0 and F != 4):
-            F = int(samples[sampleIndex][14:16], 2)
+            F = int(messageSamples[sampleIndex][14:16], 2)
 
         # Calculate the decimal value of Bi
         pi = int(key[sampleIndex % len(key): ((sampleIndex % len(key)) + 3) % len(key) + 1], 2) 
@@ -277,53 +309,32 @@ def extractMessage(samples, key):
 
         
         # If the bit at S[F] is one, extract the bit at pi
-        if (samples[sampleIndex][-1*F - 4] == '1'):
-            message += samples[sampleIndex][-1*pi - 1]
+        if (messageSamples[sampleIndex][-1*F - 4] == '1'):
+            message += messageSamples[sampleIndex][-1*pi - 1]
             
         # Else extract the opposite of the bit at pi    
         else:
-            if (samples[sampleIndex][-1*pi - 1] == '1'):
+            if (messageSamples[sampleIndex][-1*pi - 1] == '1'):
                 message += '0'
                 
             else:
                 message += '1'
-
-        # If the message size is determined, add it to the total message length
-        if (len(message) == 28):
-            messageLength = int(message[0:26], 2) + 28
-            
-            if (message[26:28] == '00'):
-                fileType = '.txt'
-            
-            elif (message[26:28] == '01'):
-                fileType = '.wav'
-            
-            key = key * (int(float(messageLength)/len(key)) + 1)
 
         # Extract the second sample for the case where F is 1/2/3
         if (F > 0 and F < 4):
             if (len(message) == messageLength):
                 break
             
-            if (samples[sampleIndex][-3] == '1'):
-                message += samples[sampleIndex][-1*pi - 1]
+            if (messageSamples[sampleIndex][-3] == '1'):
+                message += messageSamples[sampleIndex][-1*pi - 1]
                 
             else:
-                if (samples[sampleIndex][-1*pi - 1] == '1'):
+                if (messageSamples[sampleIndex][-1*pi - 1] == '1'):
                     message += '0'
                     
                 else:
                     message += '1'
                     
-            if (len(message) == 28):
-                messageLength = int(message[0:26], 2) + 28
-                key = key * (int(float(messageLength)/len(key)) + 1)
-            
         sampleIndex += 1
 
-            
-    return message[28:], fileType
-
-            
-
-
+    return message, fileType

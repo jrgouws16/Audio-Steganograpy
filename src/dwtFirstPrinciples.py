@@ -238,7 +238,6 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
                   coefficiets[1][blockNumber][i] = encodeCoefficient(int(coefficiets[1][blockNumber][i]), embedMessage)
                   samplesUsed = blockNumber * blockLength + (i + 1)*2
 
-          
                   # If the message is embedded, break
                   if (len(message) == 0):
                       break

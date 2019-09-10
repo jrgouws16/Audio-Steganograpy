@@ -17,7 +17,7 @@ import random
 from copy import deepcopy
 import time
 
-doSingleTest = True
+doSingleTest = False
 doSongDataBase = True
 
 if doSongDataBase == True:
@@ -60,11 +60,8 @@ if doSongDataBase == True:
               
               start_time = time.time()
               
-    
-              
               # Provide first audio channel samples and message samples to encode 
               LSB_encoding = LSB.LSB_encoding(coverSamples[0], secretMessage)
-              
               # Embed the message
               LSB_encoding.encode(j)
               print((time.time() - start_time), "seconds to execute embedding algorithm")         
@@ -73,6 +70,7 @@ if doSongDataBase == True:
               print("Samples used:", samplesUsed)
               print("SNR =", RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed]))
               print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
+
               
         print("")  
         song.close()
@@ -93,6 +91,7 @@ if doSongDataBase == True:
             
         # Read the secret message file
         secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
+        print(len(secretMessage))
     
         print("Cover file =", i)            
         # Second method = Genetic Algorithm
@@ -113,8 +112,12 @@ if doSongDataBase == True:
           
         # Provide first audio channel samples and message samples to encode 
         start_time = time.time()
-        stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), "txt")
+        stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), ".txt")
         print((time.time() - start_time), "seconds to execute embedding algorithm")          
+        
+        # Extract secret message
+        secretMessage, fileType = GA.extractMessage(stegoSamples, binaryKey)
+        
         # Convert the binary audio samples to decimal samples
         for i in range(0, len(stegoSamples)):
             stegoSamples[i] = int(stegoSamples[i], 2)
@@ -269,7 +272,7 @@ if doSingleTest == True:
           
       # Provide first audio channel samples and message samples to encode 
       start_time = time.time()
-      stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), "txt")
+      stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), ".txt")
       print((time.time() - start_time), "seconds to execute embedding algorithm")          
       # Convert the binary audio samples to decimal samples
       for i in range(0, len(stegoSamples)):
