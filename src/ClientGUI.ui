@@ -877,7 +877,7 @@
            <enum>QTabWidget::Rounded</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1129,11 +1129,22 @@
                </layout>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_encode">
-                <property name="text">
-                 <string>Encode</string>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="horizontalLayout_19">
+                <item>
+                 <widget class="QPushButton" name="pushButton_encode">
+                  <property name="text">
+                   <string>Encode</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_cover_capacity">
+                  <property name="text">
+                   <string>Get Cover Capacity</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </item>

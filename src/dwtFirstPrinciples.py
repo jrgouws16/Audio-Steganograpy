@@ -189,6 +189,31 @@ def decodeCoefficient(sample, bits):
         
     return msg
 
+def dwtHaarCoverCapacity(coverSamples, OBH, blockLength):
+    capacity = 0  
+    # Get the approximate coefficients and detail coefficients of the signal
+    coefficiets = getCoefficients(coverSamples, blockLength)
+    
+    
+    blockNumber = 0      
+    for blockNumber in range(0, len(coefficiets[1])):      
+        for i in range(0, len(coefficiets[1][blockNumber])):
+            # Calculate the amount of bits that can possibly hidden
+            replaceBits = calcPower(coefficiets[1][blockNumber][i]) - OBH - 3
+                
+            if (blockNumber == len(coverSamples)/blockLength -1 and i == len(coefficiets[1][blockNumber]) - 5):
+                break
+          
+            # If it returns as a negative amount, skip the sample
+            if (replaceBits <= 0):
+                continue
+              
+            else:
+                # Get the amount of message bits that will be embedded
+                capacity += replaceBits
+              
+    return capacity
+
 # Function to encode a message within a audio file using the Haar DWT transform
 # Takes in list of integer cover file samples
 # Takes a binary bit string of the message

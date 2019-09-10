@@ -81,6 +81,28 @@ def threaded_client(conn, clientNum):
             if (message == None):
                   break
               
+            elif (message.decode() == "Capacity"):
+                cover = open(str(clientNum) + "Capacity" + ".wav", "wb")
+                data = sockets.recv_one_message(conn)
+                cover.write(data)
+                cover.close()
+                
+                method = sockets.recv_one_message(conn)
+                
+                if (method.decode() == "DWT"):
+                    OBH = sockets.recv_one_message(conn)
+                    OBH = int(OBH.decode())
+                    
+                    song = wave.open(str(clientNum) + "Capacity" + ".wav", "rb")
+                    samplesOne, samplesTwo = fp.extractWaveSamples(song)
+                    
+                    capacity = DWT.dwtHaarCoverCapacity(samplesOne, OBH, 2048)
+                    sockets.send_one_message(conn, "Capacity")
+                    sockets.send_one_message(conn, str(capacity))
+
+                elif (method.decode() == "GA"):
+                    print("HAHAHAHHAHAHAH")
+              
             # If it is needed to encode the message into the audio    
             elif (message.decode() == "Encode"):
                 mainWindow.listWidget_log.addItem("Client " + str(addresses[connections.index(conn)][0]) + " requested encoding.")
@@ -486,7 +508,6 @@ if __name__ == "__main__":
     mainWindow = uic.loadUi("ServerGUI.ui")
     mainWindow.pushButton_start.clicked.connect(startServerThread)
     mainWindow.pushButton_stop.clicked.connect(endServer)
-    
     
     # Set the GUI background to specified image
     mainWindow.setStyleSheet("QMainWindow {border-image: url(Media/music.jpg) 0 0 0 0 stretch stretch}")

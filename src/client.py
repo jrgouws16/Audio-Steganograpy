@@ -17,7 +17,9 @@ signalSaveFile = SS.fileSaveSigSlot()
 msgDelivered = SS.showInfoSigSlot()
 msgDelivered.title = "Sent stego success."
 msgDelivered.info = "Message was delivered to all clients successfully."
-
+invalidCover = SS.showInfoSigSlot()
+invalidCover.title = "Cover file invalid."
+invalidCover.info = "Provide a valid cover wave file."
 errorMsg = SS.showInfoSigSlot()
 
 server = []
@@ -76,6 +78,13 @@ def fileReceiveThread():
                         f = open(filepath, "wb")
                         f.write(data)
                         f.close()
+                        
+                    elif (data.decode() == "Capacity"):
+                        capacity = sockets.recv_one_message(server[-1])
+                        invalidCover.title = "Capacity of cover file."
+                        invalidCover.info = "The provided cover file has a capacity of " + capacity.decode() + " bits."
+                        invalidCover.emit()
+
                         
                     elif (data.decode() == "Disconnect"):
                         server[-1].close()
@@ -276,6 +285,48 @@ def decode():
         errorMsg.info = str(error)
         errorMsg.emit()
 
+def getCoverCapacity():
+    # Get the cover file name from the line edit box and send to server
+    coverFileName = mainWindow.lineEdit_cover.text()
+    
+    # Error checking if files for cover file. Valid and file type.
+    if (coverFileName.split('.')[-1] != "wav"):
+        invalidCover.title = "Cover file invalid."
+        invalidCover.info = "Provide a valid cover wave file."
+        invalidCover.emit()
+        return
+    
+    if ( not (mainWindow.radioButton_DWT.isChecked() or mainWindow.radioButton_GA.isChecked())):    
+        invalidCover.title = "Invalid method selected."
+        invalidCover.info = "Please select either DWT or GA encoding."
+        invalidCover.emit()
+        return
+    
+    # Check if the order of bits or key was supplied
+    if (mainWindow.radioButton_DWT.isChecked() and mainWindow.lineEdit_OBH.text() == ""):
+        invalidCover.title = "Invalid OBH provided."
+        invalidCover.info = "Please select provide an integer for the OBH."
+        invalidCover.emit()
+        return
+    
+    # Send the start of a capacity message
+    sockets.send_one_message(server[-1], "Capacity")
+        
+    # Send the cover file
+    with open(coverFileName, "rb") as f:
+        data = f.read()
+        sockets.send_one_file(server[0], data)
+        f.close()
+
+    if (mainWindow.radioButton_DWT.isChecked()):
+        sockets.send_one_message(server[0], "DWT")
+        sockets.send_one_message(server[0], mainWindow.lineEdit_OBH.text())
+        
+    else:
+        sockets.send_one_message(server[0], "GA")
+        
+        
+    
 
 def setCoverPath():
       mainWindow.lineEdit_cover.setText(fp.openFile())
@@ -337,10 +388,12 @@ if __name__ == "__main__":
     mainWindow.pushButton_disconnect.clicked.connect(disconnectFromServer)
     mainWindow.pushButton_decode.clicked.connect(decode)
     mainWindow.pushButton_browse_stego_3.clicked.connect(setStegoPath)
+    mainWindow.pushButton_cover_capacity.clicked.connect(getCoverCapacity)
     
     signalSaveFile.connect()
     msgDelivered.connect()
     errorMsg.connect()
+    invalidCover.connect()
 
     # Guide user to provide values 1, 2, 3 or 4
     mainWindow.lineEdit_OBH.setPlaceholderText("OBH")
