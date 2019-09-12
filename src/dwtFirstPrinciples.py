@@ -194,7 +194,6 @@ def dwtHaarCoverCapacity(coverSamples, OBH, blockLength):
     # Get the approximate coefficients and detail coefficients of the signal
     coefficiets = getCoefficients(coverSamples, blockLength)
     
-    
     blockNumber = 0      
     for blockNumber in range(0, len(coefficiets[1])):      
         for i in range(0, len(coefficiets[1][blockNumber])):
@@ -242,15 +241,10 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
       message = messageLength + typeMessage + message
       
       blockNumber = 0      
-      while(len(message) > 0):      
+      for blockNumber in range(0, len(coefficiets[1])):
           for i in range(0, len(coefficiets[1][blockNumber])):
               # Calculate the amount of bits that can possibly hidden
               replaceBits = calcPower(coefficiets[1][blockNumber][i]) - OBH - 3
-                  
-              if (len(message) > 1 and blockNumber == len(coverSamples)/blockLength -1 and i == len(coefficiets[1][blockNumber]) - 5):
-                    print("Message is too long")
-                    print("Unembedded message bits =", len(message))
-                    break
           
               # If it returns as a negative amount, skip the sample
               if (replaceBits <= 0):
@@ -267,8 +261,8 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
                   if (len(message) == 0):
                       break
           
-          blockNumber+=1
-      
+      if (len(message) > 0):
+          print("Message bits unembedded:", len(message))
       
       # Reconstruct the signal
       stegoSamples = []
@@ -285,7 +279,8 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
                   stegoSamples[i] = -32767
 
       
-      return stegoSamples, samplesUsed
+      unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
+      return stegoSamples + unaltered, samplesUsed
       
 # Function to decode a message from a stego audio file using the Haar DWT transform
 # Takes in list of integer stego file samples

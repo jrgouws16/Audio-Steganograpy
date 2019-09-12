@@ -161,9 +161,10 @@ def threaded_client(conn, clientNum):
                     
                     # Extract the message bits from the message file
                     secretMessage = fp.getMessageBits(str(clientNum) + "MSG" + fileType)
+                    print(secretMessage)
                                     
                     # Convert ASCII to binary 
-                    binaryKey = fp.messageToBinary(keyString.decode()) 
+                    binaryKey = fp.messageToBinary(keyString.decode())
                     binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
     
                     stegoSamples = GA_encoding(coverSamples, secretMessage, binaryKey, song, fileType)

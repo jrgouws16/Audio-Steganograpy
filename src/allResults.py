@@ -17,8 +17,8 @@ import random
 from copy import deepcopy
 import time
 
-doSingleTest = False
-doSongDataBase = True
+doSingleTest = True
+doSongDataBase = False
 
 if doSongDataBase == True:
 
@@ -91,7 +91,6 @@ if doSongDataBase == True:
             
         # Read the secret message file
         secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
-        print(len(secretMessage))
     
         print("Cover file =", i)            
         # Second method = Genetic Algorithm
@@ -214,18 +213,20 @@ if doSingleTest == True:
       stegoFileName = 'Media/stego.wav'
       
       # Open the cover audio file
-      song = wave.open("Media/opera.wav", mode='rb')
+      song = wave.open("Media/song.wav", mode='rb')
       
       # Extract the cover samples
       coverSamples = fp.extractWaveSamples(song)
           
       # Read the secret message file
-      secretMessage = [random.randrange(0, 2) for i in range(int(len(coverSamples[0])/11))]
+      secretMessage = [random.randrange(0, 2) for i in range(int(len(coverSamples[0])))]
        
       originalCoverSamples = deepcopy(coverSamples[0])
+      print(len(originalCoverSamples))
       
       secretMessage = "".join(map(str,secretMessage))
       start_time = time.time()
+      print("starting encoding")
       stegoSamples, samplesUsed = dwtFP.dwtHaarEncode(coverSamples[0], secretMessage, 1, 1024, "txt")
       print((time.time() - start_time), "seconds to execute embedding algorithm")         
         
@@ -245,14 +246,13 @@ if doSingleTest == True:
       stegoFileName = 'Media/stego.wav'
         
       # Open the cover audio file
-      song = wave.open("Media/opera.wav", mode='rb')
+      song = wave.open("Media/song.wav", mode='rb')
         
       # Extract the cover samples
       coverSamples = fp.extractWaveSamples(song)
             
       # Read the secret message file
       secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
-      print(len(secretMessage))
       
       # Second method = Genetic Algorithm
       # Get the string representation of the key in ASCII

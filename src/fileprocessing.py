@@ -4,6 +4,8 @@ import sys
 import struct
 import SignalsAndSlots
 import wave
+from scipy.io import wavfile
+import numpy as np
 
 signalWriting = SignalsAndSlots.SigSlot()
 
@@ -16,9 +18,9 @@ signalReadMsg = SignalsAndSlots.SigSlot()
 # Create a signal to emit the progress of writing to mesage file
 signalWriteMsg = SignalsAndSlots.SigSlot()
 
-########################################################################################################################
-#####################                          General usefull functions                    ############################
-########################################################################################################################
+###############################################################################
+#                          General usefull functions                    #######
+###############################################################################
 def openFile():
     # Create a tkinter main window
     root = tk.Tk()
@@ -46,11 +48,11 @@ def saveMessage():
                                                      (".pdf) files","*.pdf"),
                                                      ("all files","*.*")))
 
-########################################################################################################################
-#####################               Functions for reading and writing to message file       ############################
-########################################################################################################################
+###############################################################################
+#               Functions for reading and writing to message file       #######
+###############################################################################
 
-# Takes any message file and returns a integer list of the bits
+# Takes a text file and returns a integer list of the bits to be embedded
 def getMessageBits(file_path):
     # Open the file to be read and get the length
     file = open(file_path, 'rb')                   
@@ -89,6 +91,47 @@ def getMessageBits(file_path):
     # Return integer list of samples
     return list(map(int, totalSamples))    
 
+# Takes a wave file and return an integer list of the combined samples as a 
+# single list. The function will also return the parameters of the wave file
+'''
+def getWaveSamples(file_path):
+    
+    fs, data = wavfile.read(file_path)
+    
+    samplesChannelOne = []
+    samplesChannelTwo = []
+    
+    for i in data:
+        if (len(data.shape) == 1):
+            samplesChannelOne.append(i)
+            
+        else:
+            samplesChannelOne.append(i[0])
+            samplesChannelTwo.append(i[1])
+            
+    for i in range(0, len(samplesChannelOne)):
+        if (samplesChannelOne[i] == -32768):       
+            samplesChannelOne[i] += 1
+            
+    for i in range(0, len(samplesChannelTwo)):
+        if (samplesChannelTwo[i] == -32768):       
+            samplesChannelTwo[i] += 1
+    
+    return samplesChannelOne, samplesChannelTwo
+
+
+# Writing two integer lists of samples to a wave audio file
+def writeWaveSamplesToFile(samplesOne, samplesTwo, rate, filePath):
+    arrOne = np.asarray(samplesOne)
+    arrTwo = np.asarray(samplesTwo)
+    
+    if (len(samplesTwo) == 0):
+        wavfile.write(filePath, rate, arrOne)
+        
+    else:
+        data  = np.vstack((arrOne, arrTwo)).T    
+        wavfile.write(filePath, rate, data)
+'''
 # Convert an eight bit string to list of eight integers
 def messageToBinary(message):
     return ''.join('{0:08b}'.format(ord(x), 'b') for x in message)
@@ -96,11 +139,7 @@ def messageToBinary(message):
 # Write the binary message to a file
 def writeMessageBitsToFile(totalMessageBits, file_path):
     file = open(file_path, 'wb')  
-    progress = 0                     
-
-    # Number of messsage bits to keep track of progress on GUI
-    originalSize = len(totalMessageBits)
-
+    
     # Write eight bits at a time and delete the eight bits
     while (len(totalMessageBits) > 0):
         # Convert eight bit sample to integer value and convert to a byte format
@@ -108,18 +147,13 @@ def writeMessageBitsToFile(totalMessageBits, file_path):
         
         # Delete the byte that was written
         totalMessageBits = totalMessageBits[8:]
-        
-        # Send signal to update GUI
-        if (100-100.0*len(totalMessageBits)/originalSize > progress):
-            progress = 100-100.0*len(totalMessageBits)/originalSize
-            signalWriteMsg.trigger.emit(progress)
-        
+                
 
     file.close()
 
-########################################################################################################################
-#####################               For reading, writing and extracting samples for wave files    ######################
-########################################################################################################################
+###############################################################################
+#               For reading, writing and extracting samples for wave files    #
+###############################################################################
 
 # Function to return the samples of a wave audio file.
 # Returns two integer lists of samples for two channels
@@ -171,30 +205,25 @@ def returnParameters(self):
     print("Framerate (sampling rate):", self.framerate)
     print("Number of samples:", self.nframes)
 
-
-########################################################################################################################
-#####################              For writing steganography samples to a wav file after encoding ######################
-########################################################################################################################
+###############################################################################
+#              For writing steganography samples to a wav file after encoding #
+###############################################################################
 
 # Write the stego samples to the stego file        
 def writeStegoToFile(fileName, parameters, samples):
-    progress = 0
     byteSamples = []
     with wave.open(fileName, 'wb') as fd:
         fd.setparams(parameters)
+        fd.setnchannels(1)
     
         for i in range(len(samples)):
             byteSamples.append(struct.pack('<h', samples[i]))
-            
-            if ((i+1)*100/(len(samples)) > progress):
-                progress = (i+1)*100/(len(samples))
-                signalWriting.trigger.emit(progress)
-                
+                      
         fd.writeframes(b''.join(byteSamples))
 
             
     fd.close()
 
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
+###############################################################################
+###############################################################################
+###############################################################################
