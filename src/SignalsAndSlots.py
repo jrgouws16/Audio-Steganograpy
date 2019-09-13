@@ -65,8 +65,8 @@ class fileSaveSigSlot(QObject):
 
     def handle_trigger(self):
           self.filePath = saveFile()
-          self.setPath = True
-          
+          self.setPath = True          
+                    
 class showInfoSigSlot(QObject):
 
     # Define a new signal called 'trigger' that has no arguments.

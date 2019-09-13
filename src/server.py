@@ -27,7 +27,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Function for encoding using the standard LSB encoding algorithm
 def GA_encoding(coverSamples, secretMessage, key, songObj, fileType):
-   
+        # Deepcopy for calculating the SNR
         originalCoverSamples = deepcopy(coverSamples[0])
 
         for i in range(0, len(coverSamples[0])):
@@ -161,7 +161,6 @@ def threaded_client(conn, clientNum):
                     
                     # Extract the message bits from the message file
                     secretMessage = fp.getMessageBits(str(clientNum) + "MSG" + fileType)
-                    print(secretMessage)
                                     
                     # Convert ASCII to binary 
                     binaryKey = fp.messageToBinary(keyString.decode())

@@ -4,8 +4,8 @@ import sys
 import struct
 import SignalsAndSlots
 import wave
-from scipy.io import wavfile
-import numpy as np
+#from scipy.io import wavfile
+#import numpy as np
 
 signalWriting = SignalsAndSlots.SigSlot()
 
@@ -162,7 +162,6 @@ def writeMessageBitsToFile(totalMessageBits, file_path):
 def extractWaveSamples(waveObject):
     samplesChannelOne = []
     samplesChannelTwo = []
-    progress = 0
     
     # Get the wave file parameters
     nchannels, sampwidth, framerate, nframes, comptype, compname = waveObject.getparams()
@@ -182,21 +181,73 @@ def extractWaveSamples(waveObject):
         samplesChannelOne.append(data[0])         
 
         # Prevents overflow when inserting the message
-        if (samplesChannelOne[-1] == -32768):       
+        if (samplesChannelOne[-1] <= -32768):       
             samplesChannelOne[-1] += 1
 
         # Do the second channel
         if (nchannels == 2):
             samplesChannelTwo.append(data[1])
 
-            if (samplesChannelTwo[-1] == -32768):
+            if (samplesChannelTwo[-1] <= -32768):
                 samplesChannelTwo[-1] += 1
        
-        if ((index+1) * 100 / nframes > progress):
-            progress = (index+1) * 100 / nframes
-            signalExtract.trigger.emit(progress)
-
     return samplesChannelOne, samplesChannelTwo
+
+def extractWaveMessage(waveObject):
+    samplesChannelOne = []
+    samplesChannelTwo = []
+    
+    # Get the wave file parameters
+    nchannels, sampwidth, framerate, nframes, comptype, compname = waveObject.getparams()
+
+    # Read two bytes for mono (<1h) in little endian format
+    # Read four bytes for stereo (<2h) in little endian format
+    format = '<{}h'.format(nchannels)
+
+    for index in range(nframes):
+        # Read one frame
+        frame = waveObject.readframes(1)
+
+        # Unpack the frame to integer value            
+        data = struct.unpack(format, frame) 
+        
+        # First channel value added to channel one
+        samplesChannelOne.append(data[0])         
+       
+    return samplesChannelOne, samplesChannelTwo
+
+def writeToWaveMessage(binString, file, parameters):
+      byteSamples = []
+      samples = []
+      with wave.open(file, 'wb') as fd:
+            fd.setparams(parameters)
+            fd.setnchannels(1)
+    
+            while (len(binString) % 16 != 0):
+                  binString = binString[:-1]
+           
+            while (len(binString) > 0):
+                  binSample = binString[0:16]
+                  decSample = int(binSample[1:], 2)
+                 
+                  if (binSample[0] == '1'):
+                        decSample = decSample * -1
+      
+                  samples.append(decSample)
+                  binString = binString[16:]
+                  
+            for i in range(len(samples)):
+                  byteSamples.append(struct.pack('<h', samples[i]))
+                      
+            fd.writeframes(b''.join(byteSamples))
+
+            
+      fd.close()
+      
+      
+      
+      
+            
 
 # Prints the wave file parameters in the terminal
 def returnParameters(self):
