@@ -16,9 +16,17 @@ import fileprocessing as fp
 import random
 from copy import deepcopy
 import time
+import dwtEncrypt
 
-doSingleTest = True
-doSongDataBase = False
+doSingleTest     = True
+doSongDataBase   = True 
+doDWT_OBH        = False
+doDWT_Encrypt    = False
+doGA             = False
+doLSB            = False
+doDWT_OBH_firstP = False
+doDWT_OBH_Lib    = False
+doDWT_encrypt    = True
 
 if doSongDataBase == True:
 
@@ -35,261 +43,293 @@ if doSongDataBase == True:
             if '.wav' in file:
                 coverFiles.append(os.path.join(r, file))
     
-    print("################# Standard LSB encoding  #############################")
-    for i in coverFiles:
-        stegoSamples = []
+    if (doLSB == True):
+        print("################# Standard LSB encoding  #############################")
+        for i in coverFiles:
+            stegoSamples = []
+            
+            # Get the stego file name to be saved to from the line edit box
+            stegoFileName = 'Media/stego.wav'
+            
+            # Open the cover audio file
+            song = wave.open(i, mode='rb')
+            
+            # Extract the cover samples
+            coverSamples = fp.extractWaveSamples(song)
+            originalCoverSamples = deepcopy(coverSamples[0])
+            
+            # Read the secret message file
+            secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
         
+            print("Cover file =", i)
+            
+            for j in range(1, 8):
+                  print('##############  LSB embedding, with LSB =', j, "############")
+                  print("Bits encoded =", len(secretMessage))
+                  
+                  start_time = time.time()
+                  
+                  # Provide first audio channel samples and message samples to encode 
+                  LSB_encoding = LSB.LSB_encoding(coverSamples[0], secretMessage)
+                  # Embed the message
+                  LSB_encoding.encode(j)
+                  print((time.time() - start_time), "seconds to execute embedding algorithm")         
+                  stegoSamples = LSB_encoding.stegoSamples
+                  samplesUsed = LSB_encoding.numberSamplesUsed
+                  print("Samples used:", samplesUsed)
+                  print("SNR =", RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed]))
+                  print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
+    
+                  
+            print("")  
+            song.close()
+        
+    if (doGA == True):    
+        print("################# Genetic algorithm encoding  ########################")
+        for i in coverFiles:
+            stegoSamples = []
+            
+            # Get the stego file name to be saved to from the line edit box
+            stegoFileName = 'Media/stego.wav'
+            
+            # Open the cover audio file
+            song = wave.open(i, mode='rb')
+            
+            # Extract the cover samples
+            coverSamples = fp.extractWaveSamples(song)
+                
+            # Read the secret message file
+            secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
+        
+            print("Cover file =", i)            
+            # Second method = Genetic Algorithm
+            # Get the string representation of the key in ASCII
+            keyString = "GA_testing"
+                
+            # Convert ASCII to binary 
+            binaryKey = fp.messageToBinary(keyString) 
+            binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
+            
+            
+            originalCoverSamples = deepcopy(coverSamples[0])
+              
+            for i in range(0, len(coverSamples[0])):
+                 coverSamples[0][i] = "{0:016b}".format(coverSamples[0][i])
+              
+            secretMessage = "".join(map(str,secretMessage))
+              
+            # Provide first audio channel samples and message samples to encode 
+            start_time = time.time()
+            stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), ".txt")
+            print((time.time() - start_time), "seconds to execute embedding algorithm")          
+            
+            # Extract secret message
+            secretMessage, fileType = GA.extractMessage(stegoSamples, binaryKey)
+            
+            # Convert the binary audio samples to decimal samples
+            for i in range(0, len(stegoSamples)):
+                stegoSamples[i] = int(stegoSamples[i], 2)
+              
+            # Get the characteristics of the stego file
+            print("Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples.")
+            print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
+            print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
+                
+            print("")  
+            song.close()
+            
+    if(doDWT_OBH_firstP == True):
+        
+        print("################# DWT Haar embedding library    ######################")
+        for i in coverFiles:
+            for j in range(0,6):  
+                  print("###################  OBH =", j, "###########################")
+                  
+                  stegoSamples = []
+                  
+                  # Get the stego file name to be saved to from the line edit box
+                  stegoFileName = 'Media/stego.wav'
+                  
+                  # Open the cover audio file
+                  song = wave.open(i, mode='rb')
+                  
+                  # Extract the cover samples
+                  coverSamples = fp.extractWaveSamples(song)
+                      
+                  # Read the secret message file
+                  secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
+              
+                  print("Cover file =", i)            
+                  
+                  originalCoverSamples = deepcopy(coverSamples[0])
+                  
+                  secretMessage = "".join(map(str,secretMessage))
+                  
+                  
+                  start_time = time.time()
+                  stegoSamples, samplesUsed = dwtL.dwtHaarEncodingLibrary(coverSamples[0], secretMessage, j, 2048)
+                  print((time.time() - start_time), "seconds to execute embedding algorithm")               
+                  # Get the characteristics of the stego file
+                  print("Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples.")
+                  print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
+                  print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
+                      
+                  print("")  
+                  song.close()    
+            
+    if (doDWT_OBH_Lib == True):        
+        print("################# DWT Haar embedding first principles  ###############")
+        for i in coverFiles:
+              for j in range(0,6):  
+                  print("###################  OBH =", j, "###########################")
+            
+                  stegoSamples = []
+                  
+                  # Get the stego file name to be saved to from the line edit box
+                  stegoFileName = 'Media/stego.wav'
+                  
+                  # Open the cover audio file
+                  song = wave.open(i, mode='rb')
+                  
+                  # Extract the cover samples
+                  coverSamples = fp.extractWaveSamples(song)
+                      
+                  # Read the secret message file
+                  secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
+              
+                  print("Cover file =", i)            
+                  
+                  originalCoverSamples = deepcopy(coverSamples[0])
+                  
+                  secretMessage = "".join(map(str,secretMessage))
+                  start_time = time.time()
+                  stegoSamples, samplesUsed = dwtFP.dwtHaarEncode(coverSamples[0], secretMessage, j, 2048, "txt")
+                  print((time.time() - start_time), "seconds to execute embedding algorithm")         
+                    
+                  # Get the characteristics of the stego file
+                  print("Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples.")
+                  print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
+                  print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
+                      
+                  print("")  
+                  song.close()        
+              
+              
+if doSingleTest == True:
+    
+    if (doDWT_OBH_firstP == True):
+        print("################# DWT haar algorithm encoding  #######################")
+    
+        stegoSamples = []
+          
         # Get the stego file name to be saved to from the line edit box
         stegoFileName = 'Media/stego.wav'
-        
+          
         # Open the cover audio file
-        song = wave.open(i, mode='rb')
-        
+        song = wave.open("Media/song.wav", mode='rb')
+          
         # Extract the cover samples
         coverSamples = fp.extractWaveSamples(song)
-        originalCoverSamples = deepcopy(coverSamples[0])
-        
+              
         # Read the secret message file
-        secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
-    
-        print("Cover file =", i)
-        
-        for j in range(1, 8):
-              print('##############  LSB embedding, with LSB =', j, "############")
-              print("Bits encoded =", len(secretMessage))
-              
-              start_time = time.time()
-              
-              # Provide first audio channel samples and message samples to encode 
-              LSB_encoding = LSB.LSB_encoding(coverSamples[0], secretMessage)
-              # Embed the message
-              LSB_encoding.encode(j)
-              print((time.time() - start_time), "seconds to execute embedding algorithm")         
-              stegoSamples = LSB_encoding.stegoSamples
-              samplesUsed = LSB_encoding.numberSamplesUsed
-              print("Samples used:", samplesUsed)
-              print("SNR =", RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed]))
-              print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
-
+        secretMessage = [random.randrange(0, 2) for i in range(int(len(coverSamples[0])))]
+          
+        originalCoverSamples = deepcopy(coverSamples[0])
+        print(len(originalCoverSamples))
+          
+        secretMessage = "".join(map(str,secretMessage))
+        start_time = time.time()
+        print("starting encoding")
+        stegoSamples, samplesUsed = dwtFP.dwtHaarEncode(coverSamples[0], secretMessage, 1, 1024, "txt")
+        print((time.time() - start_time), "seconds to execute embedding algorithm")         
+            
+        # Get the characteristics of the stego file
+        print("Embedded " + str(len(secretMessage)) + " bits into " + str(samplesUsed) + " samples.")
+        print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
+        print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
               
         print("")  
-        song.close()
-    
-    
-    print("################# Genetic algorithm encoding  ########################")
-    for i in coverFiles:
+        song.close()      
+          
+    if (doGA == True):  
+        print("################# Genetic algorithm encoding  ########################")
         stegoSamples = []
-        
+          
         # Get the stego file name to be saved to from the line edit box
         stegoFileName = 'Media/stego.wav'
-        
+            
         # Open the cover audio file
-        song = wave.open(i, mode='rb')
-        
+        song = wave.open("Media/song.wav", mode='rb')
+            
         # Extract the cover samples
         coverSamples = fp.extractWaveSamples(song)
-            
+                
         # Read the secret message file
         secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
-    
-        print("Cover file =", i)            
+          
         # Second method = Genetic Algorithm
         # Get the string representation of the key in ASCII
-        keyString = "GA_testing"
-            
+        keyString = "llllll"
+                
         # Convert ASCII to binary 
         binaryKey = fp.messageToBinary(keyString) 
         binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
-        
-        
+            
+            
         originalCoverSamples = deepcopy(coverSamples[0])
-          
+             
         for i in range(0, len(coverSamples[0])):
              coverSamples[0][i] = "{0:016b}".format(coverSamples[0][i])
-          
+              
         secretMessage = "".join(map(str,secretMessage))
-          
+              
         # Provide first audio channel samples and message samples to encode 
         start_time = time.time()
         stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), ".txt")
         print((time.time() - start_time), "seconds to execute embedding algorithm")          
-        
-        # Extract secret message
-        secretMessage, fileType = GA.extractMessage(stegoSamples, binaryKey)
-        
         # Convert the binary audio samples to decimal samples
         for i in range(0, len(stegoSamples)):
             stegoSamples[i] = int(stegoSamples[i], 2)
-          
+              
         # Get the characteristics of the stego file
         print("Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples.")
         print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
         print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
+                
+        print("")
+        song.close()
             
+    if (doDWT_encrypt == True):
+        
+        print("################# DWT encryption algorithm    ########################")
+        stegoSamples = []
+          
+        # Get the stego file name to be saved to from the line edit box
+        stegoFileName = 'Media/stego.wav'
+            
+        # Open the cover audio file
+        song = wave.open("Media/opera.wav", mode='rb')
+            
+        # Extract the cover samples
+        coverSamples = fp.extractWaveSamples(song)
+                
+        # Read the secret message file
+        secretMessage = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"*int(len(coverSamples[0])/(2*52))
+        print(len(secretMessage))
+                
+        originalCoverSamples = deepcopy(coverSamples[0])
+                   
+        # Provide first audio channel samples and message samples to encode 
+        start_time = time.time()
+        stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(coverSamples[0], secretMessage, 1024, ".txt")        
+       
+        print(samplesUsed, len(secretMessage))
+        
+        print((time.time() - start_time), "seconds to execute embedding algorithm")          
+              
+        # Get the characteristics of the stego file
+        print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
+        print("Capacity of " + str(RT.getCapacity(secretMessage*8, samplesUsed, song.getframerate())) + " kbps.")
+                
         print("")  
         song.close()
-        
-        
-    print("################# DWT Haar embedding library    ######################")
-    for i in coverFiles:
-        for j in range(0,6):  
-              print("###################  OBH =", j, "###########################")
-              
-              stegoSamples = []
-              
-              # Get the stego file name to be saved to from the line edit box
-              stegoFileName = 'Media/stego.wav'
-              
-              # Open the cover audio file
-              song = wave.open(i, mode='rb')
-              
-              # Extract the cover samples
-              coverSamples = fp.extractWaveSamples(song)
-                  
-              # Read the secret message file
-              secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
-          
-              print("Cover file =", i)            
-              
-              originalCoverSamples = deepcopy(coverSamples[0])
-              
-              secretMessage = "".join(map(str,secretMessage))
-              
-              
-              start_time = time.time()
-              stegoSamples, samplesUsed = dwtL.dwtHaarEncodingLibrary(coverSamples[0], secretMessage, j, 2048)
-              print((time.time() - start_time), "seconds to execute embedding algorithm")               
-              # Get the characteristics of the stego file
-              print("Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples.")
-              print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
-              print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
-                  
-              print("")  
-              song.close()    
-            
-    print("################# DWT Haar embedding first principles  ###############")
-    for i in coverFiles:
-          for j in range(0,6):  
-              print("###################  OBH =", j, "###########################")
-        
-              stegoSamples = []
-              
-              # Get the stego file name to be saved to from the line edit box
-              stegoFileName = 'Media/stego.wav'
-              
-              # Open the cover audio file
-              song = wave.open(i, mode='rb')
-              
-              # Extract the cover samples
-              coverSamples = fp.extractWaveSamples(song)
-                  
-              # Read the secret message file
-              secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
-          
-              print("Cover file =", i)            
-              
-              originalCoverSamples = deepcopy(coverSamples[0])
-              
-              secretMessage = "".join(map(str,secretMessage))
-              start_time = time.time()
-              stegoSamples, samplesUsed = dwtFP.dwtHaarEncode(coverSamples[0], secretMessage, j, 2048, "txt")
-              print((time.time() - start_time), "seconds to execute embedding algorithm")         
-                
-              # Get the characteristics of the stego file
-              print("Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples.")
-              print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
-              print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
-                  
-              print("")  
-              song.close()        
-              
-              
-if doSingleTest == True:
-      print("################# DWT haar algorithm encoding  #######################")
-
-      stegoSamples = []
-      
-      # Get the stego file name to be saved to from the line edit box
-      stegoFileName = 'Media/stego.wav'
-      
-      # Open the cover audio file
-      song = wave.open("Media/song.wav", mode='rb')
-      
-      # Extract the cover samples
-      coverSamples = fp.extractWaveSamples(song)
-          
-      # Read the secret message file
-      secretMessage = [random.randrange(0, 2) for i in range(int(len(coverSamples[0])))]
-       
-      originalCoverSamples = deepcopy(coverSamples[0])
-      print(len(originalCoverSamples))
-      
-      secretMessage = "".join(map(str,secretMessage))
-      start_time = time.time()
-      print("starting encoding")
-      stegoSamples, samplesUsed = dwtFP.dwtHaarEncode(coverSamples[0], secretMessage, 1, 1024, "txt")
-      print((time.time() - start_time), "seconds to execute embedding algorithm")         
-        
-      # Get the characteristics of the stego file
-      print("Embedded " + str(len(secretMessage)) + " bits into " + str(samplesUsed) + " samples.")
-      print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
-      print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
-          
-      print("")  
-      song.close()      
-      
-      
-      print("################# Genetic algorithm encoding  ########################")
-      stegoSamples = []
-        
-      # Get the stego file name to be saved to from the line edit box
-      stegoFileName = 'Media/stego.wav'
-        
-      # Open the cover audio file
-      song = wave.open("Media/song.wav", mode='rb')
-        
-      # Extract the cover samples
-      coverSamples = fp.extractWaveSamples(song)
-            
-      # Read the secret message file
-      secretMessage = [random.randrange(0, 2) for i in range(len(coverSamples[0]))]
-      
-      # Second method = Genetic Algorithm
-      # Get the string representation of the key in ASCII
-      keyString = "llllll"
-            
-      # Convert ASCII to binary 
-      binaryKey = fp.messageToBinary(keyString) 
-      binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
-        
-        
-      originalCoverSamples = deepcopy(coverSamples[0])
-          
-      for i in range(0, len(coverSamples[0])):
-           coverSamples[0][i] = "{0:016b}".format(coverSamples[0][i])
-          
-      secretMessage = "".join(map(str,secretMessage))
-          
-      # Provide first audio channel samples and message samples to encode 
-      start_time = time.time()
-      stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), ".txt")
-      print((time.time() - start_time), "seconds to execute embedding algorithm")          
-      # Convert the binary audio samples to decimal samples
-      for i in range(0, len(stegoSamples)):
-          stegoSamples[i] = int(stegoSamples[i], 2)
-          
-      # Get the characteristics of the stego file
-      print("Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples.")
-      print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
-      print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
-            
-      print("")  
-      song.close()
-        
-        
-        
-        
-        
-        
-        
-    

@@ -12,15 +12,17 @@ import fileprocessing as fp
 import matplotlib.pyplot as plt
 import dwtFirstPrinciples as firstP
 import dwtLibrary
+import dwtEncrypt
 
-testConvolution     = False
-testLevelOneDWT     = False
-testLevelsDWT       = False
-plotDiffLevelCoeff  = False
-plotUnderstanding   = False
-plotCorrectImplemnt = False
-firstPrinciplesImplement = True
-libraryImplement = False
+testConvolution          = False
+testLevelOneDWT          = False
+testLevelsDWT            = False
+plotDiffLevelCoeff       = False
+plotUnderstanding        = False
+plotCorrectImplemnt      = False
+firstPrinciplesImplement = False
+libraryImplement         = False
+encryptDWTDriver         = True
 
 def reconstruction_plot(yyy, **kwargs):
     """Plot signal vector on x [0,1] independently of amount of values it contains."""
@@ -377,5 +379,16 @@ if (libraryImplement == True):
       print("Writing to message file")
       fp.writeMessageBitsToFile(extractMessage, 'Media/dwtLibraryMessageExtract.jpeg')
       
+if (encryptDWTDriver == True):
+    myMessage = "Hello my name is Johan Gouws"
 
+    waveObj = wave.open('/home/johan/Desktop/Audio-Steganograpy/src/Media/opera.wav', 'rb')
+    
+    samples = fp.extractWaveSamples(waveObj)
+    waveObj.close()
+    
+    stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(samples[0], myMessage, 2048, ".txt")
+    
+    message, fileType = dwtEncrypt.dwtEncryptDecode(stegoSamples, 2048)
+    print(message)
       

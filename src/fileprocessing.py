@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
+import numpy as np
 import sys
 import struct
 import SignalsAndSlots
@@ -91,47 +92,6 @@ def getMessageBits(file_path):
     # Return integer list of samples
     return list(map(int, totalSamples))    
 
-# Takes a wave file and return an integer list of the combined samples as a 
-# single list. The function will also return the parameters of the wave file
-'''
-def getWaveSamples(file_path):
-    
-    fs, data = wavfile.read(file_path)
-    
-    samplesChannelOne = []
-    samplesChannelTwo = []
-    
-    for i in data:
-        if (len(data.shape) == 1):
-            samplesChannelOne.append(i)
-            
-        else:
-            samplesChannelOne.append(i[0])
-            samplesChannelTwo.append(i[1])
-            
-    for i in range(0, len(samplesChannelOne)):
-        if (samplesChannelOne[i] == -32768):       
-            samplesChannelOne[i] += 1
-            
-    for i in range(0, len(samplesChannelTwo)):
-        if (samplesChannelTwo[i] == -32768):       
-            samplesChannelTwo[i] += 1
-    
-    return samplesChannelOne, samplesChannelTwo
-
-
-# Writing two integer lists of samples to a wave audio file
-def writeWaveSamplesToFile(samplesOne, samplesTwo, rate, filePath):
-    arrOne = np.asarray(samplesOne)
-    arrTwo = np.asarray(samplesTwo)
-    
-    if (len(samplesTwo) == 0):
-        wavfile.write(filePath, rate, arrOne)
-        
-    else:
-        data  = np.vstack((arrOne, arrTwo)).T    
-        wavfile.write(filePath, rate, data)
-'''
 # Convert an eight bit string to list of eight integers
 def messageToBinary(message):
     return ''.join('{0:08b}'.format(ord(x), 'b') for x in message)
@@ -151,6 +111,8 @@ def writeMessageBitsToFile(totalMessageBits, file_path):
 
     file.close()
 
+
+
 ###############################################################################
 #               For reading, writing and extracting samples for wave files    #
 ###############################################################################
@@ -158,7 +120,7 @@ def writeMessageBitsToFile(totalMessageBits, file_path):
 # Function to return the samples of a wave audio file.
 # Returns two integer lists of samples for two channels
 # The second list will be empty if the wave file is mono
-
+# NB! This will only be used for the cover filie samples
 def extractWaveSamples(waveObject):
     samplesChannelOne = []
     samplesChannelTwo = []
@@ -211,28 +173,37 @@ def extractWaveMessage(waveObject):
         # Unpack the frame to integer value            
         data = struct.unpack(format, frame) 
         
+        # Convert to binary
+        binarySample = np.binary_repr(data[0], 16)
+        
         # First channel value added to channel one
-        samplesChannelOne.append(data[0])         
-       
+        samplesChannelOne.append(binarySample)
+      
     return samplesChannelOne, samplesChannelTwo
 
-def writeToWaveMessage(binString, file, parameters):
+def binaryToInt(binaryString):
+       
+    if (binaryString[0] == '1'):
+        return int(binaryString, 2)-(1<<16)
+    else:
+        return int(binaryString, 2)
+
+
+def writeWaveMessageToFile(binString, file):
       byteSamples = []
       samples = []
+      parameters = (1, 2, 8192, 73113, 'NONE', 'not compressed')
+            
       with wave.open(file, 'wb') as fd:
             fd.setparams(parameters)
-            fd.setnchannels(1)
-    
+   
             while (len(binString) % 16 != 0):
                   binString = binString[:-1]
            
             while (len(binString) > 0):
                   binSample = binString[0:16]
-                  decSample = int(binSample[1:], 2)
+                  decSample = binaryToInt(binSample)
                  
-                  if (binSample[0] == '1'):
-                        decSample = decSample * -1
-      
                   samples.append(decSample)
                   binString = binString[16:]
                   
@@ -243,11 +214,6 @@ def writeToWaveMessage(binString, file, parameters):
 
             
       fd.close()
-      
-      
-      
-      
-            
 
 # Prints the wave file parameters in the terminal
 def returnParameters(self):
@@ -278,3 +244,8 @@ def writeStegoToFile(fileName, parameters, samples):
 ###############################################################################
 ###############################################################################
 ###############################################################################
+    
+    
+
+    
+    

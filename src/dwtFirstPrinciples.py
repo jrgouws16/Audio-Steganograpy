@@ -88,7 +88,7 @@ def getSignal(approx, detail):
     detailSignal = np.asarray(detailSignal)
     
     # Add the results and return the result
-    returnList   = list(map(int, list(approxSignal + detailSignal)))
+    returnList   = list(map(float, list(approxSignal + detailSignal)))
     
     return returnList
     
@@ -112,7 +112,9 @@ def getLevelSignal(approx, detail):
         signal = getSignal(signal, detail[i])
        
     return signal
-       
+     
+# Process block at a time and returns a list of approximate coeff and detail
+# Coefficients in the form [[approximate[0], approximate[1]],[detail[0],detail[1]]]
 def getCoefficients(samples, blockLength):
     blocks = int(len(samples) / blockLength)
     
@@ -268,7 +270,7 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
       stegoSamples = []
       for i in range(0, len(coefficiets[1])):
           temp = getSignal(coefficiets[0][i], coefficiets[1][i])
-          temp = list(map(int, temp))
+          temp = list(map(float, temp))
           stegoSamples += temp
       
       for i in range(len(stegoSamples)):
@@ -322,6 +324,8 @@ def dwtHaarDecode(stegoSamples, OBH, blockLength):
                       elif (extractMessage[26:28] == '01'):
                           fileType = '.wav'
                       
+                      print("FileType decoded in dwt haar decoding is " + fileType)  
+                        
                   else:
                       if (len(extractMessage) >= extractedLength + 28 and foundMsgLength == True):
                           extractMessage = extractMessage[28:28 + extractedLength]

@@ -13,6 +13,7 @@ import sockets
 from copy import deepcopy
 import geneticAlgorithm as GA
 import dwtFirstPrinciples as DWT
+import dwtEncrypt as DWTcrypt
 import ResultsAndTesting as RT
 import wave
 import os
@@ -119,6 +120,8 @@ def threaded_client(conn, clientNum):
                 fileType = sockets.recv_one_message(conn)
                 fileType = fileType.decode()
                 
+                print(fileType)
+                
                 mainWindow.listWidget_log.addItem("Incomming message: " + str(addresses[connections.index(conn)][0]))
                 
                 if (fileType == ".wav"):
@@ -137,6 +140,7 @@ def threaded_client(conn, clientNum):
                     
                 # Receive the encoding method
                 method = sockets.recv_one_message(conn)
+                
                 mainWindow.listWidget_log.addItem("Encoding mode selected - " + method.decode() + ": " + str(addresses[connections.index(conn)][0]))
                 
                 
@@ -158,10 +162,22 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("Embedding stego: "+ str(addresses[connections.index(conn)][0]))
                     song = wave.open(str(clientNum) + ".wav", "rb")
                     coverSamples = fp.extractWaveSamples(song)
+
+                    secretMessage = ""
+                    if (fileType == ".wav"):
+                        
+                        messageObject = wave.open(str(clientNum) + "MSG" + fileType, "rb")
+    
+                        # Get the audio samples in integer form
+                        intSamples = fp.extractWaveMessage(messageObject)
+    
+                        # Convert to integer list of bits for embedding
+                        secretMessage = "".join(intSamples[0])
+                        secretMessage = list(map(int, list(secretMessage)))
                     
-                    # Extract the message bits from the message file
-                    secretMessage = fp.getMessageBits(str(clientNum) + "MSG" + fileType)
-                                    
+                    else:
+                        secretMessage = fp.getMessageBits(str(clientNum) + "MSG" + fileType)
+                    
                     # Convert ASCII to binary 
                     binaryKey = fp.messageToBinary(keyString.decode())
                     binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
@@ -240,10 +256,27 @@ def threaded_client(conn, clientNum):
                     song = wave.open(str(clientNum) + ".wav", "rb")
                     samplesOne, samplesTwo = fp.extractWaveSamples(song)
                     
-                    # Extract the message bits from the message file
-                    message = fp.getMessageBits(str(clientNum) + "MSG" + fileType)
+                    message = ""
+                    if (fileType == ".wav"):
+                        
+                        messageObject = wave.open(str(clientNum) + "MSG" + fileType, "rb")
+    
+                        # Get the audio samples in integer form
+                        intSamples = fp.extractWaveMessage(messageObject)
+    
+                        # Convert to integer list of bits for embedding
+                        message = "".join(intSamples[0])
+                        message = list(map(int, list(message)))
+                    
+                    else:
+                        message = fp.getMessageBits(str(clientNum) + "MSG" + fileType)
+                    
+                    
                     message = "".join(list(map(str, message)))
       
+        
+        
+        
                     stegoSamples, samplesUsed = DWT.dwtHaarEncode(samplesOne, message, OBH, 2048, fileType)
                       
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
@@ -342,14 +375,17 @@ def threaded_client(conn, clientNum):
                     
                     mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
     
-                    # Write the message bits to a file and close the steganography file
-                    fp.writeMessageBitsToFile(extractMessage, str(clientNum) + "msg" + ".txt")
+                    if (fileType == ".wav"):
+                        fp.writeWaveMessageToFile(extractMessage, str(clientNum) + "msg" + fileType)
                     
+                    else:
+                        fp.writeMessageBitsToFile(extractMessage, str(clientNum) + "msg" + fileType)
+                        
                     mainWindow.listWidget_log.addItem("Writing message completed " + str(addresses[connections.index(conn)][0]))
                     
                     mainWindow.listWidget_log.addItem("Sending message to client: " + str(addresses[connections.index(conn)][0]))
                     
-                    with open(str(clientNum) + "msg" + ".txt", "rb") as f:
+                    with open(str(clientNum) + "msg" + fileType, "rb") as f:
                         data = f.read()
                         sockets.send_one_message(conn, "RECFILE")
                         sockets.send_one_file(conn, data)
@@ -381,9 +417,13 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("Extracting completed: "+ str(addresses[connections.index(conn)][0]))
     
                     # Write the message bits to a file and close the steganography file
-    
                     mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
-                    fp.writeMessageBitsToFile(secretMessage, str(clientNum) + "msg" + fileType)
+                    if (fileType == ".wav"):
+                        fp.writeWaveMessageToFile(secretMessage, str(clientNum) + "msg" + fileType)
+                    
+                    else:
+                        fp.writeMessageBitsToFile(secretMessage, str(clientNum) + "msg" + fileType)
+                        
                     mainWindow.listWidget_log.addItem("Writing message completed " + str(addresses[connections.index(conn)][0]))
                     
                     mainWindow.listWidget_log.addItem("Sending message to client: " + str(addresses[connections.index(conn)][0]))
