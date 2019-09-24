@@ -1,12 +1,8 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep 12 11:55:47 2019
+Created on Tue Sep 24 21:51:34 2019
 
-@author: project
+@author: johan
 """
 
-a = 1.92568
-b = int(a)
-a = a - int(a)
-
-print(a, b)

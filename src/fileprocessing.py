@@ -181,6 +181,7 @@ def extractWaveMessage(waveObject):
       
     return samplesChannelOne, samplesChannelTwo
 
+# Inverse of numpy binary_representation, but only for 16 bit samples
 def binaryToInt(binaryString):
        
     if (binaryString[0] == '1'):
