@@ -315,15 +315,12 @@ if doSingleTest == True:
                 
         # Read the secret message file
         secretMessage = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"*int(len(coverSamples[0])/(2*52))
-        print(len(secretMessage))
-                
+                        
         originalCoverSamples = deepcopy(coverSamples[0])
-                   
+        
         # Provide first audio channel samples and message samples to encode 
         start_time = time.time()
         stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(coverSamples[0], secretMessage, 1024, ".txt")        
-       
-        print(samplesUsed, len(secretMessage))
         
         print((time.time() - start_time), "seconds to execute embedding algorithm")          
               

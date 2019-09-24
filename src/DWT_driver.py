@@ -13,6 +13,17 @@ import matplotlib.pyplot as plt
 import dwtFirstPrinciples as firstP
 import dwtLibrary
 import dwtEncrypt
+import scipy.io.wavfile as scWave
+from copy import deepcopy
+import ResultsAndTesting as RT
+
+
+
+def school_round(a_in,n_in):
+    if (a_in * 10 ** (n_in + 1)) % 10 == 5:
+        return round(a_in + 1 / 10 ** (n_in + 1), n_in)
+    else:
+        return round(a_in, n_in)
 
 testConvolution          = False
 testLevelOneDWT          = False
@@ -380,15 +391,23 @@ if (libraryImplement == True):
       fp.writeMessageBitsToFile(extractMessage, 'Media/dwtLibraryMessageExtract.jpeg')
       
 if (encryptDWTDriver == True):
-    myMessage = "Hello my name is Johan Gouws"
+    myMessage = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    rate, samples = scWave.read('/home/johan/Desktop/Audio-Steganograpy/src/Media/opera.wav')
+    song = wave.open('/home/johan/Desktop/Audio-Steganograpy/src/Media/opera.wav', 'rb')
+    originalCoverSamples = deepcopy(samples)
 
-    waveObj = wave.open('/home/johan/Desktop/Audio-Steganograpy/src/Media/opera.wav', 'rb')
+    stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 2048, ".txt")
     
-    samples = fp.extractWaveSamples(waveObj)
-    waveObj.close()
+    stegoSamples = np.asarray(stegoSamples)
+    stegoSamples = stegoSamples.astype(np.float32, order='C') / 32768.0
+      
+    scWave.write("papagaai.wav", rate, stegoSamples)
+
+    rate, extractStegoSamples = scWave.read('papagaai.wav')
+    extractStegoSamples = extractStegoSamples.astype(np.float64, order='C') * 32768.0
     
-    stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(samples[0], myMessage, 2048, ".txt")
-    
-    message, fileType = dwtEncrypt.dwtEncryptDecode(stegoSamples, 2048)
-    print(message)
+    boodskap, fileType = dwtEncrypt.dwtEncryptDecode(extractStegoSamples, 2048)
+    print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], extractStegoSamples[0:samplesUsed] ), 2)))
+
+    print(boodskap, fileType)
       

@@ -124,7 +124,7 @@ def encode():
             raise Exception('The message file is invalid. Only .txt and .wav files allowed.')
             
         # Error checking if a valid method was selected
-        if (not (mainWindow.radioButton_DWT.isChecked() or mainWindow.radioButton_GA.isChecked())):
+        if (not (mainWindow.radioButton_DWT.isChecked() or mainWindow.radioButton_GA.isChecked() or mainWindow.radioButton_dwt_encoding.isChecked())):
             raise Exception('Select an encoding method.')
         
         # Check if the order of bits or key was supplied
@@ -150,13 +150,14 @@ def encode():
         elif (messageFileName.split('.')[-1] == "txt"):
             sockets.send_one_message(server[-1], ".txt")
         
+        # Send the message file
         with open(messageFileName, "rb") as f:
             data = f.read()
             sockets.send_one_file(server[0], data)
             f.close()
     
         if(mainWindow.radioButton_DWT.isChecked()):
-            # Send that Genetic algorithm was chosen
+            # Send that DWT method was chosen
             sockets.send_one_message(server[-1], "DWT")
                     
             # Get the order of bits to hold in the coefficients
@@ -176,6 +177,12 @@ def encode():
             
             # Send the secret key
             sockets.send_one_message(server[-1], keyString)
+            
+        # Third method = DWT encoding method for text
+        elif(mainWindow.radioButton_dwt_encoding.isChecked()):
+            # Send that Genetic algorithm was chosen
+            sockets.send_one_message(server[-1], "DWT_encode")
+            
         
         # If no encoding algorithm is selected, throw an erro message 
         else:
@@ -242,7 +249,7 @@ def decode():
             raise Exception('The stego file is invalid. Only wave files allowed.')
             
         # Error checking if a valid method was selected
-        if (not (mainWindow.radioButton_DWT_3.isChecked() or mainWindow.radioButton_GA_3.isChecked())):
+        if (not (mainWindow.radioButton_DWT_3.isChecked() or mainWindow.radioButton_GA_3.isChecked() or mainWindow.radioButton_dwt_decoding.isChecked())):
             raise Exception('Select a decoding method.')
         
         # Check if the order of bits or key was supplied
@@ -279,6 +286,10 @@ def decode():
             # Send the key
             keyString = mainWindow.lineEdit_GA_key_3.text()
             sockets.send_one_message(server[-1], keyString) 
+            
+        elif (mainWindow.radioButton_dwt_decoding.isChecked()):
+            sockets.send_one_message(server[-1], "DWT_encode") 
+            
             
     except Exception as error:
         errorMsg.title = "Invalid user input."

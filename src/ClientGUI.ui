@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>697</width>
-    <height>431</height>
+    <width>736</width>
+    <height>519</height>
    </rect>
   </property>
   <property name="palette">
@@ -877,7 +877,7 @@
            <enum>QTabWidget::Rounded</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1093,6 +1093,13 @@
                </layout>
               </item>
               <item>
+               <widget class="QRadioButton" name="radioButton_dwt_encoding">
+                <property name="text">
+                 <string>Haar DWT Encoding</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QPushButton" name="pushButton_browse_key">
                 <property name="text">
                  <string>Browse for key file</string>
@@ -1274,6 +1281,13 @@
                       </item>
                      </layout>
                     </item>
+                    <item>
+                     <widget class="QRadioButton" name="radioButton_dwt_decoding">
+                      <property name="text">
+                       <string>Haar DWT Encoding</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </item>
                   <item>
@@ -1348,7 +1362,7 @@
               <x>0</x>
               <y>0</y>
               <width>501</width>
-              <height>273</height>
+              <height>325</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1644,8 +1658,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>697</width>
-     <height>21</height>
+     <width>736</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -1660,12 +1674,12 @@
    <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>275</x>
-     <y>192</y>
+     <x>323</x>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
-     <x>308</x>
-     <y>192</y>
+     <x>629</x>
+     <y>264</y>
     </hint>
    </hints>
   </connection>
@@ -1676,12 +1690,12 @@
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>193</y>
+     <x>323</x>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
-     <x>325</x>
-     <y>221</y>
+     <x>665</x>
+     <y>300</y>
     </hint>
    </hints>
   </connection>
@@ -1692,12 +1706,12 @@
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>253</x>
-     <y>223</y>
+     <x>342</x>
+     <y>296</y>
     </hint>
     <hint type="destinationlabel">
-     <x>330</x>
-     <y>200</y>
+     <x>651</x>
+     <y>264</y>
     </hint>
    </hints>
   </connection>
@@ -1708,12 +1722,12 @@
    <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>228</x>
-     <y>216</y>
+     <x>342</x>
+     <y>296</y>
     </hint>
     <hint type="destinationlabel">
-     <x>316</x>
-     <y>227</y>
+     <x>656</x>
+     <y>300</y>
     </hint>
    </hints>
   </connection>
@@ -1724,75 +1738,11 @@
    <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>301</x>
-     <y>202</y>
+     <x>353</x>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
-     <x>316</x>
-     <y>202</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_DWT</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_GA_key</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>242</x>
-     <y>202</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>327</x>
-     <y>234</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_OBH</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>296</x>
-     <y>228</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>327</x>
-     <y>208</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_GA_key</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>237</x>
-     <y>228</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>335</x>
-     <y>241</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA</sender>
-   <signal>clicked()</signal>
-   <receiver>pushButton_browse_key</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>216</x>
-     <y>236</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>216</x>
+     <x>667</x>
      <y>263</y>
     </hint>
    </hints>
@@ -1800,16 +1750,112 @@
   <connection>
    <sender>radioButton_DWT</sender>
    <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>353</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>679</x>
+     <y>300</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>354</x>
+     <y>296</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>678</x>
+     <y>263</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>354</x>
+     <y>296</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>687</x>
+     <y>300</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>pushButton_browse_key</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>354</x>
+     <y>296</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>409</x>
+     <y>362</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT</sender>
+   <signal>clicked()</signal>
    <receiver>pushButton_browse_key</receiver>
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>203</x>
-     <y>205</y>
+     <x>353</x>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
-     <x>207</x>
-     <y>261</y>
+     <x>400</x>
+     <y>362</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_dwt_encoding</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>448</x>
+     <y>309</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>458</x>
+     <y>242</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_dwt_encoding</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>503</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>504</x>
+     <y>295</y>
     </hint>
    </hints>
   </connection>
