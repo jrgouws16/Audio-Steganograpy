@@ -111,7 +111,20 @@ def writeMessageBitsToFile(totalMessageBits, file_path):
 
     file.close()
 
-
+def binaryStringToASCII(binaryString):
+    
+    ASCII = ""
+    
+    while (len(binaryString) % 8 != 0):
+        binaryString = list(binaryString)
+        binaryString = binaryString[1:]
+        binaryString = "".join(binaryString)
+        
+    while (len(binaryString) > 0):
+        ASCII += chr(int(binaryString[0:8], 2))
+        binaryString = binaryString[8:]
+        
+    return ASCII    
 
 ###############################################################################
 #               For reading, writing and extracting samples for wave files    #
