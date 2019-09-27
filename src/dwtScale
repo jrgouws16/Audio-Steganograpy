@@ -12,6 +12,7 @@ import fileprocessing as fp
 import ResultsAndTesting as RT
 from copy import deepcopy
 import scipy.io.wavfile as scWave
+import wave
 
 # Inverse of the binary_representation function of numpy
 def binaryToInt(binaryString):
@@ -30,7 +31,7 @@ def binaryToInt(binaryString):
 # Returns a list of integer stego file samples
 def dwtScaleEncode(coverSamples, message, messageType, LSBs):
       samplesUsed = 0
-      
+      total = []
       originalCoeffs = []
       newCoeffs      = []
       
@@ -44,7 +45,7 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
       numBlocks     = int(len(coverSamples)/512) 
       doBreak       = False  
       blockNumber   = 0     
-      
+            
       # Get the type of message
       # 0 is a textmessage and 1 is a wave message
       typeMessage = ""
@@ -63,8 +64,8 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
       #print("Message to be embedded", message, "\n\n")
       
       for blockNumber in range(0, numBlocks):
-      
           # Reconstruct the coefficients into 32 subbands of 16 coeff each
+          #print(blockNumber, len(message))
           subbandCoeff = []
       
           # Get the approximate coefficients and detail coefficients of the signal
@@ -77,71 +78,83 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
           # Scale each subband by the maximum value inside the subband
           for i in range(0, len(subbandCoeff)):
               scalingValue = max(subbandCoeff[i])
-              scalingValue = 1
+              scalingValue = 100
               
               for j in range(0, len(subbandCoeff[i])):
                   samplesUsed += 1
+                  #print(subbandCoeff[i][j])
                   #print("Before scaling:", subbandCoeff[i][j])
+                  #print(subbandCoeff[i][j], end = " ")
+                  
                   subbandCoeff[i][j] = subbandCoeff[i][j] * scalingValue  
                   #print("After scaling:", subbandCoeff[i][j])
                   intValue = int(subbandCoeff[i][j])
                   originalCoeffs.append(intValue)
                   fraction = subbandCoeff[i][j] - intValue
                   
-                  binaryWidth = 10
+                  binaryWidth = 25
                   '''
                   if (intValue == 0):
-                      binaryWidth = 3
+                      binaryWidth = 2
                       
                   else:
                       binaryWidth = int(np.ceil(np.log2(np.abs(intValue)) + 1))
                   '''
                   binaryValue = np.binary_repr(intValue, binaryWidth)
+                  #print(binaryValue)
                   binaryValue = list(binaryValue)
                   
                   #print("Before coeff:", intValue, "".join(binaryValue))
-                  
-                  # If the coefficient does not have the number of LSBs required to be replaced, replace available bits
-                  if (len(binaryValue) - 3 < LSBs):
-                      #print("Not enough")
-                      for k in range(0, len(binaryValue) - 3):
-                          binaryValue[k+3] = message[0]
-                          tempMesssss += message[0]
-                          message = message[1:]
+                  if (len(binaryValue) - 3 > 0):
+                      # If the coefficient does not have the number of LSBs required to be replaced, replace available bits
+                      if (len(binaryValue) - 3 < LSBs):
+                          #print("Not enough")
+                          for k in range(0, len(binaryValue) - 3):
+                              binaryValue[k+3] = message[0]
+                              tempMesssss += message[0]
+                              message = message[1:]
+                              
+                              if (len(message) == 0):
+                                  doBreak = True
+                                  break
                           
-                          if (len(message) == 0):
-                              doBreak = True
-                              break
-                        
-                  # If the coefficient has the number of LSBs to replace, replace all the LSBs required
-                  else:
-                      #print("Enough")
-                      for k in range(len(binaryValue) - LSBs - 3, len(binaryValue) - 3): 
-                          
-                          binaryValue[k] = message[0]
-                          tempMesssss += message[0]
-                          message = message[1:]
-                          
-                          if (len(message) == 0):
-                              doBreak = True
-                              break
+                            
+                      # If the coefficient has the number of LSBs to replace, replace all the LSBs required
+                      else:
+                          #print("Enough")
+                          for k in range(len(binaryValue) - LSBs - 3, len(binaryValue) - 3): 
+                              
+                              binaryValue[k] = message[0]
+                              tempMesssss += message[0]
+                              message = message[1:]
+                              
+                              if (len(message) == 0):
+                                  doBreak = True
+                                  break
                   
-                  if (binaryValue[-1] == '1' and binaryValue[-2] == '1' and binaryValue[-3] == '1'):
-                      binaryValue[-1] = '1'
-                      binaryValue[-2] = '0'
-                      binaryValue[-3] = '0'
-                  
-                  if (binaryValue[-1] == '0' and binaryValue[-2] == '0' and binaryValue[-3] == '0'):
-                      binaryValue[-1] = '0'
-                      binaryValue[-2] = '1'
-                      binaryValue[-3] = '1'  
+                  if (len(binaryValue) > 3):  
+                      if (binaryValue[-1] == '1' and binaryValue[-2] == '1' and binaryValue[-3] == '1'):
+                          binaryValue[-1] = '1'
+                          binaryValue[-2] = '0'
+                          binaryValue[-3] = '0'
+                      
+                      if (binaryValue[-1] == '0' and binaryValue[-2] == '0' and binaryValue[-3] == '0'):
+                          binaryValue[-1] = '1'
+                          binaryValue[-2] = '0'
+                          binaryValue[-3] = '0'  
                     
                   binaryValue = "".join(binaryValue)          
-                  #print("After coeff :", binaryValue, tempMesssss)
+                  
+                  #total.append(binaryValue)
+                  #print(binaryValue)
+                  #print(tempMesssss)
+                  #print(message)
 
                   if (scalingValue != 0):
                       newCoeffs.append(binaryToInt(binaryValue))
                       subbandCoeff[i][j] = (binaryToInt(binaryValue) + fraction)/scalingValue
+                      total.append(subbandCoeff[i][j])
+
                       #print("Embedded", tempMesssss, "Final coeff:", subbandCoeff[i][j])
                       
                       
@@ -178,10 +191,12 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
           diffssss.append(np.abs(originalCoeffs[i] - newCoeffs[i]))
         
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
-      #print("End of encoding algorithm\n\n\n")
-      return stegoSamples + unaltered, samplesUsed
+      print("End of encoding algorithm\n\n\n")
+      
+      return stegoSamples + unaltered, samplesUsed, total
 
 def dwtScaleDecode(stegoSamples, LSBs):
+      total = []
       message = ""
       stegoSamples = list(stegoSamples)
       
@@ -193,7 +208,7 @@ def dwtScaleDecode(stegoSamples, LSBs):
       typeMessage   = "" 
       
       for blockNumber in range(0, numBlocks):
-      
+          
           # Reconstruct the coefficients into 32 subbands of 16 coeff each
           subbandCoeff = []
       
@@ -207,15 +222,17 @@ def dwtScaleDecode(stegoSamples, LSBs):
           # Scale each subband by the maximum value inside the subband
           for i in range(0, len(subbandCoeff)):
               scalingValue = max(subbandCoeff[i])
-              scalingValue = 1
+              scalingValue = 100
               
               for j in range(0, len(subbandCoeff[i])):
                   
                   #print(subbandCoeff[i][j])
+                  #print(subbandCoeff[i][j], end = " ")
+                  total.append(subbandCoeff[i][j])
                   subbandCoeff[i][j] = subbandCoeff[i][j] * scalingValue  
                   intValue = int(subbandCoeff[i][j])                  
                   
-                  binaryWidth = 10
+                  binaryWidth = 25
                   
                   '''
                   if (intValue == 0):
@@ -226,49 +243,52 @@ def dwtScaleDecode(stegoSamples, LSBs):
                   '''    
                   binaryValue = np.binary_repr(intValue, binaryWidth)
                   #print(binaryValue)
+                  #total.append(binaryValue)
                   binaryValue = list(binaryValue)
                   
                   # If the coefficient does not have the number of LSBs required to be replaced, replace available bits
-                  if (len(binaryValue) - 3 < LSBs):
-                      
-                      
-                      for k in range(0, len(binaryValue) -3):
+                  if (len(binaryValue) - 3 > 0):
+                      if (len(binaryValue) - 3 < LSBs):
                           
-                          message += binaryValue[k+3] 
                           
-                          if (len(message) == 27):
-                              messageLength = int(message[0:26],2)
+                          for k in range(0, len(binaryValue) -3):
                               
-                              if (message[26] == 0):
-                                  typeMessage = ".txt"
+                              message += binaryValue[k+3] 
+                              
+                              if (len(message) == 27):
+                                  messageLength = int(message[0:26],2)
+                                  print(messageLength)
                                   
-                              else:
-                                  typeMessage = ".wav"
-                                  
-                          if (len(message) == messageLength + 27):
-                              #print(message)
-                              doBreak = True
-                              break
-
-                        
-                  # If the coefficient has the number of LSBs to replace, replace all the LSBs required
-                  else:
-                      for k in range(len(binaryValue) - LSBs - 3, len(binaryValue) - 3):        
-                          message += binaryValue[k]
-                          
-                          if (len(message) == 27):
-                              messageLength = int(message[0:26],2)
-                                                            
-                              if (message[26] == 0):
-                                  typeMessage = ".txt"
-                                  
-                              else:
-                                  typeMessage = ".wav"
-                                  
-                          if (len(message) == messageLength + 27):
-                              #print(message)
-                              doBreak = True
-                              break
+                                  if (message[26] == 0):
+                                      typeMessage = ".txt"
+                                      
+                                  else:
+                                      typeMessage = ".wav"
+                                      
+                              if (len(message) == messageLength + 27):
+                                  #print(message)
+                                  doBreak = True
+                                  break
+    
+                            
+                      # If the coefficient has the number of LSBs to replace, replace all the LSBs required
+                      else:
+                          for k in range(len(binaryValue) - LSBs - 3, len(binaryValue) - 3):        
+                              message += binaryValue[k]
+                              
+                              if (len(message) == 27):
+                                  messageLength = int(message[0:26],2)
+                                                                
+                                  if (message[26] == 0):
+                                      typeMessage = ".txt"
+                                      
+                                  else:
+                                      typeMessage = ".wav"
+                                      
+                              if (len(message) == messageLength + 27):
+                                  #print(message)
+                                  doBreak = True
+                                  break
                                   
                   binaryValue = "".join(binaryValue)          
 
@@ -286,29 +306,33 @@ def dwtScaleDecode(stegoSamples, LSBs):
               break
       
       #print(message[-8:])  
-      return fp.binaryStringToASCII(message[27:]), typeMessage  
+      return fp.binaryStringToASCII(message[27:]), typeMessage, total  
 
 
-binaryMessage = fp.messageToBinary("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\ncccccccccccccccccccccccccccccccccccccccccccccccccccccc\ndddddddddddddddddddddddddddddddddddddddddddddddddddd\neeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\nfffffffffffffffffffffffffffffffffff\nggggggggggggggggggggggggggggggggggggg\nhhhhhhhhhhhhhhhhhhhhhhhhhhhhh\niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii\njjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj\nkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\nllllllllllllllllllllllllllllllll\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn\nooooooooooooooooooooooooooooooooooooooo\npppppppppppppppppppppppppppppppppppppppp\nqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nrrrrrrrrrrrrrrrrrrrrrrrrrrrr\nssssssssssssssssssssssssssssssssssssss\ntttttttttttttttttttttttttttttttttttttt\nuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\nwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
-rate, samples = scWave.read('/home/johan/Desktop/Audio-Steganograpy/src/Media/44100hz.wav')
-tempSamples = []
 
-for i in range(0, len(samples)):
-    tempSamples.append(samples[i][0])
-    
-samples = tempSamples
+binaryMessage = fp.messageToBinary("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"*100)
+rate, samples = scWave.read('/home/johan/Desktop/Audio-Steganograpy/src/Media/song.wav')
+
+
+
+#tempSamples = []
+#for i in range(0, len(samples)):
+#    tempSamples.append(samples[i][0])
+#samples = tempSamples
 originalSamples = deepcopy(samples)
 
-stegoSamples, used = dwtScaleEncode(samples, binaryMessage, ".txt", 2)
-    
+stegoSamples, used, sequence1 = dwtScaleEncode(samples, binaryMessage, ".txt", 4)
+
 stegoSamples = np.asarray(stegoSamples)
 stegoSamples = stegoSamples.astype(np.float32, order='C') / 32768.0
 scWave.write('/home/johan/Desktop/Audio-Steganograpy/src/Media/testing123.wav', rate, stegoSamples)
 rate, stegoSamples = scWave.read('/home/johan/Desktop/Audio-Steganograpy/src/Media/testing123.wav')
 stegoSamples = stegoSamples.astype(np.float64, order='C') * 32768.0
 
-message,typeMessage = dwtScaleDecode(list(stegoSamples), 2)
+message,typeMessage, sequence2 = dwtScaleDecode(list(stegoSamples), 4)
 print("SNR of " + str(round(RT.getSNR(originalSamples[0:used], stegoSamples[0:used] ), 2)))
 print(RT.getCapacity(binaryMessage, used, rate), "kbps")
 print(message, used)
 
+#for i in range(0, len(sequence1)):
+#    print(sequence1, sequence2)

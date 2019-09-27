@@ -33,6 +33,9 @@ def getSNR(originalSamples, embeddedSamples):
     for i in range(0, len(originalSamples)):
         difference += (originalSamples[i] - embeddedSamples[i])**2 
     
+    print("The difference is thus",difference, "and the total original samples is", totalOriginal)
+    
+    
     SNR = 10*np.log10(totalOriginal/difference)
     
     return SNR
