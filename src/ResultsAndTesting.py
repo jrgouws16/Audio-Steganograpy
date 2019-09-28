@@ -4,6 +4,7 @@ Created on Tue Aug 13 09:17:16 2019
 
 @author: project
 """
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 import wave
@@ -26,16 +27,12 @@ def plotAmpDifference(originalSamples, stegoSamples):
 # Do not include samples where not message bits were hidden within
 def getSNR(originalSamples, embeddedSamples):
     
-    
-    totalOriginal = sum(originalSamples)**2
+    totalOriginal = math.pow(sum(originalSamples), 2)
     difference = 0
     
     for i in range(0, len(originalSamples)):
         difference += (originalSamples[i] - embeddedSamples[i])**2 
-    
-    print("The difference is thus",difference, "and the total original samples is", totalOriginal)
-    
-    
+        
     SNR = 10*np.log10(totalOriginal/difference)
     
     return SNR

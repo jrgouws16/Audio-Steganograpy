@@ -16,7 +16,7 @@ import dwtEncrypt
 import scipy.io.wavfile as scWave
 from copy import deepcopy
 import ResultsAndTesting as RT
-
+import dwtScale 
 
 
 def school_round(a_in,n_in):
@@ -33,8 +33,8 @@ plotUnderstanding        = False
 plotCorrectImplemnt      = False
 firstPrinciplesImplement = False
 libraryImplement         = False
-encryptDWTDriver         = True
-
+encryptDWTDriver         = False
+scaleDWTDriver           = True
 def reconstruction_plot(yyy, **kwargs):
     """Plot signal vector on x [0,1] independently of amount of values it contains."""
     ym = np.median(yyy)
@@ -411,3 +411,28 @@ if (encryptDWTDriver == True):
 
     print(boodskap, fileType)
       
+if (scaleDWTDriver == True):
+      binaryMessage = fp.messageToBinary("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"*500)
+      rate, samples = scWave.read('Media/44100HZ.wav')
+      
+      tempSamples = []
+      for i in range(0, len(samples)):
+          tempSamples.append(samples[i][0])
+      samples = tempSamples
+      
+      originalSamples = deepcopy(samples)
+      
+      stegoSamples, used, sequence1 = dwtScale.dwtScaleEncode(samples, binaryMessage, ".txt", 8)
+      
+      stegoSamples = np.asarray(stegoSamples)
+      stegoSamples = stegoSamples.astype(np.float32, order='C') / 32768.0
+      scWave.write('Media/testing123.wav', rate, stegoSamples)
+      rate, stegoSamples = scWave.read('Media/testing123.wav')
+      stegoSamples = stegoSamples.astype(np.float64, order='C') * 32768.0
+      
+      message,typeMessage, sequence2 = dwtScale.dwtScaleDecode(list(stegoSamples), 8)
+      
+      print(message, used)
+      
+      print(RT.getCapacity(binaryMessage, used, rate)*44100/44100, "kbps")
+      print("SNR of " + str(round(RT.getSNR(originalSamples[0:used], stegoSamples[0:used] ), 2)))
