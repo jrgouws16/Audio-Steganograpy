@@ -36,7 +36,7 @@ def connectToServer():
         HOST = mainWindow.lineEdit_server_ip.text()
         PORT = int(mainWindow.lineEdit_server_port.text())
         
-        s = socket.socket(socket.AF_INET,   socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         try:
             s.connect((HOST, PORT))

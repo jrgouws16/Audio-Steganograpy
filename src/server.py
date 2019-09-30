@@ -12,7 +12,7 @@ import fileprocessing as fp
 import sockets
 from copy import deepcopy
 import geneticAlgorithm as GA
-import dwtFirstPrinciples as DWT
+import dwtOBH as dwtOBH
 import dwtEncrypt as DWTcrypt
 import ResultsAndTesting as RT
 import wave
@@ -29,7 +29,7 @@ clientsConnected = 0
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Function for encoding using the standard LSB encoding algorithm
-def GA_encoding(coverSamples, secretMessage, key, songObj, fileType):
+def GA_encoding(coverSamples, secretMessage, key, frameRate, fileType):
         # Deepcopy for calculating the SNR
         originalCoverSamples = deepcopy(coverSamples[0])
 
@@ -40,16 +40,22 @@ def GA_encoding(coverSamples, secretMessage, key, songObj, fileType):
     
         # Provide first audio channel samples and message samples to encode 
         stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], key, "".join(map(str, secretMessage)), fileType)
-             
+        
         # Convert the binary audio samples to decimal samples
         for i in range(0, len(stegoSamples)):
             stegoSamples[i] = int(stegoSamples[i], 2)
+        
+            if (stegoSamples[i] < -32768):
+                stegoSamples[i] = -32768
             
+            if (stegoSamples[i] > 32767):
+                stegoSamples[i] = 32767
+        
+        
+        
         # Get the characteristics of the stego file
         infoMessage = "Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples."
         infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
-        
-        frameRate = songObj.getframerate() 
         infoMessage += ".\nCapacity of " + str(RT.getCapacity(secretMessage, samplesUsed, frameRate)) + " kbps."       
             
         # Show the results of the stego quality of the stego file
@@ -60,13 +66,21 @@ def GA_encoding(coverSamples, secretMessage, key, songObj, fileType):
 # Function to extract the message from the stego file making use of 
 # Genetic Algorithm
 def GA_decoding(stegoSamples, key):
-   
+    
+    
+    
     # Convert integer samples to binary samples
-    for i in range(0, len(stegoSamples[0])):
-        stegoSamples[0][i] = "{0:016b}".format(stegoSamples[0][i])
+    for i in range(0, len(stegoSamples)):
+        if (stegoSamples[i] < -32768):
+            print("wat")
+        
+        if (stegoSamples[i] > 32767):
+            print("se gat")
+                
+        stegoSamples[i] = "{0:016b}".format(int(stegoSamples[i]))
         
     # Extract secret message
-    secretMessage, fileType = GA.extractMessage(stegoSamples[0], key)
+    secretMessage, fileType = GA.extractMessage(stegoSamples, key)
         
     return secretMessage, fileType
    
@@ -99,7 +113,7 @@ def threaded_client(conn, clientNum):
                     song = wave.open(str(clientNum) + "Capacity" + ".wav", "rb")
                     samplesOne, samplesTwo = fp.extractWaveSamples(song)
                     
-                    capacity = DWT.dwtHaarCoverCapacity(samplesOne, OBH, 2048)
+                    capacity = dwtOBH.dwtHaarCoverCapacity(samplesOne, OBH, 2048)
                     sockets.send_one_message(conn, "Capacity")
                     sockets.send_one_message(conn, str(capacity))
 
@@ -160,16 +174,14 @@ def threaded_client(conn, clientNum):
                                     
                     # Extract the cover samples from the cover audio file
                     mainWindow.listWidget_log.addItem("Embedding stego: "+ str(addresses[connections.index(conn)][0]))
-                    song = wave.open(str(clientNum) + ".wav", "rb")
-                    coverSamples = fp.extractWaveSamples(song)
+                    coverSamplesOne, coverSamplesTwo, rate = fp.getWaveSamples(str(clientNum) + ".wav")
+                    coverSamples = [coverSamplesOne, coverSamplesTwo]
 
                     secretMessage = ""
                     if (fileType == ".wav"):
-                        
-                        messageObject = wave.open(str(clientNum) + "MSG" + fileType, "rb")
-    
-                        # Get the audio samples in integer form
-                        intSamples = fp.extractWaveMessage(messageObject)
+     
+                        # Get the audio samples in integer form converted to binary
+                        intSamples = fp.extractWaveMessage(str(clientNum) + "MSG" + fileType)
     
                         # Convert to integer list of bits for embedding
                         secretMessage = "".join(intSamples[0])
@@ -182,12 +194,13 @@ def threaded_client(conn, clientNum):
                     binaryKey = fp.messageToBinary(keyString.decode())
                     binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
     
-                    stegoSamples = GA_encoding(coverSamples, secretMessage, binaryKey, song, fileType)
+                    stegoSamples = GA_encoding(coverSamples, secretMessage, binaryKey, rate, fileType)
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
                     
                     # Write to the stego audio file in wave format and close the song
-                    fp.writeStegoToFile(str(clientNum) + "_StegoFile" + ".wav", song.getparams(), stegoSamples)
-                    song.close()
+                    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/ 32768.0
+                    scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
+                    
         
                     # Send to the requested receiver            
                     mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
@@ -253,36 +266,33 @@ def threaded_client(conn, clientNum):
                                     
                     # Extract the cover samples from the cover audio file
                     mainWindow.listWidget_log.addItem("Embedding stego: "+ str(addresses[connections.index(conn)][0]))
-                    song = wave.open(str(clientNum) + ".wav", "rb")
-                    samplesOne, samplesTwo = fp.extractWaveSamples(song)
+                    
+                    samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + ".wav")
                     
                     message = ""
+                    
                     if (fileType == ".wav"):
-                        
-                        messageObject = wave.open(str(clientNum) + "MSG" + fileType, "rb")
     
                         # Get the audio samples in integer form
-                        intSamples = fp.extractWaveMessage(messageObject)
+                        intSamples = fp.extractWaveMessage(str(clientNum) + "MSG" + fileType)
     
                         # Convert to integer list of bits for embedding
                         message = "".join(intSamples[0])
                         message = list(map(int, list(message)))
-                    
+                        
                     else:
                         message = fp.getMessageBits(str(clientNum) + "MSG" + fileType)
                     
-                    
                     message = "".join(list(map(str, message)))
-             
-                    stegoSamples, samplesUsed = DWT.dwtHaarEncode(samplesOne, message, OBH, 2048, fileType)
-                      
+                
+                    stegoSamples, samplesUsed = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 2048, fileType)
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
                     # Write to the stego audio file in wave format and close the song
                     mainWindow.listWidget_log.addItem("Writing stego to file")
-                    fp.writeStegoToFile(str(clientNum) + "_StegoFile" + ".wav", song.getparams(), stegoSamples)
+                    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
+                    scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
                     mainWindow.listWidget_log.addItem("Done writing stego to file")
-                    song.close()
         
                     # Send to the requested receiver            
                     mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
@@ -449,12 +459,14 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("Extracting message: "+ str(addresses[connections.index(conn)][0]))
     
                     # Open the steganography file
-                    stego = wave.open(str(clientNum) + "Stego" + ".wav", mode='rb')
-                      
+                    #stego = wave.open(str(clientNum) + "Stego" + ".wav", mode='rb')
+                    samplesOneStego, samplesTwoStego, rate = fp.getWaveSamples(str(clientNum) + "Stego" + ".wav")
+                    samplesOneStego = np.asarray(samplesOneStego, dtype=np.float32, order = 'C')*32768.0
+                    
                     # Extract the wave samples from the host signal
-                    samplesOneStego, samplesTwoStego = fp.extractWaveSamples(stego)
+#                    samplesOneStego, samplesTwoStego = fp.extractWaveSamples(stego)
                       
-                    extractMessage, fileType = DWT.dwtHaarDecode(samplesOneStego, OBH, 2048)
+                    extractMessage, fileType = dwtOBH.dwtHaarDecode(samplesOneStego, OBH, 2048)
                       
                     mainWindow.listWidget_log.addItem("Extracting completed: "+ str(addresses[connections.index(conn)][0]))
                     
@@ -528,13 +540,15 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("Extracting message: "+ str(addresses[connections.index(conn)][0]))
     
                     # Open the steganography file
-                    stego = wave.open(str(clientNum) + "Stego" + ".wav", mode='rb')
+                    #stego = wave.open(str(clientNum) + "Stego" + ".wav", mode='rb')
                     
                     # Extract the samples from the stego file
-                    stegoSamples = fp.extractWaveSamples(stego)
+                    #stegoSamples = fp.extractWaveSamples(stego)
+                    stegoSamplesOne, stegoSamplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Stego" + ".wav")
+                    stegoSamples = np.asarray(stegoSamplesOne, dtype=np.float32, order = 'C') * 32768.0
                     
                     # Get the secret message
-                    secretMessage, fileType = GA_decoding(stegoSamples, binaryKey)
+                    secretMessage, fileType = GA_decoding(list(stegoSamples), binaryKey)
                                         
                     mainWindow.listWidget_log.addItem("Extracting completed: "+ str(addresses[connections.index(conn)][0]))
     

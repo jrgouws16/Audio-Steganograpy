@@ -17,7 +17,7 @@ import scipy.io.wavfile as scWave
 from copy import deepcopy
 import ResultsAndTesting as RT
 import dwtScale 
-
+import dwtOBH
 
 def school_round(a_in,n_in):
     if (a_in * 10 ** (n_in + 1)) % 10 == 5:
@@ -31,10 +31,10 @@ testLevelsDWT            = False
 plotDiffLevelCoeff       = False
 plotUnderstanding        = False
 plotCorrectImplemnt      = False
-firstPrinciplesImplement = False
+firstPrinciplesImplement = True
 libraryImplement         = False
 encryptDWTDriver         = False
-scaleDWTDriver           = True
+scaleDWTDriver           = False
 
 
 
@@ -318,47 +318,50 @@ if (plotCorrectImplemnt == True):
     
     
 if (firstPrinciplesImplement == True):
-        OBH = 0
-        fileType = ".wav"
-        print("Extracting wave samples")
-        samplesOne, samplesTwo, rate = fp.getWaveSamples("Media/song.wav")
-        print(len(samplesOne))
-        print("Extracting message samples")
-        message = ""
-        
-        message = fp.getMessageBits("Media/opera" + fileType)
-        
-        message = "".join(list(map(str, message)))
- 
-        print("Encoding")
-        stegoSamples, samplesUsed, coeffOne = firstP.dwtHaarEncode(samplesOne, message, OBH, 512, fileType)
-        print("Writing to stego file")  
-        
-        # Write to the stego audio file in wave format and close the song
-        stegoSamples = np.asarray(stegoSamples)
-        stegoSamples = stegoSamples.astype(np.float32, order='C')
-        scWave.write('Media/StegoFile.wav', rate, stegoSamples)
-        
-        print("Reading from stego")
-        
-        # Extract the wave samples from the host signal
-        samplesOneStego, samplesTwoStego, rate = fp.getWaveSamples("Media/StegoFile.wav")
-        samplesOneStego = np.asarray(samplesOneStego)
-        samplesOneStego = samplesOneStego.astype(np.float64, order='C')
-        
-      
-        print("Extracting")
-        
-        extractMessage, fileType, coeffTwo = firstP.dwtHaarDecode(samplesOneStego, OBH, 512)
-        
-        for i in range(0, len(coeffTwo)):
-              print(int(coeffOne[i]) - int(coeffTwo[i]), end= " ")
-        
-        print(len(coeffOne), len(coeffTwo))
+    OBH = 0
+    print("Extracting wave samples")
+    samplesOne, samplesTwo, rate = fp.getWaveSamples("Media/song.wav")
+    
+    print("Extracting message samples")
+    messageObject = wave.open("Media/opera.wav", "rb")
 
-        print("Writing to message file")
-        fp.writeMessageBitsToFile(extractMessage, 'hihihihi.wav')
-        print(len(extractMessage), len(message))
+    # Get the audio samples in integer form
+    intSamples = fp.extractWaveMessage(messageObject)
+
+    # Convert to integer list of bits for embedding
+    message = "".join(intSamples[0])
+    message = list(map(int, list(message)))
+    
+    print("Done2")
+    message = "".join(list(map(str, message)))
+
+    
+#    message = ""
+#    message = fp.getMessageBits("Media/opera.wav")
+#    message = "".join(list(map(str, message)))
+    print(len(message))           
+    print("Encoding")
+    stegoSamples, samplesUsed = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 512, ".wav")
+    print("Writing to stego file")  
+      
+    # Write to the stego audio file in wave format and close the song
+    minStego = np.abs(min(stegoSamples))
+    maxStego = max(stegoSamples)
+    
+    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
+    origStego = deepcopy(stegoSamples)
+    #print(stegoSamples.dtype)
+    #stegoSamples = stegoSamples.astype(np.float32, order='C')
+    scWave.write('Media/Koekies3.wav', rate, stegoSamples)
+      
+    print("Reading from stego")
+      
+    # Extract the wave samples from the host signal
+    samplesOneStego, samplesTwoStego, rate = fp.getWaveSamples("Media/Koekies3.wav")
+    samplesOneStego = np.asarray(samplesOneStego, dtype=np.float32, order = 'C')*32768.0
+    
+    message, fileType = dwtOBH.dwtHaarDecode(samplesOneStego, OBH, 512)
+    fp.writeMessageBitsToFile(message, 'Pannekoekies4.wav')
         
 if (libraryImplement == True):
       # Open the cover audio

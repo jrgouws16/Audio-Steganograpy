@@ -8,7 +8,7 @@ Created on Mon Aug 19 15:04:23 2019
 import ResultsAndTesting as RT
 import geneticAlgorithm as GA
 import LSB
-import dwtFirstPrinciples as dwtFP
+import dwtOBH
 import dwtLibrary as dwtL
 import os
 import wave
@@ -18,7 +18,7 @@ from copy import deepcopy
 import time
 import dwtEncrypt
 
-doSingleTest     = False
+doSingleTest     = True
 doSongDataBase   = True 
 doDWT_OBH        = False
 doDWT_Encrypt    = False
@@ -203,7 +203,7 @@ if doSongDataBase == True:
                   
                   secretMessage = "".join(map(str,secretMessage))
                   start_time = time.time()
-                  stegoSamples, samplesUsed = dwtFP.dwtHaarEncode(coverSamples[0], secretMessage, j, 2048, "txt")
+                  stegoSamples, samplesUsed = dwtOBH.dwtHaarEncode(coverSamples[0], secretMessage, j, 2048, "txt")
                   print((time.time() - start_time), "seconds to execute embedding algorithm")         
                     
                   # Get the characteristics of the stego file
@@ -233,6 +233,7 @@ if doSingleTest == True:
               
         # Read the secret message file
         secretMessage = [random.randrange(0, 2) for i in range(int(len(coverSamples[0])))]
+        
           
         originalCoverSamples = deepcopy(coverSamples[0])
         print(len(originalCoverSamples))
@@ -240,7 +241,7 @@ if doSingleTest == True:
         secretMessage = "".join(map(str,secretMessage))
         start_time = time.time()
         print("starting encoding")
-        stegoSamples, samplesUsed = dwtFP.dwtHaarEncode(coverSamples[0], secretMessage, 1, 1024, "txt")
+        stegoSamples, samplesUsed = dwtOBH.dwtHaarEncode(coverSamples[0], secretMessage, 1, 1024, ".txt")
         print((time.time() - start_time), "seconds to execute embedding algorithm")         
             
         # Get the characteristics of the stego file

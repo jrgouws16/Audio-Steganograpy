@@ -128,7 +128,6 @@ def binaryStringToASCII(binaryString):
         
     return ASCII    
 
-###############################################################################
 #               For reading, writing and extracting samples for wave files    #
 ###############################################################################
 
@@ -170,30 +169,35 @@ def extractWaveSamples(waveObject):
        
     return samplesChannelOne, samplesChannelTwo
 
-def extractWaveMessage(waveObject):
-    samplesChannelOne = []
-    samplesChannelTwo = []
+def getWaveSamples(path):
+      
+      while (1):
+          try:
+              rate, samples = scWave.read(path)
+              break
+          except Exception:
+              print("Exception in reading the wave file, retrying")
+      
+      samplesOne = []
+      samplesTwo = []
+            
+      for i in range(0, len(samples)):
+            if (len(samples.shape) == 2):
+                  samplesOne.append(samples[i][0])
+                  samplesTwo.append(samples[i][1])
+            else:
+                  samplesOne.append(samples[i])
+                  
+      return samplesOne, samplesTwo, rate
+
+def extractWaveMessage(path):
+    samplesChannelOne, samplesChannelTwo, framerate = getWaveSamples(path)
     
-    # Get the wave file parameters
-    nchannels, sampwidth, framerate, nframes, comptype, compname = waveObject.getparams()
-
-    # Read two bytes for mono (<1h) in little endian format
-    # Read four bytes for stereo (<2h) in little endian format
-    format = '<{}h'.format(nchannels)
-
-    for index in range(nframes):
-        # Read one frame
-        frame = waveObject.readframes(1)
-
-        # Unpack the frame to integer value            
-        data = struct.unpack(format, frame) 
+    for index in range(0, len(samplesChannelOne)):
         
         # Convert to binary
-        binarySample = np.binary_repr(data[0], 16)
+        samplesChannelOne[index] = np.binary_repr(samplesChannelOne[index], 16)
         
-        # First channel value added to channel one
-        samplesChannelOne.append(binarySample)
-      
     return samplesChannelOne, samplesChannelTwo
 
 # Inverse of numpy binary_representation, but only for 16 bit samples
@@ -206,31 +210,21 @@ def binaryToInt(binaryString):
 
 
 def writeWaveMessageToFile(binString, file):
-      byteSamples = []
       samples = []
-      parameters = (1, 2, 8192, 73113, 'NONE', 'not compressed')
+      rate = 8192
             
-      with wave.open(file, 'wb') as fd:
-            fd.setparams(parameters)
+      while (len(binString) % 16 != 0):
+            binString = binString[:-1]
    
-            while (len(binString) % 16 != 0):
-                  binString = binString[:-1]
-           
-            while (len(binString) > 0):
-                  binSample = binString[0:16]
-                  decSample = binaryToInt(binSample)
-                 
-                  samples.append(decSample)
-                  binString = binString[16:]
-                  
-            for i in range(len(samples)):
-                  byteSamples.append(struct.pack('<h', samples[i]))
-                      
-            fd.writeframes(b''.join(byteSamples))
-
-            
-      fd.close()
-
+      while (len(binString) > 0):
+            binSample = binString[0:16]
+            decSample = binaryToInt(binSample)
+            samples.append(decSample)
+            binString = binString[16:]
+      
+      samples = np.asarray(samples,dtype=np.int16,order='C')
+      scWave.write(file, rate, samples)
+      
 # Prints the wave file parameters in the terminal
 def returnParameters(self):
     print("Channels:", self.nchannels)
@@ -261,19 +255,6 @@ def writeStegoToFile(fileName, parameters, samples):
 ###############################################################################
 ###############################################################################
     
-def getWaveSamples(path):
-      rate, samples = scWave.read(path)
-      
-      samplesOne = []
-      samplesTwo = []
-      
-      for i in range(0, len(samples)):
-            if (len(samples.shape) == 2):
-                  samplesOne.append(samples[i][0])
-                  samplesTwo.append(samples[i][1])
-            else:
-                  samplesOne.append(samples[i])
-                  
-      return samplesOne, samplesTwo, rate
+
 
     
