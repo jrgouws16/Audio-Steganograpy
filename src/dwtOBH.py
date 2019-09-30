@@ -24,6 +24,29 @@ def calcPower(coefficient):
         
     return p
 
+def getCapacity(coverSamples, OBH, blockLength):
+      numBits = -28
+      
+      # Get the approximate coefficients and detail coefficients of the signal
+      coefficients = dwt.getCoefficients(coverSamples, blockLength)
+      
+      for block in range(0, len(coefficients[1])):
+            for i in range(0, len(coefficients[1][block])):
+                  
+                  bits = calcPower(coefficients[1][block][i]) - OBH - 2
+                  
+                  if (bits < 1):
+                        continue
+                  
+                  binCoeff = "{0:016b}".format(int(coefficients[1][block][i]))
+                  binCoeff = list(binCoeff)
+                  
+                  for j in range(-1 * bits, 0):
+                        numBits += 1
+                        
+      return numBits
+
+
 # Function to encode a message within a audio file using the Haar DWT transform
 # Takes in list of integer cover file samples
 # Takes a binary bit string of the message

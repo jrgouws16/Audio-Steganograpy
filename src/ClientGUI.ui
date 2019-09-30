@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>734</width>
-    <height>603</height>
+    <width>788</width>
+    <height>494</height>
    </rect>
   </property>
   <property name="palette">
@@ -877,7 +877,7 @@
            <enum>QTabWidget::Rounded</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1121,35 +1121,6 @@
                </widget>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_8">
-                <item>
-                 <widget class="QLabel" name="label_type_8">
-                  <property name="font">
-                   <font>
-                    <family>Century Schoolbook L</family>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Embedding</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_9">
-                <item>
-                 <widget class="QProgressBar" name="progressBar_embedding">
-                  <property name="value">
-                   <number>24</number>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
                <layout class="QHBoxLayout" name="horizontalLayout_19">
                 <item>
                  <widget class="QPushButton" name="pushButton_encode">
@@ -1334,38 +1305,6 @@
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_19">
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_28">
-                    <item>
-                     <layout class="QVBoxLayout" name="verticalLayout_20"/>
-                    </item>
-                    <item>
-                     <layout class="QVBoxLayout" name="verticalLayout_21">
-                      <item>
-                       <widget class="QLabel" name="label_type_24">
-                        <property name="font">
-                         <font>
-                          <family>Century Schoolbook L</family>
-                          <weight>75</weight>
-                          <bold>true</bold>
-                         </font>
-                        </property>
-                        <property name="text">
-                         <string>Extracting</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QProgressBar" name="progressBar_extracting">
-                        <property name="value">
-                         <number>24</number>
-                        </property>
-                       </widget>
-                      </item>
-                     </layout>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
                    <widget class="QPushButton" name="pushButton_decode">
                     <property name="text">
                      <string>Decode</string>
@@ -1384,13 +1323,13 @@
            <attribute name="title">
             <string>Network Settings</string>
            </attribute>
-           <widget class="QWidget" name="layoutWidget_2">
+           <widget class="QWidget" name="layoutWidget">
             <property name="geometry">
              <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>501</width>
-              <height>325</height>
+              <x>10</x>
+              <y>10</y>
+              <width>486</width>
+              <height>286</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1447,30 +1386,34 @@
               </widget>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout">
+              <layout class="QVBoxLayout" name="verticalLayout_4">
                <item>
-                <widget class="QLabel" name="label_type_5">
-                 <property name="font">
-                  <font>
-                   <family>Century Schoolbook L</family>
-                   <weight>75</weight>
-                   <bold>true</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Server IP address      </string>
-                 </property>
-                </widget>
+                <layout class="QHBoxLayout" name="horizontalLayout">
+                 <item>
+                  <widget class="QLabel" name="label_type_5">
+                   <property name="font">
+                    <font>
+                     <family>Century Schoolbook L</family>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Server IP address</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="lineEdit_server_ip">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_server_ip">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_14">
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
                  <item>
                   <widget class="QLabel" name="label_type_12">
                    <property name="font">
@@ -1481,7 +1424,7 @@
                     </font>
                    </property>
                    <property name="text">
-                    <string>Port to connect           </string>
+                    <string>Port to connect     </string>
                    </property>
                   </widget>
                  </item>
@@ -1497,7 +1440,7 @@
               </layout>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_15">
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
                <item>
                 <widget class="QLabel" name="label_server_status">
                  <property name="font">
@@ -1529,7 +1472,7 @@
               </layout>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_12">
+              <layout class="QHBoxLayout" name="horizontalLayout_9">
                <item>
                 <widget class="QLabel" name="label_type_11">
                  <property name="font">
@@ -1561,112 +1504,100 @@
               </layout>
              </item>
              <item>
+              <widget class="QLabel" name="label_type_receiver_IP">
+               <property name="font">
+                <font>
+                 <family>Century Schoolbook L</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Receiver IP addresses :</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_12">
+               <item>
+                <widget class="QLabel" name="label_type_receiver_IP_2">
+                 <property name="font">
+                  <font>
+                   <family>Century Schoolbook L</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Receiver 1:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_receiver_IP_1"/>
+               </item>
+              </layout>
+             </item>
+             <item>
               <layout class="QHBoxLayout" name="horizontalLayout_13">
                <item>
-                <layout class="QVBoxLayout" name="verticalLayout_4">
-                 <item>
-                  <widget class="QLabel" name="label_type_receiver_IP">
-                   <property name="font">
-                    <font>
-                     <family>Century Schoolbook L</family>
-                     <weight>75</weight>
-                     <bold>true</bold>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Receiver IP addresses :</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <layout class="QVBoxLayout" name="verticalLayout_5">
-                   <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_3">
-                     <item>
-                      <widget class="QLabel" name="label_type_receiver_IP_2">
-                       <property name="font">
-                        <font>
-                         <family>Century Schoolbook L</family>
-                         <weight>75</weight>
-                         <bold>true</bold>
-                        </font>
-                       </property>
-                       <property name="text">
-                        <string>Receiver 1:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="lineEdit_receiver_IP_1"/>
-                     </item>
-                    </layout>
-                   </item>
-                   <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_16">
-                     <item>
-                      <widget class="QLabel" name="label_type_receiver_IP_3">
-                       <property name="font">
-                        <font>
-                         <family>Century Schoolbook L</family>
-                         <weight>75</weight>
-                         <bold>true</bold>
-                        </font>
-                       </property>
-                       <property name="text">
-                        <string>Receiver 2:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="lineEdit_receiver_IP_2"/>
-                     </item>
-                    </layout>
-                   </item>
-                   <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_17">
-                     <item>
-                      <widget class="QLabel" name="label_type_receiver_IP_4">
-                       <property name="font">
-                        <font>
-                         <family>Century Schoolbook L</family>
-                         <weight>75</weight>
-                         <bold>true</bold>
-                        </font>
-                       </property>
-                       <property name="text">
-                        <string>Receiver 3:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="lineEdit_receiver_IP_3"/>
-                     </item>
-                    </layout>
-                   </item>
-                   <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_18">
-                     <item>
-                      <widget class="QLabel" name="label_type_receiver_IP_5">
-                       <property name="font">
-                        <font>
-                         <family>Century Schoolbook L</family>
-                         <weight>75</weight>
-                         <bold>true</bold>
-                        </font>
-                       </property>
-                       <property name="text">
-                        <string>Receiver 4:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="lineEdit_receiver_IP_4"/>
-                     </item>
-                    </layout>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
+                <widget class="QLabel" name="label_type_receiver_IP_3">
+                 <property name="font">
+                  <font>
+                   <family>Century Schoolbook L</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Receiver 2:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_receiver_IP_2"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_14">
+               <item>
+                <widget class="QLabel" name="label_type_receiver_IP_4">
+                 <property name="font">
+                  <font>
+                   <family>Century Schoolbook L</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Receiver 3:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_receiver_IP_3"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_15">
+               <item>
+                <widget class="QLabel" name="label_type_receiver_IP_5">
+                 <property name="font">
+                  <font>
+                   <family>Century Schoolbook L</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Receiver 4:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_receiver_IP_4"/>
                </item>
               </layout>
              </item>
@@ -1686,7 +1617,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>734</width>
+     <width>788</width>
      <height>21</height>
     </rect>
    </property>
@@ -1696,6 +1627,22 @@
  <resources/>
  <connections>
   <connection>
+   <sender>radioButton_dwt_scaling_encode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>301</x>
+     <y>351</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>454</x>
+     <y>268</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>radioButton_DWT_3</sender>
    <signal>clicked()</signal>
    <receiver>lineEdit_OBH_nr_3</receiver>
@@ -1712,130 +1659,98 @@
    </hints>
   </connection>
   <connection>
-   <sender>radioButton_DWT_3</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_GA_key_3</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>299</x>
-     <y>293</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>647</x>
-     <y>267</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA_3</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_OBH_nr_3</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>298</x>
-     <y>265</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>637</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA_3</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_GA_key_3</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>298</x>
-     <y>265</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>647</x>
-     <y>267</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_DWT</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_OBH</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>343</x>
-     <y>299</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>707</x>
-     <y>297</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_DWT</sender>
+   <sender>radioButton_dwt_encoding</sender>
    <signal>clicked()</signal>
    <receiver>lineEdit_GA_key</receiver>
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>343</x>
-     <y>299</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>706</x>
-     <y>252</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_OBH</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>343</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>707</x>
-     <y>297</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_GA_key</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>343</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>706</x>
-     <y>252</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA</sender>
-   <signal>clicked()</signal>
-   <receiver>pushButton_browse_key</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>343</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
      <x>598</x>
-     <y>401</y>
+     <y>378</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>706</x>
+     <y>252</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>303</x>
+     <y>302</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>391</x>
+     <y>310</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_3</sender>
+   <signal>clicked()</signal>
+   <receiver>pushButton_browse_key_3</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>271</x>
+     <y>301</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>267</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>706</x>
+     <y>252</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA_3</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_nr_3</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>298</x>
+     <y>265</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>637</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA_3</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key_3</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>298</x>
+     <y>265</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>647</x>
+     <y>267</y>
     </hint>
    </hints>
   </connection>
@@ -1872,34 +1787,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>radioButton_dwt_encoding</sender>
+   <sender>radioButton_DWT</sender>
    <signal>clicked()</signal>
-   <receiver>lineEdit_GA_key</receiver>
-   <slot>hide()</slot>
+   <receiver>lineEdit_OBH</receiver>
+   <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>598</x>
-     <y>378</y>
+     <x>343</x>
+     <y>299</y>
     </hint>
     <hint type="destinationlabel">
-     <x>706</x>
-     <y>252</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_GA_3</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_dwt_scale_decoding_LSB</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>298</x>
-     <y>265</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>421</x>
-     <y>323</y>
+     <x>707</x>
+     <y>297</y>
     </hint>
    </hints>
   </connection>
@@ -1915,22 +1814,6 @@
     </hint>
     <hint type="destinationlabel">
      <x>421</x>
-     <y>323</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_dwt_scaling_decode</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_dwt_scale_decoding_LSB</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>298</x>
-     <y>321</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>417</x>
      <y>323</y>
     </hint>
    </hints>
@@ -1948,22 +1831,6 @@
     <hint type="destinationlabel">
      <x>401</x>
      <y>323</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_dwt_decoding</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_OBH_nr_3</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>394</x>
-     <y>347</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>428</x>
-     <y>295</y>
     </hint>
    </hints>
   </connection>
@@ -2016,6 +1883,38 @@
    </hints>
   </connection>
   <connection>
+   <sender>radioButton_DWT_3</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key_3</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>299</x>
+     <y>293</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>647</x>
+     <y>267</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA_3</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_dwt_scale_decoding_LSB</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>298</x>
+     <y>265</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>323</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>radioButton_GA</sender>
    <signal>clicked()</signal>
    <receiver>lineEdit_dwt_scale_encoding_LSB</receiver>
@@ -2048,6 +1947,70 @@
    </hints>
   </connection>
   <connection>
+   <sender>radioButton_dwt_scaling_decode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_dwt_scale_decoding_LSB</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>298</x>
+     <y>321</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>417</x>
+     <y>323</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>707</x>
+     <y>297</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>299</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>706</x>
+     <y>252</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_dwt_decoding</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_nr_3</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>394</x>
+     <y>347</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>428</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>radioButton_dwt_encoding</sender>
    <signal>clicked()</signal>
    <receiver>lineEdit_dwt_scale_encoding_LSB</receiver>
@@ -2064,6 +2027,22 @@
    </hints>
   </connection>
   <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>pushButton_browse_key</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>598</x>
+     <y>401</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>radioButton_dwt_scaling_encode</sender>
    <signal>clicked()</signal>
    <receiver>lineEdit_OBH</receiver>
@@ -2076,54 +2055,6 @@
     <hint type="destinationlabel">
      <x>443</x>
      <y>314</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_dwt_scaling_encode</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_GA_key</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>301</x>
-     <y>351</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>454</x>
-     <y>268</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_DWT</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_OBH</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>303</x>
-     <y>302</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>391</x>
-     <y>310</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_dwt_scaling_encode</sender>
-   <signal>clicked()</signal>
-   <receiver>lineEdit_dwt_scale_encoding_LSB</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>306</x>
-     <y>351</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>439</x>
-     <y>357</y>
     </hint>
    </hints>
   </connection>
@@ -2160,18 +2091,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>radioButton_DWT_3</sender>
+   <sender>radioButton_dwt_scaling_encode</sender>
    <signal>clicked()</signal>
-   <receiver>pushButton_browse_key_3</receiver>
-   <slot>hide()</slot>
+   <receiver>lineEdit_dwt_scale_encoding_LSB</receiver>
+   <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>271</x>
-     <y>301</y>
+     <x>306</x>
+     <y>351</y>
     </hint>
     <hint type="destinationlabel">
-     <x>267</x>
-     <y>369</y>
+     <x>439</x>
+     <y>357</y>
     </hint>
    </hints>
   </connection>

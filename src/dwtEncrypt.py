@@ -31,6 +31,18 @@ def getCount(messageLength):
             
     return count
 
+def getCapacity(coverSamples, blockLength):
+      bits = -28
+      
+      # Get the approximate coefficients and detail coefficients of the signal
+      coefficiets = dwt.getCoefficients(coverSamples, blockLength)
+      
+      for blockNumber in range(0, len(coefficiets[1])):
+          for i in range(0, len(coefficiets[1][blockNumber])):
+              bits += 1
+              
+      return bits
+
 # Function to encode a message within a audio file using the Haar DWT transform
 # Takes in list of integer cover file samples
 # Takes a integer list of ascii values as the message

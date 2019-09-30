@@ -327,7 +327,7 @@ def getCoverCapacity():
         invalidCover.emit()
         return
     
-    if ( not (mainWindow.radioButton_DWT.isChecked() or mainWindow.radioButton_GA.isChecked())):    
+    if ( not (mainWindow.radioButton_DWT.isChecked() or mainWindow.radioButton_GA.isChecked() or mainWindow.radioButton_dwt_scaling_encode.isChecked() or mainWindow.radioButton_dwt_encoding.isChecked())):    
         invalidCover.title = "Invalid method selected."
         invalidCover.info = "Please select either DWT or GA encoding."
         invalidCover.emit()
@@ -352,6 +352,13 @@ def getCoverCapacity():
     if (mainWindow.radioButton_DWT.isChecked()):
         sockets.send_one_message(server[0], "DWT")
         sockets.send_one_message(server[0], mainWindow.lineEdit_OBH.text())
+        
+    elif (mainWindow.radioButton_dwt_scaling_encode.isChecked()):
+        sockets.send_one_message(server[0], "DWT_scale")  
+        sockets.send_one_message(server[0], mainWindow.lineEdit_dwt_scale_encoding_LSB.text())
+    
+    elif ( mainWindow.radioButton_dwt_encoding.isChecked()):
+        sockets.send_one_message(server[0], "DWT_encode")
         
     else:
         sockets.send_one_message(server[0], "GA")
@@ -434,10 +441,6 @@ if __name__ == "__main__":
     # Guide user to provide values 1, 2, 3 or 4
     mainWindow.lineEdit_OBH.setPlaceholderText("OBH")
     
-    # Set the progress on the progress bars to 0 to start with
-    mainWindow.progressBar_embedding.setValue(0)
-    mainWindow.progressBar_extracting.setValue(0)
-
     recFileThread = threading.Thread(target=fileReceiveThread, args=())
     recFileThread.isDaemon = True
     recFileThread.start()

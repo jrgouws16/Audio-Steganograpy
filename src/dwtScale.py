@@ -5,6 +5,9 @@ Created on Tue Sep 24 21:51:34 2019
 
 @author: johan
 """
+embeddingProcess   = 0.0
+extractingProcess  = 0.0
+
 
 import dwtFirstPrinciples as dwt
 import numpy as np
@@ -17,6 +20,30 @@ def binaryToInt(binaryString):
     else:
         return int(binaryString, 2)
 
+def getCapacity(coverSamples, LSBs):
+      numBits       = 0
+      numBlocks     = int(len(coverSamples)/512) 
+      
+      for blockNumber in range(0, numBlocks):
+         
+          subbandCoeff = []
+      
+          # Get the approximate coefficients and detail coefficients of the signal
+          coefficiets = dwt.getLevelCoefficients(5, coverSamples[blockNumber*512:blockNumber*512 + 512])
+          subbandCoeff.append(coefficiets[0])
+          for i in range(0, len(coefficiets[1])):
+              for j in range(0, len(coefficiets[1][i]), 16):
+                  subbandCoeff.append(coefficiets[1][i][j:j + 16])
+                  
+          # Scale each subband by the maximum value inside the subband
+          for i in range(0, len(subbandCoeff)):
+              
+              for j in range(0, len(subbandCoeff[i])):
+                  
+                    for k in range(25 - LSBs - 2, 25 - 2): 
+                        numBits += 1
+              
+      return numBits - 28
 
 # Function to encode a message within a audio file using the Haar DWT transform
 # Takes in list of integer cover file samples
@@ -25,6 +52,7 @@ def binaryToInt(binaryString):
 # performed each time.
 # Returns a list of integer stego file samples
 def dwtScaleEncode(coverSamples, message, messageType, LSBs):
+      global embeddingProcess
       samplesUsed = 0
       stegoSamples = []
       coverSamples = list(coverSamples)
@@ -32,7 +60,8 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
       numBlocks     = int(len(coverSamples)/512) 
       doBreak       = False  
       blockNumber   = 0     
-            
+      originalMessageLength = len(message)
+      embeddingProcess = 0.0      
       # Get the type of message
       # 0 is a textmessage and 1 is a wave message
       typeMessage = ""
@@ -57,6 +86,9 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
           for i in range(0, len(coefficiets[1])):
               for j in range(0, len(coefficiets[1][i]), 16):
                   subbandCoeff.append(coefficiets[1][i][j:j + 16])
+                  
+                  
+          embeddingProcess = 100 - 100 * messageLength/originalMessageLength 
                   
           # Scale each subband by the maximum value inside the subband
           for i in range(0, len(subbandCoeff)):

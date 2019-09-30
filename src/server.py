@@ -23,8 +23,8 @@ import scipy.io.wavfile as scWave
 import numpy as np
 
 serverThread = []
-connections = []
-addresses = []
+connections  = []
+addresses    = []
 
 clientsConnected = 0
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -87,8 +87,7 @@ def threaded_client(conn, clientNum):
     fileType = ''
     
     while True:
-        #try:
-        
+#        try:
             message = sockets.recv_one_message(conn)
             
             if (message == None):
@@ -109,12 +108,34 @@ def threaded_client(conn, clientNum):
                     song = wave.open(str(clientNum) + "Capacity" + ".wav", "rb")
                     samplesOne, samplesTwo = fp.extractWaveSamples(song)
                     
-                    capacity = dwtOBH.dwtHaarCoverCapacity(samplesOne, OBH, 2048)
+                    capacity = dwtOBH.getCapacity(samplesOne, OBH, 2048)
                     sockets.send_one_message(conn, "Capacity")
                     sockets.send_one_message(conn, str(capacity))
-
+                    
+                elif (method.decode() == "DWT_scale"):
+                    LSBs = sockets.recv_one_message(conn)
+                    LSBs = int(LSBs.decode())
+                    
+                    song = wave.open(str(clientNum) + "Capacity" + ".wav", "rb")
+                    samplesOne, samplesTwo = fp.extractWaveSamples(song)
+                    
+                    capacity = dwtScale.getCapacity(samplesOne, LSBs)
+                    sockets.send_one_message(conn, "Capacity")
+                    sockets.send_one_message(conn, str(capacity))
+                    
+                elif (method.decode() == "DWT_encode"):
+                    song = wave.open(str(clientNum) + "Capacity" + ".wav", "rb")
+                    samplesOne, samplesTwo = fp.extractWaveSamples(song)
+                    
+                    capacity = DWTcrypt.getCapacity(samplesOne, 2048)
+                    sockets.send_one_message(conn, "Capacity")
+                    sockets.send_one_message(conn, str(capacity))
+                    
                 elif (method.decode() == "GA"):
-                    print("HAHAHAHHAHAHAH")
+                    song = wave.open(str(clientNum) + "Capacity" + ".wav", "rb")
+                    samplesOne, samplesTwo = fp.extractWaveSamples(song)
+                    sockets.send_one_message(conn, "Capacity")
+                    sockets.send_one_message(conn, str(len(samplesOne)*1.5))
               
             # If it is needed to encode the message into the audio    
             elif (message.decode() == "Encode"):
@@ -454,10 +475,7 @@ def threaded_client(conn, clientNum):
                                     
                     # Extract the cover samples from the cover audio file
                     mainWindow.listWidget_log.addItem("Embedding stego: "+ str(addresses[connections.index(conn)][0]))
-                    song = wave.open(str(clientNum) + ".wav", "rb")
-                    rate = song.getframerate()
-                    samplesOne, samplesTwo = fp.extractWaveSamples(song)
-                    song.close()
+                    samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + ".wav")
                     
                     message = ""
                     if (fileType == ".txt"):
@@ -556,13 +574,10 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("Extracting message: "+ str(addresses[connections.index(conn)][0]))
     
                     # Open the steganography file
-                    #stego = wave.open(str(clientNum) + "Stego" + ".wav", mode='rb')
                     samplesOneStego, samplesTwoStego, rate = fp.getWaveSamples(str(clientNum) + "Stego" + ".wav")
                     samplesOneStego = np.asarray(samplesOneStego, dtype=np.float32, order = 'C')*32768.0
                     
                     # Extract the wave samples from the host signal
-#                    samplesOneStego, samplesTwoStego = fp.extractWaveSamples(stego)
-                      
                     extractMessage, fileType = dwtOBH.dwtHaarDecode(samplesOneStego, OBH, 2048)
                       
                     mainWindow.listWidget_log.addItem("Extracting completed: "+ str(addresses[connections.index(conn)][0]))
@@ -671,11 +686,7 @@ def threaded_client(conn, clientNum):
                     
                     mainWindow.listWidget_log.addItem("Extracting message: "+ str(addresses[connections.index(conn)][0]))
     
-                    # Open the steganography file
-                    #stego = wave.open(str(clientNum) + "Stego" + ".wav", mode='rb')
-                    
                     # Extract the samples from the stego file
-                    #stegoSamples = fp.extractWaveSamples(stego)
                     stegoSamplesOne, stegoSamplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Stego.wav")
                     stegoSamples = np.asarray(stegoSamplesOne, dtype=np.float32, order = 'C') * 32768.0
                     
@@ -719,10 +730,10 @@ def threaded_client(conn, clientNum):
                   mainWindow.listWidget_log.addItem("Server receiving command")
                   mainWindow.listWidget_log.addItem("Command -> " + message.decode())
                   
-        #except Exception:
-        #    mainWindow.listWidget_log.addItem("[-] Client disconnected")
-        #    clientsConnected -= 1
-        #    mainWindow.label_num_clients.setText("Clients connected: " + str(clientsConnected))
+#        except Exception:
+#            mainWindow.listWidget_log.addItem("[-] Client disconnected")
+#            clientsConnected -= 1
+#            mainWindow.label_num_clients.setText("Clients connected: " + str(clientsConnected))
 
 def acceptClients(param):
       HOST = ""
