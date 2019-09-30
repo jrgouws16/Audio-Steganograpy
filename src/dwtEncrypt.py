@@ -112,13 +112,12 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
           stegoSamples += temp
       
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
-      print(coefficiets[1][0][0:10])
+
       return stegoSamples + unaltered, samplesUsed
 
 def dwtEncryptDecode(stegoSamples, blockLength):
       # Get the approximate coefficients and detail coefficients of the signal
       newCoeff = dwt.getCoefficients(stegoSamples, blockLength) 
-      print(newCoeff[1][0][0:10])
       extractedLength = 0
       extractMessage = []
       fileType = ''

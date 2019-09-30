@@ -31,10 +31,10 @@ testLevelsDWT            = False
 plotDiffLevelCoeff       = False
 plotUnderstanding        = False
 plotCorrectImplemnt      = False
-firstPrinciplesImplement = True
+firstPrinciplesImplement = False
 libraryImplement         = False
 encryptDWTDriver         = False
-scaleDWTDriver           = False
+scaleDWTDriver           = True
 
 
 
@@ -403,29 +403,47 @@ if (libraryImplement == True):
       
 if (encryptDWTDriver == True):
     myMessage = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n"*100
+    
     rate, samples = scWave.read('Media/opera.wav')
     originalCoverSamples = deepcopy(samples)
 
-    stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 2048, ".txt")
+    stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 256, ".txt")
+
+    stegoSamples = np.asarray(stegoSamples,dtype=np.float32, order='C') / 32768.0
     
-    stegoSamples = np.asarray(stegoSamples)
-    stegoSamples = stegoSamples.astype(np.float32, order='C') / 32768.0
-      
     scWave.write("papagaai.wav", rate, stegoSamples)
 
     rate, extractStegoSamples = scWave.read('papagaai.wav')
-    extractStegoSamples = extractStegoSamples.astype(np.float64, order='C') * 32768.0
-    
-    boodskap, fileType = dwtEncrypt.dwtEncryptDecode(extractStegoSamples, 2048)
-    print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], extractStegoSamples[0:samplesUsed] ), 2)))
 
+    extractStegoSamples = extractStegoSamples.astype(np.float32, order='C') * 32768.0
+    
+    boodskap, fileType = dwtEncrypt.dwtEncryptDecode(extractStegoSamples, 256)
+    
+    diff = []
+    for i in range(0, len(originalCoverSamples)):
+        diff.append(np.abs(extractStegoSamples[i] - stegoSamples[i] * 32768.0))
+
+    print(max(diff), sum(diff)/len(diff))    
+    
+    if (myMessage != boodskap):
+        print("Erorororororo ocurrres")
+    
     print(boodskap, fileType)
+    print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], extractStegoSamples[0:samplesUsed] ), 2)))
+    
       
 if (scaleDWTDriver == True):
-      #binaryMessage = fp.messageToBinary("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n")
+
       print("Getting message bits")
       binaryMessage = fp.getMessageBits('Media/opera.wav')
       binaryMessage = "".join(list(map(str, binaryMessage)))
+  
+      # Get the audio samples in integer form converted to binary
+      binaryMessage = fp.extractWaveMessage('Media/opera.wav')
+
+      # Convert to integer list of bits for embedding
+      binaryMessage = "".join(binaryMessage[0])
+      
       print("Getting cover sampels")
       samples, samples2, rate = fp.getWaveSamples('Media/song.wav')
       
@@ -434,7 +452,6 @@ if (scaleDWTDriver == True):
       stegoSamples, used = dwtScale.dwtScaleEncode(samples, binaryMessage, ".wav", 6)
       
       stegoSamples = np.asarray(stegoSamples)
-#      print(stegoSamples.dtype)
       
       stegoSamples = stegoSamples.astype(np.float32, order='C') / 32768.0
       print("Writing to stego file")
@@ -445,7 +462,7 @@ if (scaleDWTDriver == True):
       print("Decoding")
       message,typeMessage = dwtScale.dwtScaleDecode(list(stegoSamples), 6)
       
-      fp.writeMessageBitsToFile(message, 'hihihihi.wav')
+      fp.writeWaveMessageToFile(message, 'Media/testingExtract.wav')
 
       
       print(RT.getCapacity(binaryMessage, used, rate)*44100/44100, "kbps")

@@ -372,13 +372,16 @@ if __name__ == "__main__":
     
     # Set the placeholder for the key of the GA
     mainWindow.lineEdit_GA_key.setPlaceholderText("Insert Key or browse for key file (.txt)")
-    
+    mainWindow.lineEdit_GA_key_3.setPlaceholderText("Insert Key or browse for key file (.txt)")
+
     # Set the placeholder that will display the stego file path selected
     mainWindow.lineEdit_stego.setPlaceholderText("Path")
     mainWindow.lineEdit_stego.setReadOnly(True)
     
-    # Guide user to provide values 1, 2, 3 or 4
     mainWindow.lineEdit_OBH_nr_3.setPlaceholderText("OBH")
+    
+    mainWindow.lineEdit_dwt_scale_encoding_LSB.setPlaceholderText("LSB's")
+    mainWindow.lineEdit_dwt_scale_decoding_LSB.setPlaceholderText("LSB's")
         
     # Objects to hide at the start of the GUI
     mainWindow.lineEdit_GA_key.hide()
@@ -389,7 +392,9 @@ if __name__ == "__main__":
     mainWindow.lineEdit_OBH.hide()
     mainWindow.lineEdit_OBH_nr_3.hide()
     mainWindow.lineEdit_GA_key_3.hide()
-    
+    mainWindow.lineEdit_dwt_scale_encoding_LSB.hide()
+    mainWindow.lineEdit_dwt_scale_decoding_LSB.hide()
+
     # Connect the buttons to the appropriate slots
     mainWindow.pushButton_connect.clicked.connect(connectToServer)
     mainWindow.pushButton_encode.clicked.connect(encode)
