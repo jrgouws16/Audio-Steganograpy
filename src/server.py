@@ -71,11 +71,6 @@ def GA_decoding(stegoSamples, key):
     
     # Convert integer samples to binary samples
     for i in range(0, len(stegoSamples)):
-        if (stegoSamples[i] < -32768):
-            print("wat")
-        
-        if (stegoSamples[i] > 32767):
-            print("se gat")
                 
         stegoSamples[i] = "{0:016b}".format(int(stegoSamples[i]))
         
@@ -175,6 +170,11 @@ def threaded_client(conn, clientNum):
                     # Extract the cover samples from the cover audio file
                     mainWindow.listWidget_log.addItem("Embedding stego: "+ str(addresses[connections.index(conn)][0]))
                     coverSamplesOne, coverSamplesTwo, rate = fp.getWaveSamples(str(clientNum) + ".wav")
+                    
+                    for i in range(0, len(coverSamplesOne)):
+                        if (coverSamplesOne[i] <= -32768):       
+                                coverSamplesOne[i] += 1
+                    
                     coverSamples = [coverSamplesOne, coverSamplesTwo]
 
                     secretMessage = ""
@@ -544,7 +544,7 @@ def threaded_client(conn, clientNum):
                     
                     # Extract the samples from the stego file
                     #stegoSamples = fp.extractWaveSamples(stego)
-                    stegoSamplesOne, stegoSamplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Stego" + ".wav")
+                    stegoSamplesOne, stegoSamplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Stego.wav")
                     stegoSamples = np.asarray(stegoSamplesOne, dtype=np.float32, order = 'C') * 32768.0
                     
                     # Get the secret message
