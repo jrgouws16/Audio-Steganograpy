@@ -18,15 +18,15 @@ from copy import deepcopy
 import time
 import dwtEncrypt
 
-doSingleTest     = True
+doSingleTest     = False
 doSongDataBase   = True 
 doDWT_OBH        = False
 doDWT_Encrypt    = False
 doGA             = False
 doLSB            = False
-doDWT_OBH_firstP = False
+doDWT_OBH_firstP = True
 doDWT_OBH_Lib    = False
-doDWT_encrypt    = True
+doDWT_encrypt    = False
 
 if doSongDataBase == True:
 
@@ -138,7 +138,7 @@ if doSongDataBase == True:
             print("")  
             song.close()
             
-    if(doDWT_OBH_firstP == True):
+    if(doDWT_OBH_Lib == True):
         
         print("################# DWT Haar embedding library    ######################")
         for i in coverFiles:
@@ -177,7 +177,7 @@ if doSongDataBase == True:
                   print("")  
                   song.close()    
             
-    if (doDWT_OBH_Lib == True):        
+    if (doDWT_OBH_firstP == True):        
         print("################# DWT Haar embedding first principles  ###############")
         for i in coverFiles:
               for j in range(0,6):  
@@ -207,7 +207,7 @@ if doSongDataBase == True:
                   print((time.time() - start_time), "seconds to execute embedding algorithm")         
                     
                   # Get the characteristics of the stego file
-                  print("Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples.")
+                  print("Embedded " + str(len(secretMessage)) + " bits into " + str(samplesUsed) + " samples.")
                   print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
                   print("Capacity of " + str(RT.getCapacity(secretMessage, samplesUsed, song.getframerate())) + " kbps.")
                       
@@ -226,7 +226,7 @@ if doSingleTest == True:
         stegoFileName = 'Media/stego.wav'
           
         # Open the cover audio file
-        song = wave.open("Media/song.wav", mode='rb')
+        song = wave.open("Media/opera.wav", mode='rb')
           
         # Extract the cover samples
         coverSamples = fp.extractWaveSamples(song)

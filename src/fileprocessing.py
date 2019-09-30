@@ -5,6 +5,8 @@ import sys
 import struct
 import SignalsAndSlots
 import wave
+import scipy.io.wavfile as scWave
+
 #from scipy.io import wavfile
 #import numpy as np
 
@@ -259,7 +261,19 @@ def writeStegoToFile(fileName, parameters, samples):
 ###############################################################################
 ###############################################################################
     
-    
+def getWaveSamples(path):
+      rate, samples = scWave.read(path)
+      
+      samplesOne = []
+      samplesTwo = []
+      
+      for i in range(0, len(samples)):
+            if (len(samples.shape) == 2):
+                  samplesOne.append(samples[i][0])
+                  samplesTwo.append(samples[i][1])
+            else:
+                  samplesOne.append(samples[i])
+                  
+      return samplesOne, samplesTwo, rate
 
-    
     

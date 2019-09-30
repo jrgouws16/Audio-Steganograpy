@@ -35,6 +35,9 @@ firstPrinciplesImplement = False
 libraryImplement         = False
 encryptDWTDriver         = False
 scaleDWTDriver           = True
+
+
+
 def reconstruction_plot(yyy, **kwargs):
     """Plot signal vector on x [0,1] independently of amount of values it contains."""
     ym = np.median(yyy)
@@ -83,7 +86,7 @@ if (testLevelOneDWT == True):
     song = wave.open('Media/opera.wav', mode='rb')
     
     # Extract the wave samples from the host signal
-    samplesOne, samplesTwo = fp.extractWaveSamples(song)
+    samplesOne, samplesTwo, rate = fp.getWaveSamples(song)
     
     # Make the signal equal to block to process
     while (len(samplesOne) % 1024 != 0):
@@ -315,43 +318,48 @@ if (plotCorrectImplemnt == True):
     
     
 if (firstPrinciplesImplement == True):
-      # Open the cover audio
-      song = wave.open('Media/song.wav', mode='rb')
+        OBH = 0
+        fileType = ".wav"
+        print("Extracting wave samples")
+        samplesOne, samplesTwo, rate = fp.getWaveSamples("Media/song.wav")
+        print(len(samplesOne))
+        print("Extracting message samples")
+        message = ""
+        
+        message = fp.getMessageBits("Media/opera" + fileType)
+        
+        message = "".join(list(map(str, message)))
+ 
+        print("Encoding")
+        stegoSamples, samplesUsed, coeffOne = firstP.dwtHaarEncode(samplesOne, message, OBH, 512, fileType)
+        print("Writing to stego file")  
+        
+        # Write to the stego audio file in wave format and close the song
+        stegoSamples = np.asarray(stegoSamples)
+        stegoSamples = stegoSamples.astype(np.float32, order='C')
+        scWave.write('Media/StegoFile.wav', rate, stegoSamples)
+        
+        print("Reading from stego")
+        
+        # Extract the wave samples from the host signal
+        samplesOneStego, samplesTwoStego, rate = fp.getWaveSamples("Media/StegoFile.wav")
+        samplesOneStego = np.asarray(samplesOneStego)
+        samplesOneStego = samplesOneStego.astype(np.float64, order='C')
+        
       
-      print("Getting cover samples")
-      
-      # Extract the wave samples from the host signal
-      samplesOne, samplesTwo = fp.extractWaveSamples(song)
-      
-      print("Getting message samples")
-      
-      # Message to embed
-      message = fp.getMessageBits('Media/opera.wav')
-      message = "".join(list(map(str, message)))
-      
-      print("Encoding")
-      
-      stegoSamples, samplesUsed = firstP.dwtHaarEncode(samplesOne, message, 0, 2048, ".wav")
-            
-      print("Writing to stego")
-      
-      # Write to the stego song file
-      fp.writeStegoToFile('Media/DWT.wav',song.getparams(), stegoSamples)
-      
-      print("Reading from stego")
-      # Open the cover audio
-      stego = wave.open('Media/DWT.wav', mode='rb')
-      
-      # Extract the wave samples from the host signal
-      samplesOneStego, samplesTwoStego = fp.extractWaveSamples(stego)
-      
-      print("Extracting")
-      
-      extractMessage, fileType = firstP.dwtHaarDecode(samplesOneStego, 0, 2048)
-          
-      print("Writing to message file")
-      fp.writeMessageBitsToFile(extractMessage, 'Media/dwtFirstPrinciplesMessageExtract.wav')
-      
+        print("Extracting")
+        
+        extractMessage, fileType, coeffTwo = firstP.dwtHaarDecode(samplesOneStego, OBH, 512)
+        
+        for i in range(0, len(coeffTwo)):
+              print(int(coeffOne[i]) - int(coeffTwo[i]), end= " ")
+        
+        print(len(coeffOne), len(coeffTwo))
+
+        print("Writing to message file")
+        fp.writeMessageBitsToFile(extractMessage, 'hihihihi.wav')
+        print(len(extractMessage), len(message))
+        
 if (libraryImplement == True):
       # Open the cover audio
       song = wave.open('Media/song.wav', mode='rb')
@@ -359,7 +367,7 @@ if (libraryImplement == True):
       print("Getting cover samples")
       
       # Extract the wave samples from the host signal
-      samplesOne, samplesTwo = fp.extractWaveSamples(song)
+      samplesOne, samplesTwo, rate = fp.getWaveSamples('Media/song.wav')
       
       print("Getting message samples")
       
@@ -381,7 +389,7 @@ if (libraryImplement == True):
       stego = wave.open('Media/DWT.wav', mode='rb')
       
       # Extract the wave samples from the host signal
-      samplesOneStego, samplesTwoStego = fp.extractWaveSamples(stego)
+      samplesOneStego, samplesTwoStego, rate = fp.getWaveSamples(stego)
       
       print("Extracting")
       
@@ -391,9 +399,8 @@ if (libraryImplement == True):
       fp.writeMessageBitsToFile(extractMessage, 'Media/dwtLibraryMessageExtract.jpeg')
       
 if (encryptDWTDriver == True):
-    myMessage = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    rate, samples = scWave.read('/home/johan/Desktop/Audio-Steganograpy/src/Media/opera.wav')
-    song = wave.open('/home/johan/Desktop/Audio-Steganograpy/src/Media/opera.wav', 'rb')
+    myMessage = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n"*100
+    rate, samples = scWave.read('Media/opera.wav')
     originalCoverSamples = deepcopy(samples)
 
     stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 2048, ".txt")
@@ -412,27 +419,31 @@ if (encryptDWTDriver == True):
     print(boodskap, fileType)
       
 if (scaleDWTDriver == True):
-      binaryMessage = fp.messageToBinary("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"*500)
-      rate, samples = scWave.read('Media/44100HZ.wav')
-      
-      tempSamples = []
-      for i in range(0, len(samples)):
-          tempSamples.append(samples[i][0])
-      samples = tempSamples
+      #binaryMessage = fp.messageToBinary("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n")
+      print("Getting message bits")
+      binaryMessage = fp.getMessageBits('Media/opera.wav')
+      binaryMessage = "".join(list(map(str, binaryMessage)))
+      print("Getting cover sampels")
+      samples, samples2, rate = fp.getWaveSamples('Media/song.wav')
       
       originalSamples = deepcopy(samples)
-      
-      stegoSamples, used, sequence1 = dwtScale.dwtScaleEncode(samples, binaryMessage, ".txt", 8)
+      print("Encoding")
+      stegoSamples, used = dwtScale.dwtScaleEncode(samples, binaryMessage, ".wav", 6)
       
       stegoSamples = np.asarray(stegoSamples)
+#      print(stegoSamples.dtype)
+      
       stegoSamples = stegoSamples.astype(np.float32, order='C') / 32768.0
+      print("Writing to stego file")
       scWave.write('Media/testing123.wav', rate, stegoSamples)
+      print("Reading from stego file")
       rate, stegoSamples = scWave.read('Media/testing123.wav')
       stegoSamples = stegoSamples.astype(np.float64, order='C') * 32768.0
+      print("Decoding")
+      message,typeMessage = dwtScale.dwtScaleDecode(list(stegoSamples), 6)
       
-      message,typeMessage, sequence2 = dwtScale.dwtScaleDecode(list(stegoSamples), 8)
-      
-      print(message, used)
+      fp.writeMessageBitsToFile(message, 'hihihihi.wav')
+
       
       print(RT.getCapacity(binaryMessage, used, rate)*44100/44100, "kbps")
       print("SNR of " + str(round(RT.getSNR(originalSamples[0:used], stegoSamples[0:used] ), 2)))

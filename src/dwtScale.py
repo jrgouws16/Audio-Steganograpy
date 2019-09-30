@@ -27,16 +27,8 @@ def binaryToInt(binaryString):
 # Returns a list of integer stego file samples
 def dwtScaleEncode(coverSamples, message, messageType, LSBs):
       samplesUsed = 0
-      total = []
-      originalCoeffs = []
-      newCoeffs      = []
-      
-      tempMesssss = ""
-      
       stegoSamples = []
       coverSamples = list(coverSamples)
-      
-      # Embed the messagelength within the message
       messageLength = len(message)
       numBlocks     = int(len(coverSamples)/512) 
       doBreak       = False  
@@ -77,7 +69,6 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
                   
                   subbandCoeff[i][j] = subbandCoeff[i][j] * scalingValue  
                   intValue = int(subbandCoeff[i][j])
-                  originalCoeffs.append(intValue)
                   fraction = subbandCoeff[i][j] - intValue
                   
                   binaryWidth = 25
@@ -88,7 +79,6 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
                   for k in range(len(binaryValue) - LSBs - 2, len(binaryValue) - 2): 
                         
                         binaryValue[k] = message[0]
-                        tempMesssss += message[0]
                         message = message[1:]
                         
                         if (len(message) == 0):
@@ -106,11 +96,7 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
                   binaryValue = "".join(binaryValue)          
      
                   if (scalingValue != 0):
-                      newCoeffs.append(binaryToInt(binaryValue))
                       subbandCoeff[i][j] = (binaryToInt(binaryValue) + fraction)/scalingValue
-                      total.append(subbandCoeff[i][j])
-
-                      tempMesssss = ""
      
                   if (doBreak == True):
                       break
@@ -135,19 +121,12 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
                 
       if (len(message) > 0):
           print("Message bits unembedded:", len(message))
-      
-        
-      diffssss = []
-      for i in range(0, len(originalCoeffs)):
-          diffssss.append(np.abs(originalCoeffs[i] - newCoeffs[i]))
         
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
-      print("End of encoding algorithm\n\n\n")
       
-      return stegoSamples + unaltered, samplesUsed, total
+      return stegoSamples + unaltered, samplesUsed
 
 def dwtScaleDecode(stegoSamples, LSBs):
-      total = []
       message = ""
       stegoSamples = list(stegoSamples)
       
@@ -177,7 +156,6 @@ def dwtScaleDecode(stegoSamples, LSBs):
               
               for j in range(0, len(subbandCoeff[i])):
                   
-                  total.append(subbandCoeff[i][j])
                   subbandCoeff[i][j] = subbandCoeff[i][j] * scalingValue  
                   intValue = int(subbandCoeff[i][j])                  
                   
@@ -219,7 +197,7 @@ def dwtScaleDecode(stegoSamples, LSBs):
           if (doBreak == True):
               break
       
-      return fp.binaryStringToASCII(message[27:]), typeMessage, total  
+      return message[27:], typeMessage  
 
 
 

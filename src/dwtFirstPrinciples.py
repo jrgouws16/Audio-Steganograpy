@@ -12,6 +12,14 @@ Created on Thu Aug 15 13:19:34 2019
 import numpy as np
 import math
 
+# Inverse of the binary_representation function of numpy
+def binaryToInt(binaryString):
+       
+    if (binaryString[0] == '1'):
+        return int(binaryString, 2)-(1<<len(binaryString))
+    else:
+        return int(binaryString, 2)
+
 # Convolve signal x with signal y
 def convolve(x, y):
     lenX = len(x)
@@ -134,21 +142,22 @@ def calcPower(coefficient):
     p = 0
     
     coefficient = np.abs(coefficient)
-    
+          
     for i in range(0,17):
-        if (2 ** i > coefficient):
+        if ((2 ** i) > coefficient):
             p = i - 1
             break
         
     if (p == -1):
         p = 0
         
+    #p = 8
     return p
 
 # Function to place a single bit within a 16 bit cover sample
 def replaceBit(sample, LSB_number, bit):
     # Convert the sample to a sixteen bit binary string
-    sample = "{0:016b}".format(sample)      
+    sample = np.binary_repr(sample, 16)  
     
     # Convert binary string to a list
     sample = list(sample)                   
@@ -160,27 +169,29 @@ def replaceBit(sample, LSB_number, bit):
     sample = ''.join(sample)      
 
     # Return the decimal value  
-    return int(sample,2) 
+    return binaryToInt(sample)
 
 # Function to extract the ith bit of a sample
 def extractBit(sample, LSB_number):
     # Form a sixteen bit sample value string
-    sample = "{0:016b}".format(int(sample))
+    sample = np.binary_repr(int(sample),16)
     
     # Return the bit
     return sample[-1*LSB_number]  
 
 # Function to embed a message within a single sample. Will start at 3rd LSB 
 def encodeCoefficient(sample, message):
-
-    sample = replaceBit(sample, 1, '1')  
+    fraction = sample - int(sample)
+    sample = int(sample)
+    
+    sample = replaceBit(sample, 1, '0')  
     sample = replaceBit(sample, 2, '0')  
     sample = replaceBit(sample, 3, '1')  
     
     for i in range(4, 4 + len(message)):
         sample = replaceBit(sample, i, message[i - 4])
         
-    return sample
+    return sample + fraction
 
 # Function to embed a message within a single sample. Will start at 3rd LSB 
 def decodeCoefficient(sample, bits):
@@ -223,8 +234,10 @@ def dwtHaarCoverCapacity(coverSamples, OBH, blockLength):
 # performed each time.
 # Returns a list of integer stego file samples
 def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
+      allCoefficients = []
       samplesUsed = 0
-      
+      progress = 100
+      originalMessageLen = len(message)
       # Get the approximate coefficients and detail coefficients of the signal
       coefficiets = getCoefficients(coverSamples, blockLength)
       
@@ -247,7 +260,7 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
           for i in range(0, len(coefficiets[1][blockNumber])):
               # Calculate the amount of bits that can possibly hidden
               replaceBits = calcPower(coefficiets[1][blockNumber][i]) - OBH - 3
-          
+              allCoefficients.append(replaceBits)
               # If it returns as a negative amount, skip the sample
               if (replaceBits <= 0):
                   continue
@@ -255,8 +268,17 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
               else:
                   # Get the amount of message bits that will be embedded
                   embedMessage = message[:replaceBits]
+                  
+                  newProgress = int(100*len(message)/originalMessageLen)
+                  
+                  if (newProgress < progress):
+                        progress = newProgress
+                        print(progress, end=" ")
+            
+                  
                   message = message[replaceBits:]
-                  coefficiets[1][blockNumber][i] = encodeCoefficient(int(coefficiets[1][blockNumber][i]), embedMessage)
+                  coefficiets[1][blockNumber][i] = encodeCoefficient(coefficiets[1][blockNumber][i], embedMessage)
+                  
                   samplesUsed = blockNumber * blockLength + (i + 1)*2
 
                   # If the message is embedded, break
@@ -272,17 +294,17 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
           temp = getSignal(coefficiets[0][i], coefficiets[1][i])
           temp = list(map(float, temp))
           stegoSamples += temp
-      
-      for i in range(len(stegoSamples)):
-            if (stegoSamples[i] > 32767):
-                  stegoSamples[i] = 32767
-            
-            if (stegoSamples[i] < -32767):
-                  stegoSamples[i] = -32767
 
-      
+      print(max(stegoSamples), min(stegoSamples))      
+#      for i in range(len(stegoSamples)):
+#            if (stegoSamples[i] > 32767):
+#                  stegoSamples[i] = 32767
+#            
+#            if (stegoSamples[i] < -32767):
+#                  stegoSamples[i] = -32767
+
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
-      return stegoSamples + unaltered, samplesUsed
+      return stegoSamples + unaltered, samplesUsed, allCoefficients
       
 # Function to decode a message from a stego audio file using the Haar DWT transform
 # Takes in list of integer stego file samples
@@ -294,7 +316,9 @@ def dwtHaarDecode(stegoSamples, OBH, blockLength):
       
       # Get the approximate coefficients and detail coefficients of the signal
       newCoeff = getCoefficients(stegoSamples, blockLength)
-          
+      allCoefficients = []    
+      
+      
       extractedLength = 0
       foundMsgLength = False
       
@@ -307,13 +331,12 @@ def dwtHaarDecode(stegoSamples, OBH, blockLength):
           for i in range(0, len(newCoeff[1][blockNumber])):    
               
               replaceBits = calcPower(newCoeff[1][blockNumber][i]) - OBH - 3
-                 
+              allCoefficients.append(replaceBits)
               if (replaceBits <= 0):
                   continue
               
               else:
                   extractMessage += decodeCoefficient(newCoeff[1][blockNumber][i], replaceBits)
-          
                   if (len(extractMessage) >= 28 and foundMsgLength == False):
                       extractedLength = int(extractMessage[0:26], 2)
                       foundMsgLength = True
@@ -337,7 +360,7 @@ def dwtHaarDecode(stegoSamples, OBH, blockLength):
           if(doBreak == 1):
               break
         
-      return extractMessage, fileType
+      return extractMessage, fileType, allCoefficients
       
       
 
