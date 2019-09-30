@@ -8,7 +8,6 @@ Created on Tue Sep 24 21:51:34 2019
 
 import dwtFirstPrinciples as dwt
 import numpy as np
-import fileprocessing as fp
 
 # Inverse of the binary_representation function of numpy
 def binaryToInt(binaryString):
@@ -43,7 +42,7 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
         
       elif (messageType == ".wav"):
           typeMessage = '1'
-                
+                          
       # Insert the type of message as the second element and the message length 
       # as the first element
       message = '{0:026b}'.format(messageLength) + typeMessage + message
@@ -171,8 +170,10 @@ def dwtScaleDecode(stegoSamples, LSBs):
                         
                       if (len(message) == 27):
                           messageLength = int(message[0:26],2)
-                                                          
-                          if (message[26] == 0):
+                                             
+                          print(message[26])
+                          
+                          if (message[26] == '0'):
                               typeMessage = ".txt"
                                 
                           else:

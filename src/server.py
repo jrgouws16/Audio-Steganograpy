@@ -13,6 +13,7 @@ import sockets
 from copy import deepcopy
 import geneticAlgorithm as GA
 import dwtOBH as dwtOBH
+import dwtScale
 import dwtEncrypt as DWTcrypt
 import ResultsAndTesting as RT
 import wave
@@ -344,6 +345,102 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
     
                     sockets.send_one_message(conn, "SENT_SUCCESS")
+                    
+                    
+                # The DWT OBH was selected                
+                elif (method.decode() == "DWT_scale"):
+                    LSBs = int(sockets.recv_one_message(conn).decode())
+    
+                    mainWindow.listWidget_log.addItem("LSBs = " + str(LSBs) + ": "  + str(addresses[connections.index(conn)][0]))
+                    
+                    # Receive the recipients to whom to send to
+                    # CP = Client and Peer
+                    # P  = Peer
+                    # C  = Client
+                    toWhom = sockets.recv_one_message(conn)
+                    toWhom = toWhom.decode()
+                                    
+                    # Extract the cover samples from the cover audio file
+                    mainWindow.listWidget_log.addItem("Embedding stego: "+ str(addresses[connections.index(conn)][0]))
+                    
+                    samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + ".wav")
+                    
+                    message = ""
+                    
+                    if (fileType == ".wav"):
+    
+                        # Get the audio samples in integer form
+                        intSamples = fp.extractWaveMessage(str(clientNum) + "MSG" + fileType)
+    
+                        # Convert to integer list of bits for embedding
+                        message = intSamples[0]
+                        
+                    else:
+                        message = fp.getMessageBits(str(clientNum) + "MSG" + fileType)
+                    
+                        
+                    message = "".join(list(map(str, message)))
+                
+                    print(fileType)
+                    stegoSamples, samplesUsed = dwtScale.dwtScaleEncode(samplesOne, message, fileType, LSBs)
+                    mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
+    
+                    # Write to the stego audio file in wave format and close the song
+                    mainWindow.listWidget_log.addItem("Writing stego to file")
+                    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
+                    scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
+                    mainWindow.listWidget_log.addItem("Done writing stego to file")
+        
+                    # Send to the requested receiver            
+                    mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
+                    f_send = str(clientNum) + "_StegoFile" + ".wav"
+        
+                    # Get the connections to send to
+                    connToSendTo = []
+                    
+                    if (toWhom == "P"):
+                        howMuch = sockets.recv_one_message(conn)
+                        howMuch = int(howMuch)
+                        
+                        for i in range(howMuch):
+                            ip = sockets.recv_one_message(conn)
+                            
+                            for j in range(0, len(addresses)):
+                                if (addresses[j][0] == ip.decode()):
+                                    connToSendTo.append(connections[j])
+                        
+                    elif (toWhom == "C"):
+                        connToSendTo.append(conn)
+                        
+                    elif (toWhom == "CP"):
+                        connToSendTo.append(conn)
+                        
+                        howMuch = sockets.recv_one_message(conn)
+                        howMuch = int(howMuch)
+                        
+                        for i in range(howMuch):
+                            ip = sockets.recv_one_message(conn)
+                            
+                            for j in range(0, len(addresses)):
+                                if (addresses[j][0] == ip.decode()):
+                                    connToSendTo.append(connections[j])
+                                         
+                    clients = "Client targets: \n"
+                    for i in connToSendTo:
+                        clients += "--->" + str(addresses[connections.index(i)][0]) + "\n"
+                    
+                    mainWindow.listWidget_log.addItem(clients)
+                                    
+                    for i in connToSendTo:
+                        with open(f_send, "rb") as f:
+                            data = f.read()
+                            sockets.send_one_message(i, "RECFILE")
+                            sockets.send_one_file(i, data)
+                            f.close()
+                        
+                    mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
+    
+                    sockets.send_one_message(conn, "SENT_SUCCESS")
     
     
                 elif (method.decode() == "DWT_encode"):
@@ -489,7 +586,42 @@ def threaded_client(conn, clientNum):
                         f.close()
                         
                     mainWindow.listWidget_log.addItem("Client received message: " + str(addresses[connections.index(conn)][0]))
+                
+                if (method.decode() == "DWT_scale"):
+                    LSBs = int(sockets.recv_one_message(conn).decode())
+                    mainWindow.listWidget_log.addItem("OBH = " + str(LSBs) + ": "  + str(addresses[connections.index(conn)][0]))
+    
+                    mainWindow.listWidget_log.addItem("Extracting message: "+ str(addresses[connections.index(conn)][0]))
+    
+                    samplesOneStego, samplesTwoStego, rate = fp.getWaveSamples(str(clientNum) + "Stego" + ".wav")
+                    samplesOneStego = np.asarray(samplesOneStego, dtype=np.float32, order = 'C') * 32768.0
                     
+                    extractMessage, fileType = dwtScale.dwtScaleDecode(list(samplesOneStego), LSBs)
+                      
+                    mainWindow.listWidget_log.addItem("Extracting completed: "+ str(addresses[connections.index(conn)][0]))
+                    
+                    mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
+                    print(fileType)
+                    
+      
+                    if (fileType == ".wav"):
+                        fp.writeWaveMessageToFile(extractMessage, str(clientNum) + "msg" + fileType)
+                    
+                    else:
+                        fp.writeMessageBitsToFile(extractMessage, str(clientNum) + "msg" + fileType)
+                        
+                    mainWindow.listWidget_log.addItem("Writing message completed " + str(addresses[connections.index(conn)][0]))
+                    
+                    mainWindow.listWidget_log.addItem("Sending message to client: " + str(addresses[connections.index(conn)][0]))
+                    
+                    with open(str(clientNum) + "msg" + fileType, "rb") as f:
+                        data = f.read()
+                        sockets.send_one_message(conn, "RECFILE")
+                        sockets.send_one_file(conn, data)
+                        f.close()
+                        
+                    mainWindow.listWidget_log.addItem("Client received message: " + str(addresses[connections.index(conn)][0]))  
+                  
                 # DWT encryption decoding
                 elif(method.decode() == "DWT_encode"):
                     

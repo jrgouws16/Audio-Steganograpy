@@ -877,7 +877,7 @@
            <enum>QTabWidget::Rounded</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1095,7 +1095,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_30">
                 <item>
-                 <widget class="QRadioButton" name="radioButton_dwt_scaling_enecode">
+                 <widget class="QRadioButton" name="radioButton_dwt_scaling_encode">
                   <property name="text">
                    <string>DWT scaling              </string>
                   </property>
@@ -2064,7 +2064,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>radioButton_dwt_scaling_enecode</sender>
+   <sender>radioButton_dwt_scaling_encode</sender>
    <signal>clicked()</signal>
    <receiver>lineEdit_OBH</receiver>
    <slot>hide()</slot>
@@ -2080,7 +2080,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>radioButton_dwt_scaling_enecode</sender>
+   <sender>radioButton_dwt_scaling_encode</sender>
    <signal>clicked()</signal>
    <receiver>lineEdit_GA_key</receiver>
    <slot>hide()</slot>
@@ -2112,7 +2112,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>radioButton_dwt_scaling_enecode</sender>
+   <sender>radioButton_dwt_scaling_encode</sender>
    <signal>clicked()</signal>
    <receiver>lineEdit_dwt_scale_encoding_LSB</receiver>
    <slot>show()</slot>

@@ -124,7 +124,7 @@ def encode():
             raise Exception('The message file is invalid. Only .txt and .wav files allowed.')
             
         # Error checking if a valid method was selected
-        if (not (mainWindow.radioButton_DWT.isChecked() or mainWindow.radioButton_GA.isChecked() or mainWindow.radioButton_dwt_encoding.isChecked())):
+        if (not (mainWindow.radioButton_DWT.isChecked() or mainWindow.radioButton_GA.isChecked() or mainWindow.radioButton_dwt_encoding.isChecked() or mainWindow.radioButton_dwt_scaling_encode.isChecked())):
             raise Exception('Select an encoding method.')
         
         # Check if the order of bits or key was supplied
@@ -165,6 +165,16 @@ def encode():
             
             # Send the order of bits to hold
             sockets.send_one_message(server[-1], OBH)
+            
+        elif(mainWindow.radioButton_dwt_scaling_encode.isChecked()):
+            # Send that DWT method was chosen
+            sockets.send_one_message(server[-1], "DWT_scale")
+                    
+            # Get the order of bits to hold in the coefficients
+            LSBs = mainWindow.lineEdit_dwt_scale_encoding_LSB.text()
+            
+            # Send the order of bits to hold
+            sockets.send_one_message(server[-1], LSBs)
             
                 
         # Second method = Genetic Algorithm
@@ -249,7 +259,7 @@ def decode():
             raise Exception('The stego file is invalid. Only wave files allowed.')
             
         # Error checking if a valid method was selected
-        if (not (mainWindow.radioButton_DWT_3.isChecked() or mainWindow.radioButton_GA_3.isChecked() or mainWindow.radioButton_dwt_decoding.isChecked())):
+        if (not (mainWindow.radioButton_DWT_3.isChecked() or mainWindow.radioButton_GA_3.isChecked() or mainWindow.radioButton_dwt_decoding.isChecked() or mainWindow.radioButton_dwt_scaling_decode.isChecked())):
             raise Exception('Select a decoding method.')
         
         # Check if the order of bits or key was supplied
@@ -278,6 +288,16 @@ def decode():
             
             # Send the order of bits to hold
             sockets.send_one_message(server[-1], OBH)
+            
+        elif (mainWindow.radioButton_dwt_scaling_decode.isChecked()):
+            # Send the DWT method
+            sockets.send_one_message(server[-1], "DWT_scale") 
+            
+            # Get the order of bits to hold in the coefficients
+            LSBs = mainWindow.lineEdit_dwt_scale_decoding_LSB.text()
+            
+            # Send the order of bits to hold
+            sockets.send_one_message(server[-1], LSBs)
             
         # Genetic Algorithm decoding
         elif(mainWindow.radioButton_GA_3.isChecked()):

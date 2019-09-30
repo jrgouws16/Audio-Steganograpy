@@ -435,21 +435,21 @@ if (encryptDWTDriver == True):
 if (scaleDWTDriver == True):
 
       print("Getting message bits")
-      binaryMessage = fp.getMessageBits('Media/opera.wav')
+      binaryMessage = fp.getMessageBits('Media/text.txt')
       binaryMessage = "".join(list(map(str, binaryMessage)))
   
       # Get the audio samples in integer form converted to binary
-      binaryMessage = fp.extractWaveMessage('Media/opera.wav')
+      #binaryMessage = fp.extractWaveMessage('Media/opera.wav')
 
       # Convert to integer list of bits for embedding
-      binaryMessage = "".join(binaryMessage[0])
+      #binaryMessage = "".join(binaryMessage[0])
       
       print("Getting cover sampels")
-      samples, samples2, rate = fp.getWaveSamples('Media/song.wav')
+      samples, samples2, rate = fp.getWaveSamples('Media/opera.wav')
       
       originalSamples = deepcopy(samples)
       print("Encoding")
-      stegoSamples, used = dwtScale.dwtScaleEncode(samples, binaryMessage, ".wav", 6)
+      stegoSamples, used = dwtScale.dwtScaleEncode(samples, binaryMessage, ".txt", 6)
       
       stegoSamples = np.asarray(stegoSamples)
       
@@ -462,7 +462,11 @@ if (scaleDWTDriver == True):
       print("Decoding")
       message,typeMessage = dwtScale.dwtScaleDecode(list(stegoSamples), 6)
       
-      fp.writeWaveMessageToFile(message, 'Media/testingExtract.wav')
+      if (typeMessage == '.wav'):
+            fp.writeWaveMessageToFile(message, 'Media/Johan.wav')
+            
+      else:
+            fp.writeMessageBitsToFile(message, 'Media/Johan.txt')
 
       
       print(RT.getCapacity(binaryMessage, used, rate)*44100/44100, "kbps")
