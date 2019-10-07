@@ -87,8 +87,9 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
               for j in range(0, len(coefficiets[1][i]), 16):
                   subbandCoeff.append(coefficiets[1][i][j:j + 16])
                   
-                  
-          embeddingProcess = 100 - 100 * messageLength/originalMessageLength 
+          if (int(100 - 100 * len(message)/originalMessageLength )>embeddingProcess):        
+                embeddingProcess = int(100 - 100 * len(message)/originalMessageLength )
+                print(embeddingProcess, end =" ")
                   
           # Scale each subband by the maximum value inside the subband
           for i in range(0, len(subbandCoeff)):

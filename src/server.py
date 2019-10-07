@@ -418,17 +418,29 @@ def threaded_client(conn, clientNum):
     
                         # Get the audio samples in integer form
                         intSamples = fp.extractWaveMessage(str(clientNum) + "MSG" + fileType)
-    
+                        
                         # Convert to integer list of bits for embedding
-                        message = intSamples[0]
+                        message = "".join(intSamples[0])
+                        print("Before encryption length", len(message))
+                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
+                        message = AES.encryptBinaryString(message, AESkey)
+                        print("After encryption length", len(message))
+                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
+                        
+                        message = list(map(int, list(message)))
                         
                     else:
                         message = fp.getMessageBits(str(clientNum) + "MSG" + fileType)
-                    
+                        message = list(map(str, message))
+                        message = "".join(message)
+                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
+                        message = AES.encryptBinaryString(message, AESkey)
+                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
+                        message = list(map(int, list(message)))
+                        
                         
                     message = "".join(list(map(str, message)))
                 
-                    print(fileType)
                     stegoSamples, samplesUsed = dwtScale.dwtScaleEncode(samplesOne, message, fileType, LSBs)
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
@@ -655,6 +667,18 @@ def threaded_client(conn, clientNum):
                     extractMessage, fileType = dwtScale.dwtScaleDecode(list(samplesOneStego), LSBs)
                       
                     mainWindow.listWidget_log.addItem("Steganography extracting completed: "+ str(addresses[connections.index(conn)][0]))
+                    
+                    try:
+                        # Encrypt the secret message
+                        mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
+                        extractMessage = AES.decryptBinaryString(extractMessage, AESkey)
+                    
+                    except Exception:
+                        fileType = '.txt'
+                        secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
+                                                        
+                    mainWindow.listWidget_log.addItem("AES decoding completed: "+ str(addresses[connections.index(conn)][0]))
+                    
                     
                     mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
                     print(fileType)

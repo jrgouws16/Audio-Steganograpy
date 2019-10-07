@@ -57,6 +57,9 @@ def getCapacity(coverSamples, OBH, blockLength):
 def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
       samplesUsed = 0 
       doBreak     = False
+      originalMessageLen = len(message)
+      progress = 0
+      
       # Get the approximate coefficients and detail coefficients of the signal
       coefficients = dwt.getCoefficients(coverSamples, blockLength)
       # Embed the messagelength within the message
@@ -74,6 +77,11 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
       message = messageLength + typeMessage + message
       
       for block in range(0, len(coefficients[1])):
+            
+            if (int(100 - 100*len(message)/originalMessageLen)>progress):
+                  progress = int(100 - 100*len(message)/originalMessageLen)
+                  print(progress, end =" ")
+            
             for i in range(0, len(coefficients[1][block])):
                   
                   bits = calcPower(coefficients[1][block][i]) - OBH - 2
