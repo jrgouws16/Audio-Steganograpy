@@ -17,7 +17,7 @@ Created on Mon Sep 30 23:18:51 2019
 # License: MIT
 ##
 
-
+import fileprocessing as fp
 from hashlib import md5
 from base64 import b64decode
 from base64 import b64encode
@@ -42,15 +42,38 @@ class AESCipher:
         self.cipher = AES.new(self.key, AES.MODE_CBC, raw[:AES.block_size])
         return unpad(self.cipher.decrypt(raw[AES.block_size:]), AES.block_size)
 
+def encryptBinaryString(binaryString, key):
+    
+    while (len(binaryString)%8 != 0):
+        binaryString = binaryString[-1]
+    
+    plainText = fp.binaryStringToASCII(binaryString)   
+    encrypted = AESCipher(key).encrypt(plainText).decode('utf-8')
+
+    binaryEncrypted = fp.messageToBinary(encrypted)
+    fp.binaryStringToASCII(binaryEncrypted)   
+
+    return binaryEncrypted
+
+def decryptBinaryString(binaryString, key):
+    
+    encrypted = fp.binaryStringToASCII(binaryString)        
+    
+    decrypted = AESCipher(key).decrypt(encrypted).decode('utf-8')
+    
+    binaryDecrypted = fp.messageToBinary(decrypted)
+    
+    return binaryDecrypted
 
 if __name__ == '__main__':
     print('TESTING ENCRYPTION')
-    msg       = "This is going to be great"
-    pwd       = "0123456789"
-    encrypted = AESCipher(pwd).encrypt(msg).decode('utf-8') 
-    print('Ciphertext:', encrypted)
-
-    print('\nTESTING DECRYPTION')
-    cte = encrypted
-    pwd = pwd
-    print('Message...:', AESCipher(pwd).decrypt(cte).decode('utf-8'))
+    msg       = "This is testing with one binary message string encryption and decryption.\n If you can read this message, the encryption and decryption was done successfully"
+    pwd       = "123456789"
+    message = fp.messageToBinary(msg)
+    encrypted = encryptBinaryString(message, pwd)
+    print("Ciphertext...:", fp.binaryStringToASCII(encrypted))
+    pwd = "123456789"
+    print("TESTING DECRYPTION")
+    extractMessage = decryptBinaryString(encrypted, pwd)
+    print("Message...:", fp.binaryStringToASCII(extractMessage))
+    

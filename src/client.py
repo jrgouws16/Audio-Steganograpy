@@ -48,7 +48,7 @@ def connectToServer():
               SS.showErrorMessage("Error Connecting", "Server unavailable.")
               s.close()
               del server[:]
-     
+
 def disconnectFromServer():
     global connectedToServer
     connectedToServer = False
@@ -134,6 +134,13 @@ def encode():
         if (mainWindow.radioButton_GA.isChecked() and mainWindow.lineEdit_GA_key.text() == ""):
             raise Exception('Provide a valid key for GA encoding.')
         
+        if (mainWindow.lineEdit_AES_encode.text() == ""):
+            raise Exception('Provide a non-empty string for the AES key')
+            
+        if (mainWindow.label_server_status.text() == "Status: Disonnected"):
+            raise Exception('You are not connected to a server.')
+     
+        
         # Send the encode command to the server
         sockets.send_one_message(server[-1], "Encode")    
         
@@ -155,6 +162,9 @@ def encode():
             data = f.read()
             sockets.send_one_file(server[0], data)
             f.close()
+    
+        # Send the AES encryption key
+        sockets.send_one_message(server[-1], mainWindow.lineEdit_AES_encode.text())
     
         if(mainWindow.radioButton_DWT.isChecked()):
             # Send that DWT method was chosen
@@ -268,7 +278,13 @@ def decode():
         
         if (mainWindow.radioButton_GA_3.isChecked() and mainWindow.lineEdit_GA_key_3.text() == ""):
             raise Exception('Provide a valid key for GA decoding.')
+                
+        if (mainWindow.lineEdit_AES_decode.text() == ""):
+            raise Exception('Provide a non-empty string for the AES key')
         
+        if (mainWindow.label_server_status.text() == "Status: Disonnected"):
+            raise Exception('You are not connected to a server.')
+            
         # Send the encode command to the server
         sockets.send_one_message(server[-1], "Decode") 
                 
@@ -277,6 +293,9 @@ def decode():
             data = f.read()
             sockets.send_one_file(server[-1], data)
             f.close()
+        
+        # Send the AES encryption key
+        sockets.send_one_message(server[-1], mainWindow.lineEdit_AES_decode.text())
         
         # Discrete haar wavelet transform decoding
         if (mainWindow.radioButton_DWT_3.isChecked()):
@@ -363,9 +382,6 @@ def getCoverCapacity():
     else:
         sockets.send_one_message(server[0], "GA")
         
-        
-    
-
 def setCoverPath():
       mainWindow.lineEdit_cover.setText(fp.openFile())
       
@@ -375,12 +391,27 @@ def setMessagePath():
 # Slot to set the file path to get the stego file      
 def setStegoPath():
       mainWindow.lineEdit_stego.setText(fp.openFile())
+      
+def setEncryptionKeyAES():
+    fileName = fp.openFile()
+    fileContent = open(fileName, 'r', encoding = 'utf-8')
+    mainWindow.lineEdit_AES_encode.setText(fileContent.read())
 
+def setDecryptionKeyAES():
+    fileName = fp.openFile()
+    fileContent = open(fileName, 'r', encoding = 'utf-8')
+    mainWindow.lineEdit_AES_decode.setText(fileContent.read())
       
 def setKey():
     fileName = fp.openFile()
     fileContent = open(fileName, 'r', encoding = 'utf-8')
-    mainWindow.lineEdit_GA_key.setText(fileContent.read())      
+    mainWindow.lineEdit_GA_key.setText(fileContent.read())   
+    
+def setKeyDecode():
+    fileName = fp.openFile()
+    fileContent = open(fileName, 'r', encoding = 'utf-8')
+    mainWindow.lineEdit_GA_key_3.setText(fileContent.read())   
+    
 
 if __name__ == "__main__":
     # Create a QtWidget application
@@ -416,6 +447,7 @@ if __name__ == "__main__":
     # Hide objects at start
     mainWindow.lineEdit_GA_key.hide()
     mainWindow.pushButton_browse_key.hide()
+    mainWindow.pushButton_browse_key_3.hide()
     mainWindow.lineEdit_OBH.hide()
     mainWindow.lineEdit_OBH_nr_3.hide()
     mainWindow.lineEdit_GA_key_3.hide()
@@ -426,12 +458,15 @@ if __name__ == "__main__":
     mainWindow.pushButton_connect.clicked.connect(connectToServer)
     mainWindow.pushButton_encode.clicked.connect(encode)
     mainWindow.pushButton_browse_key.clicked.connect(setKey)
+    mainWindow.pushButton_browse_key_3.clicked.connect(setKeyDecode)
     mainWindow.pushButton_browse_cover.clicked.connect(setCoverPath)
     mainWindow.pushButton_browse_message.clicked.connect(setMessagePath)
     mainWindow.pushButton_disconnect.clicked.connect(disconnectFromServer)
     mainWindow.pushButton_decode.clicked.connect(decode)
     mainWindow.pushButton_browse_stego_3.clicked.connect(setStegoPath)
     mainWindow.pushButton_cover_capacity.clicked.connect(getCoverCapacity)
+    mainWindow.pushButton_AES_encode.clicked.connect(setEncryptionKeyAES)
+    mainWindow.pushButton_AES_decode.clicked.connect(setDecryptionKeyAES)
     
     signalSaveFile.connect()
     msgDelivered.connect()
