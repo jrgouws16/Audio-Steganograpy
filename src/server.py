@@ -16,7 +16,6 @@ import dwtOBH as dwtOBH
 import dwtScale
 import dwtEncrypt as DWTcrypt
 import ResultsAndTesting as RT
-import wave
 import os
 import time
 import scipy.io.wavfile as scWave
@@ -103,10 +102,7 @@ def threaded_client(conn, clientNum):
                 if (method.decode() == "DWT"):
                     OBH = sockets.recv_one_message(conn)
                     OBH = int(OBH.decode())
-                    
-                    song = wave.open(str(clientNum) + "Capacity" + ".wav", "rb")
-                    samplesOne, samplesTwo = fp.extractWaveSamples(song)
-                    
+                    samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Capacity" + ".wav")
                     capacity = dwtOBH.getCapacity(samplesOne, OBH, 2048)
                     sockets.send_one_message(conn, "Capacity")
                     sockets.send_one_message(conn, str(capacity))
@@ -114,25 +110,19 @@ def threaded_client(conn, clientNum):
                 elif (method.decode() == "DWT_scale"):
                     LSBs = sockets.recv_one_message(conn)
                     LSBs = int(LSBs.decode())
-                    
-                    song = wave.open(str(clientNum) + "Capacity" + ".wav", "rb")
-                    samplesOne, samplesTwo = fp.extractWaveSamples(song)
-                    
+                    samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Capacity" + ".wav")
                     capacity = dwtScale.getCapacity(samplesOne, LSBs)
                     sockets.send_one_message(conn, "Capacity")
                     sockets.send_one_message(conn, str(capacity))
                     
                 elif (method.decode() == "DWT_encode"):
-                    song = wave.open(str(clientNum) + "Capacity" + ".wav", "rb")
-                    samplesOne, samplesTwo = fp.extractWaveSamples(song)
-                    
+                    samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Capacity" + ".wav")
                     capacity = DWTcrypt.getCapacity(samplesOne, 2048)
                     sockets.send_one_message(conn, "Capacity")
                     sockets.send_one_message(conn, str(capacity))
                     
                 elif (method.decode() == "GA"):
-                    song = wave.open(str(clientNum) + "Capacity" + ".wav", "rb")
-                    samplesOne, samplesTwo = fp.extractWaveSamples(song)
+                    samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Capacity" + ".wav")
                     sockets.send_one_message(conn, "Capacity")
                     sockets.send_one_message(conn, str(len(samplesOne)*1.5))
               

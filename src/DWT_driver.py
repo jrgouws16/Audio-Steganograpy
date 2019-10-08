@@ -18,6 +18,7 @@ from copy import deepcopy
 import ResultsAndTesting as RT
 import dwtScale 
 import dwtOBH
+import dwtHybrid
 
 def school_round(a_in,n_in):
     if (a_in * 10 ** (n_in + 1)) % 10 == 5:
@@ -33,8 +34,9 @@ plotUnderstanding        = False
 plotCorrectImplemnt      = False
 firstPrinciplesImplement = False
 libraryImplement         = False
-encryptDWTDriver         = False
-scaleDWTDriver           = True
+encryptDWTDriver         = True
+scaleDWTDriver           = False
+dwtHybridTest            = False
 
 
 
@@ -407,7 +409,7 @@ if (encryptDWTDriver == True):
     rate, samples = scWave.read('Media/opera.wav')
     originalCoverSamples = deepcopy(samples)
 
-    stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 256, ".txt")
+    stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 512, ".txt")
 
     stegoSamples = np.asarray(stegoSamples,dtype=np.float32, order='C') / 32768.0
     
@@ -428,7 +430,7 @@ if (encryptDWTDriver == True):
     if (myMessage != boodskap):
         print("Erorororororo ocurrres")
     
-    print(boodskap, fileType)
+    #print(boodskap, fileType)
     print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], extractStegoSamples[0:samplesUsed] ), 2)))
     
       
@@ -471,3 +473,39 @@ if (scaleDWTDriver == True):
       
       print(RT.getCapacity(binaryMessage, used, rate)*44100/44100, "kbps")
       print("SNR of " + str(round(RT.getSNR(originalSamples[0:used], stegoSamples[0:used] ), 2)))
+      
+      
+if (dwtHybridTest == True):
+    print("Getting message bits")
+    binaryMessage = fp.extractWaveMessage('Media/opera.wav')
+    binaryMessage = "".join(binaryMessage[0])
+    print("Getting cover sampels")
+    samples, samples2, rate = fp.getWaveSamples('Media/44100hz.wav')
+    
+    originalSamples = deepcopy(samples)
+    print("Encoding")
+    stegoSamples, used = dwtHybrid.dwtHybridEncode(samples, binaryMessage, ".wav", 7)
+     
+    stegoSamples = np.asarray(stegoSamples)
+      
+    stegoSamples = stegoSamples.astype(np.float32, order='C') / 32768.0
+    print("Writing to stego file")
+    scWave.write('Media/testing123.wav', rate, stegoSamples)
+    print("Reading from stego file")
+    rate, stegoSamples = scWave.read('Media/testing123.wav')
+    stegoSamples = stegoSamples.astype(np.float64, order='C') * 32768.0
+    print("Decoding")
+    message,typeMessage = dwtHybrid.dwtHybridDecode(list(stegoSamples), 7)
+    
+    for i in range(0, len(message)):
+        if (message[i] != binaryMessage[i]):
+            print("Err", end="")
+            
+    if (typeMessage == '.wav'):
+          fp.writeWaveMessageToFile(message, 'Media/Johan.wav')
+            
+    else:
+          fp.writeMessageBitsToFile(message, 'Media/Johan.txt')
+    
+    print(RT.getCapacity(binaryMessage, used, rate)*44100/44100, "kbps")
+    print("SNR of " + str(round(RT.getSNR(originalSamples[0:used], stegoSamples[0:used] ), 2)))

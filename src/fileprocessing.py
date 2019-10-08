@@ -135,39 +135,39 @@ def binaryStringToASCII(binaryString):
 # Returns two integer lists of samples for two channels
 # The second list will be empty if the wave file is mono
 # NB! This will only be used for the cover filie samples
-def extractWaveSamples(waveObject):
-    samplesChannelOne = []
-    samplesChannelTwo = []
-    
-    # Get the wave file parameters
-    nchannels, sampwidth, framerate, nframes, comptype, compname = waveObject.getparams()
-
-    # Read two bytes for mono (<1h) in little endian format
-    # Read four bytes for stereo (<2h) in little endian format
-    format = '<{}h'.format(nchannels)
-
-    for index in range(nframes):
-        # Read one frame
-        frame = waveObject.readframes(1)
-
-        # Unpack the frame to integer value            
-        data = struct.unpack(format, frame) 
-        
-        # First channel value added to channel one
-        samplesChannelOne.append(data[0])         
-
-        # Prevents overflow when inserting the message
-        if (samplesChannelOne[-1] <= -32768):       
-            samplesChannelOne[-1] += 1
-
-        # Do the second channel
-        if (nchannels == 2):
-            samplesChannelTwo.append(data[1])
-
-            if (samplesChannelTwo[-1] <= -32768):
-                samplesChannelTwo[-1] += 1
-       
-    return samplesChannelOne, samplesChannelTwo
+#def extractWaveSamples(waveObject):
+#    samplesChannelOne = []
+#    samplesChannelTwo = []
+#    
+#    # Get the wave file parameters
+#    nchannels, sampwidth, framerate, nframes, comptype, compname = waveObject.getparams()
+#
+#    # Read two bytes for mono (<1h) in little endian format
+#    # Read four bytes for stereo (<2h) in little endian format
+#    format = '<{}h'.format(nchannels)
+#
+#    for index in range(nframes):
+#        # Read one frame
+#        frame = waveObject.readframes(1)
+#
+#        # Unpack the frame to integer value            
+#        data = struct.unpack(format, frame) 
+#        
+#        # First channel value added to channel one
+#        samplesChannelOne.append(data[0])         
+#
+#        # Prevents overflow when inserting the message
+#        if (samplesChannelOne[-1] <= -32768):       
+#            samplesChannelOne[-1] += 1
+#
+#        # Do the second channel
+#        if (nchannels == 2):
+#            samplesChannelTwo.append(data[1])
+#
+#            if (samplesChannelTwo[-1] <= -32768):
+#                samplesChannelTwo[-1] += 1
+#       
+#    return samplesChannelOne, samplesChannelTwo
 
 def getWaveSamples(path):
       
