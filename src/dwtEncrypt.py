@@ -8,12 +8,7 @@ Created on Sun Sep 22 19:26:32 2019
 
 import dwtFirstPrinciples as dwt
 import numpy as np
-
-def school_round(a_in,n_in):
-    if (a_in * 10 ** (n_in + 1)) % 10 == 5:
-        return round(a_in + 1 / 10 ** (n_in + 1), n_in)
-    else:
-        return round(a_in, n_in)
+from copy import deepcopy
 
 # Function to get the number of 1's in the length of the message
 # Input: integer of the length of the message
@@ -30,6 +25,12 @@ def getCount(messageLength):
             count += 1
             
     return count
+
+def school_round(a_in,n_in):
+    if (a_in * 10 ** (n_in + 1)) % 10 == 5:
+        return round(a_in + 1 / 10 ** (n_in + 1), n_in)
+    else:
+        return round(a_in, n_in)
 
 def getCapacity(coverSamples, blockLength):
       bits = -28
@@ -67,6 +68,7 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
       # Subtract the count from every ASCII character of the message
       for i in range(0, messageLength):
           message[i] = message[i] - count
+                
       
       # Divide by 10000 to get four decimal digits
       message = list(np.asarray(message)/1000)
@@ -87,19 +89,28 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
       # Insert the type of message as the second element and the message length 
       # as the first element
       message.insert(0, typeMessage)
-      message.insert(0, messageLength/1000)
+      message.insert(0, messageLength)
+      
+      
+      originalMessage = deepcopy(message)
       
       for blockNumber in range(0, len(coefficiets[1])):
           for i in range(0, len(coefficiets[1][blockNumber])):
               # Replace the coefficient by the encrypted ascii char
               
-#              if (coefficiets[1][blockNumber][i] > 0):
-#                  coefficiets[1][blockNumber][i] = int(coefficiets[1][blockNumber][i]) + message[0]
-#                  
-#              else:    
-#                  coefficiets[1][blockNumber][i] = int(coefficiets[1][blockNumber][i]) - message[0]
+              coefficiets[1][blockNumber][i] = int(coefficiets[1][blockNumber][i]/10)
+              if (blockNumber == 0 and i == 0):
+                  coefficiets[1][blockNumber][i] = message[0]/100
+                  
+              elif (coefficiets[1][blockNumber][i] > 0):
+                  coefficiets[1][blockNumber][i] += message[0]
+                  
+              else:    
+                  coefficiets[1][blockNumber][i] -= message[0] 
               
-              coefficiets[1][blockNumber][i] = message[0]
+              #print(message[0], end = " ")                      
+              coefficiets[1][blockNumber][i] = coefficiets[1][blockNumber][i] * 10
+
               message = message[1:]
               samplesUsed = blockNumber * blockLength + (i + 1)*2
               
@@ -125,28 +136,36 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
       
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
 
-      return stegoSamples + unaltered, samplesUsed
+      return stegoSamples + unaltered, samplesUsed, originalMessage
 
 def dwtEncryptDecode(stegoSamples, blockLength):
       # Get the approximate coefficients and detail coefficients of the signal
+#      print("")
       newCoeff = dwt.getCoefficients(stegoSamples, blockLength) 
       extractedLength = 0
+      returnList = []
       extractMessage = []
       fileType = ''
       blockNumber = 0      
       doBreak = 0
-      
       while(1):
           for i in range(0, len(newCoeff[1][blockNumber])):    
-              
-              extractMessage.append(newCoeff[1][blockNumber][i])
+             
+              newCoeff[1][blockNumber][i] = newCoeff[1][blockNumber][i] / 10 
+#              print(school_round(newCoeff[1][blockNumber][i],3), end = " ")
+              if (blockNumber == 0 and i == 0):  
+                    extractMessage.append(int(np.abs(school_round(newCoeff[1][blockNumber][i]*100,0))))
+                    returnList.append(int(np.abs(school_round(newCoeff[1][blockNumber][i]*100,0))))
+              else:
+                    extractMessage.append(np.abs(school_round(newCoeff[1][blockNumber][i] - int(newCoeff[1][blockNumber][i]),3)))
+                    returnList.append(np.abs(school_round(newCoeff[1][blockNumber][i] - int(newCoeff[1][blockNumber][i]),3)))
+                    
               
               # Interpret the message length and the message type  
               if (len(extractMessage) == 2):
-                  #extractedLength = int(school_round((extractMessage[0]-int(extractMessage[0]))*10000, 0))
-
-                  extractedLength = int(school_round(extractMessage[0]*1000, 0))
-
+                  
+                  extractedLength = int(school_round(extractMessage[0],0))
+                  
                   if (extractMessage[1] == 0):
                       fileType = '.txt'
 
@@ -169,12 +188,14 @@ def dwtEncryptDecode(stegoSamples, blockLength):
       
       # Add the count and scale the message  
       for i in range(0, len(extractMessage)):
-          #extractMessage[i] = int(school_round((np.abs(extractMessage[i])-np.abs(int(extractMessage[i]))) * 10000 + count, 0))
-          extractMessage[i] = int(school_round(extractMessage[i] * 1000 + count, 0))
+          extractMessage[i] = int(extractMessage[i] * 1000 + count)
+          
+          
+          
       
       # Map the ASCII value to the character version  
       extractMessage = "".join(list(map(chr, extractMessage)))
       
       
-      return extractMessage, fileType
+      return extractMessage, fileType, returnList
 

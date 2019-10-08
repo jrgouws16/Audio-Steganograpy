@@ -404,32 +404,29 @@ if (libraryImplement == True):
       fp.writeMessageBitsToFile(extractMessage, 'Media/dwtLibraryMessageExtract.jpeg')
       
 if (encryptDWTDriver == True):
-    myMessage = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n"*100
-    
-    rate, samples = scWave.read('Media/opera.wav')
+    myMessage = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n"*1000
+    samples, samples2, rate = fp.getWaveSamples('Media/song.wav')
     originalCoverSamples = deepcopy(samples)
 
-    stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 512, ".txt")
+    stegoSamples, samplesUsed, origCoeff = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 512, ".txt")
 
     stegoSamples = np.asarray(stegoSamples,dtype=np.float32, order='C') / 32768.0
-    
     scWave.write("papagaai.wav", rate, stegoSamples)
 
     rate, extractStegoSamples = scWave.read('papagaai.wav')
 
     extractStegoSamples = extractStegoSamples.astype(np.float32, order='C') * 32768.0
     
-    boodskap, fileType = dwtEncrypt.dwtEncryptDecode(extractStegoSamples, 256)
     
-    diff = []
-    for i in range(0, len(originalCoverSamples)):
-        diff.append(np.abs(extractStegoSamples[i] - stegoSamples[i] * 32768.0))
-
-    print(max(diff), sum(diff)/len(diff))    
     
-    if (myMessage != boodskap):
-        print("Erorororororo ocurrres")
+    boodskap, fileType, gotCoeff = dwtEncrypt.dwtEncryptDecode(extractStegoSamples, 256)
     
+    
+    if (boodskap == myMessage):
+          print("The message extracted is exactly the same as original message")
+          
+    else:
+          print(boodskap)
     #print(boodskap, fileType)
     print("SNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], extractStegoSamples[0:samplesUsed] ), 2)))
     
@@ -463,6 +460,8 @@ if (scaleDWTDriver == True):
       stegoSamples = stegoSamples.astype(np.float64, order='C') * 32768.0
       print("Decoding")
       message,typeMessage = dwtScale.dwtScaleDecode(list(stegoSamples), 6)
+      
+      
       
       if (typeMessage == '.wav'):
             fp.writeWaveMessageToFile(message, 'Media/Johan.wav')
