@@ -100,7 +100,7 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
               
               coefficiets[1][blockNumber][i] = int(coefficiets[1][blockNumber][i]/10)
               if (blockNumber == 0 and i == 0):
-                  coefficiets[1][blockNumber][i] = message[0]/100
+                  coefficiets[1][blockNumber][i] = message[0]/1000000
                   
               elif (coefficiets[1][blockNumber][i] > 0):
                   coefficiets[1][blockNumber][i] += message[0]
@@ -154,8 +154,8 @@ def dwtEncryptDecode(stegoSamples, blockLength):
               newCoeff[1][blockNumber][i] = newCoeff[1][blockNumber][i] / 10 
 #              print(school_round(newCoeff[1][blockNumber][i],3), end = " ")
               if (blockNumber == 0 and i == 0):  
-                    extractMessage.append(int(np.abs(school_round(newCoeff[1][blockNumber][i]*100,0))))
-                    returnList.append(int(np.abs(school_round(newCoeff[1][blockNumber][i]*100,0))))
+                    extractMessage.append(int(np.abs(school_round(newCoeff[1][blockNumber][i]*1000000,0))))
+                    returnList.append(int(np.abs(school_round(newCoeff[1][blockNumber][i]*1000000,0))))
               else:
                     extractMessage.append(np.abs(school_round(newCoeff[1][blockNumber][i] - int(newCoeff[1][blockNumber][i]),3)))
                     returnList.append(np.abs(school_round(newCoeff[1][blockNumber][i] - int(newCoeff[1][blockNumber][i]),3)))

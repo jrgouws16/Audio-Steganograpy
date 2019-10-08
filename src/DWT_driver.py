@@ -404,17 +404,30 @@ if (libraryImplement == True):
       fp.writeMessageBitsToFile(extractMessage, 'Media/dwtLibraryMessageExtract.jpeg')
       
 if (encryptDWTDriver == True):
-    myMessage = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n"*1000
+    myMessage = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n"*2000
+    print("Getting cover samples")
     samples, samples2, rate = fp.getWaveSamples('Media/song.wav')
+    
     originalCoverSamples = deepcopy(samples)
-
+    print("Embedding")
     stegoSamples, samplesUsed, origCoeff = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 512, ".txt")
 
+    print("Getting difference")
+
+    diff = []
+    
+    for i in range(0,len(stegoSamples)):
+          diff.append(np.abs(stegoSamples[i]-originalCoverSamples[i]))
+          
+    print(max(diff))
+
+    print("Writing to stego file")
     stegoSamples = np.asarray(stegoSamples,dtype=np.float32, order='C') / 32768.0
     scWave.write("papagaai.wav", rate, stegoSamples)
-
+    print("Reading from stego file")
     rate, extractStegoSamples = scWave.read('papagaai.wav')
 
+    print("Extracting")
     extractStegoSamples = extractStegoSamples.astype(np.float32, order='C') * 32768.0
     
     
