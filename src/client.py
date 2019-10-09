@@ -124,13 +124,16 @@ def encode():
             raise Exception('The message file is invalid. Only .txt and .wav files allowed.')
             
         # Error checking if a valid method was selected
-        if (not (mainWindow.radioButton_DWT.isChecked() or mainWindow.radioButton_GA.isChecked() or mainWindow.radioButton_dwt_encoding.isChecked() or mainWindow.radioButton_dwt_scaling_encode.isChecked())):
+        if (not (mainWindow.radioButton_DWT.isChecked() or mainWindow.radioButton_GA.isChecked() or mainWindow.radioButton_dwt_encoding.isChecked() or mainWindow.radioButton_dwt_scaling_encode.isChecked() or mainWindow.radioButton_DWT_hybrid_encode.isChecked())):
             raise Exception('Select an encoding method.')
         
         # Check if the order of bits or key was supplied
         if (mainWindow.radioButton_DWT.isChecked() and mainWindow.lineEdit_OBH.text() == ""):
             raise Exception('Provide a valid OBH for DWT encoding.')
         
+        if (mainWindow.radioButton_DWT_hybrid_encode.isChecked() and mainWindow.lineEdit_OBH_hybrid_encode.text() == ""):
+            raise Exception('Provide a valid OBH for DWT hybrid encoding.')    
+            
         if (mainWindow.radioButton_GA.isChecked() and mainWindow.lineEdit_GA_key.text() == ""):
             raise Exception('Provide a valid key for GA encoding.')
         
@@ -172,6 +175,16 @@ def encode():
                     
             # Get the order of bits to hold in the coefficients
             OBH = mainWindow.lineEdit_OBH.text()
+            
+            # Send the order of bits to hold
+            sockets.send_one_message(server[-1], OBH)
+            
+        elif(mainWindow.radioButton_DWT_hybrid_encode.isChecked()):
+            # Send that DWT method was chosen
+            sockets.send_one_message(server[-1], "DWT_hybrid")
+                    
+            # Get the order of bits to hold in the coefficients
+            OBH = mainWindow.lineEdit_OBH_hybrid_encode.text()
             
             # Send the order of bits to hold
             sockets.send_one_message(server[-1], OBH)
@@ -269,13 +282,17 @@ def decode():
             raise Exception('The stego file is invalid. Only wave files allowed.')
             
         # Error checking if a valid method was selected
-        if (not (mainWindow.radioButton_DWT_3.isChecked() or mainWindow.radioButton_GA_3.isChecked() or mainWindow.radioButton_dwt_decoding.isChecked() or mainWindow.radioButton_dwt_scaling_decode.isChecked())):
+        if (not (mainWindow.radioButton_DWT_3.isChecked() or mainWindow.radioButton_GA_3.isChecked() or mainWindow.radioButton_dwt_decoding.isChecked() or mainWindow.radioButton_dwt_scaling_decode.isChecked() or mainWindow.radioButton_DWT_hybrid_decode.isChecked())):
             raise Exception('Select a decoding method.')
         
         # Check if the order of bits or key was supplied
         if (mainWindow.radioButton_DWT_3.isChecked() and mainWindow.lineEdit_OBH_nr_3.text() == ""):
             raise Exception('Provide a valid OBH for DWT decoding.')
         
+        if (mainWindow.radioButton_DWT_hybrid_decode.isChecked() and mainWindow.lineEdit_OBH_hybrid_decode.text() == ""):
+            raise Exception('Provide a valid OBH for DWT hybrid decoding.')
+         
+            
         if (mainWindow.radioButton_GA_3.isChecked() and mainWindow.lineEdit_GA_key_3.text() == ""):
             raise Exception('Provide a valid key for GA decoding.')
                 
@@ -307,6 +324,16 @@ def decode():
             
             # Send the order of bits to hold
             sockets.send_one_message(server[-1], OBH)
+        
+        elif (mainWindow.radioButton_DWT_hybrid_decode.isChecked()):
+            # Send the DWT method
+            sockets.send_one_message(server[-1], "DWT_hybrid") 
+            
+            # Get the order of bits to hold in the coefficients
+            OBH = mainWindow.lineEdit_OBH_hybrid_decode.text()
+            
+            # Send the order of bits to hold
+            sockets.send_one_message(server[-1], OBH) 
             
         elif (mainWindow.radioButton_dwt_scaling_decode.isChecked()):
             # Send the DWT method
@@ -437,6 +464,8 @@ if __name__ == "__main__":
     mainWindow.lineEdit_stego.setReadOnly(True)
     
     mainWindow.lineEdit_OBH_nr_3.setPlaceholderText("OBH")
+    mainWindow.lineEdit_OBH_hybrid_decode.setPlaceholderText("OBH")
+    mainWindow.lineEdit_OBH_hybrid_encode.setPlaceholderText("OBH")
     
     mainWindow.lineEdit_dwt_scale_encoding_LSB.setPlaceholderText("LSB's")
     mainWindow.lineEdit_dwt_scale_decoding_LSB.setPlaceholderText("LSB's")
@@ -453,6 +482,9 @@ if __name__ == "__main__":
     mainWindow.lineEdit_GA_key_3.hide()
     mainWindow.lineEdit_dwt_scale_encoding_LSB.hide()
     mainWindow.lineEdit_dwt_scale_decoding_LSB.hide()
+    mainWindow.lineEdit_OBH_hybrid_decode.hide()
+    mainWindow.lineEdit_OBH_hybrid_encode.hide()
+    
 
     # Connect the buttons to the appropriate slots
     mainWindow.pushButton_connect.clicked.connect(connectToServer)

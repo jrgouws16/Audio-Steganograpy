@@ -8,7 +8,6 @@ Created on Sun Sep 22 19:26:32 2019
 
 import dwtFirstPrinciples as dwt
 import numpy as np
-from copy import deepcopy
 
 # Function to get the number of 1's in the length of the message
 # Input: integer of the length of the message
@@ -93,11 +92,17 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
       message.insert(0, typeMessage)
       message.insert(0, messageLength)
            
-      originalMessage = deepcopy(message)
+      
+      
       progress = 0
+      original = len(message)
+
+
       for blockNumber in range(0, len(coefficiets[1])):
           for i in range(0, len(coefficiets[1][blockNumber])):
-              
+              progress = 100 - len(message)/original*100
+              print(int(progress), end  = " ")
+      
               # Replace the coefficient by the encrypted ascii char
               
               coefficiets[1][blockNumber][i] = int(coefficiets[1][blockNumber][i]/10)
@@ -110,16 +115,11 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
               else:    
                   coefficiets[1][blockNumber][i] -= message[0] 
               
-              #print(message[0], end = " ")                      
               coefficiets[1][blockNumber][i] = coefficiets[1][blockNumber][i] * 10
 
               message = message[1:]
               samplesUsed = blockNumber * blockLength + (i + 1)*2
               
-              if (int(100 - 100*len(message)/len(originalMessage)) > progress):
-                  progress = 100 - 100*len(message)/len(originalMessage)
-                  print(progress, end =" ")
-
               # If the message is embedded, break
               if (len(message) == 0):
                   doBreak = True
@@ -168,7 +168,6 @@ def dwtEncryptDecode(stegoSamples, blockLength):
               if (len(extractMessage) == 2):
                   
                   extractedLength = int(school_round(extractMessage[0],0))
-                  print(extractMessage[1])
                   if (extractMessage[1] == 0.5000):
                       fileType = '.txt'
 

@@ -12,8 +12,9 @@ import fileprocessing as fp
 import sockets
 from copy import deepcopy
 import geneticAlgorithm as GA
-import dwtOBH as dwtOBH
+import dwtOBH
 import dwtScale
+import dwtHybrid
 import dwtEncrypt as DWTcrypt
 import ResultsAndTesting as RT
 import os
@@ -384,7 +385,117 @@ def threaded_client(conn, clientNum):
                     sockets.send_one_message(conn, "SENT_SUCCESS")
                     
                     
+                    
+                    
+                    
                 # The DWT OBH was selected                
+                elif (method.decode() == "DWT_hybrid"):
+                    OBH = int(sockets.recv_one_message(conn).decode())
+    
+                    mainWindow.listWidget_log.addItem("OBH = " + str(OBH) + ": "  + str(addresses[connections.index(conn)][0]))
+                    # Receive the recipients to whom to send to
+                    # CP = Client and Peer
+                    # P  = Peer
+                    # C  = Client
+                    toWhom = sockets.recv_one_message(conn)
+                    toWhom = toWhom.decode()
+                                    
+                    # Extract the cover samples from the cover audio file
+                    mainWindow.listWidget_log.addItem("Embedding stego: "+ str(addresses[connections.index(conn)][0]))
+                    
+                    samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + ".wav")
+                    
+                    message = ""
+                    
+                    if (fileType == ".wav"):
+    
+                        # Get the audio samples in integer form
+                        intSamples = fp.extractWaveMessage(str(clientNum) + "MSG" + fileType)
+    
+                        # Convert to integer list of bits for embedding
+                        message = "".join(intSamples[0])
+                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
+                        message = AES.encryptBinaryString(message, AESkeyEncode)
+                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
+                        
+                        message = list(map(int, list(message)))
+                        
+                    else:
+                        message = fp.getMessageBits(str(clientNum) + "MSG" + fileType)
+                        message = list(map(str, message))
+                        message = "".join(message)
+                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
+                        message = AES.encryptBinaryString(message, AESkeyEncode)
+                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
+                        message = list(map(int, list(message)))
+                        
+                    
+                    message = "".join(list(map(str, message)))
+                
+                    stegoSamples, samplesUsed = dwtHybrid.dwtHybridEncode(samplesOne, message, fileType, OBH)
+                    mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
+    
+                    # Write to the stego audio file in wave format and close the song
+                    mainWindow.listWidget_log.addItem("Writing stego to file")
+                    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
+                    scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
+                    mainWindow.listWidget_log.addItem("Done writing stego to file")
+        
+                    # Send to the requested receiver            
+                    mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
+                    f_send = str(clientNum) + "_StegoFile" + ".wav"
+        
+                    # Get the connections to send to
+                    connToSendTo = []
+                    
+                    if (toWhom == "P"):
+                        howMuch = sockets.recv_one_message(conn)
+                        howMuch = int(howMuch)
+                        
+                        for i in range(howMuch):
+                            ip = sockets.recv_one_message(conn)
+                            
+                            for j in range(0, len(addresses)):
+                                if (addresses[j][0] == ip.decode()):
+                                    connToSendTo.append(connections[j])
+                        
+                    elif (toWhom == "C"):
+                        connToSendTo.append(conn)
+                        
+                    elif (toWhom == "CP"):
+                        connToSendTo.append(conn)
+                        
+                        howMuch = sockets.recv_one_message(conn)
+                        howMuch = int(howMuch)
+                        
+                        for i in range(howMuch):
+                            ip = sockets.recv_one_message(conn)
+                            
+                            for j in range(0, len(addresses)):
+                                if (addresses[j][0] == ip.decode()):
+                                    connToSendTo.append(connections[j])
+                                         
+                    clients = "Client targets: \n"
+                    for i in connToSendTo:
+                        clients += "--->" + str(addresses[connections.index(i)][0]) + "\n"
+                    
+                    mainWindow.listWidget_log.addItem(clients)
+                                    
+                    for i in connToSendTo:
+                        with open(f_send, "rb") as f:
+                            data = f.read()
+                            sockets.send_one_message(i, "RECFILE")
+                            sockets.send_one_file(i, data)
+                            f.close()
+                        
+                    mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
+    
+                    sockets.send_one_message(conn, "SENT_SUCCESS")    
+                    
+                    
+                    
+                    
+                # The DWT scaling selected                
                 elif (method.decode() == "DWT_scale"):
                     LSBs = int(sockets.recv_one_message(conn).decode())
     
@@ -512,12 +623,13 @@ def threaded_client(conn, clientNum):
                         # Extract the message as a string of characters
                         message = messageObject.read()
                         
-                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        print('BEFORE ENCRYPTION ENCODING', message[0:20], AESkeyEncode)
-                        message = AES.AESCipher(AESkeyEncode).encrypt(message).decode('utf-8')
-                        print('AFTER ENCRYPTION ENCODING', message[0:20], AESkeyEncode)
-                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
-                        
+#                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
+#                        message = AES.string2bits(message)
+#                        message = AES.encryptBinaryString(message, AESkeyEncode)
+#                        message = AES.bits2string(message)
+#                        
+#                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
+#                        
                         messageObject.close()
                         
                     else:
@@ -528,15 +640,16 @@ def threaded_client(conn, clientNum):
                         message = "".join(intSamples[0])
                         alphaMessage = ''
                         
-#                         Convert the binary stream to a ASCII string
+                        # Convert the binary stream to a ASCII string
                         for i in range(0, len(message), 8):
                             alphaMessage += AES.bits2string(message[i: i + 8])
                         
-                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkeyEncode)
-                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
+#                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
+#                        message = AES.encryptBinaryString(message, AESkeyEncode)
+#                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                                             
-                    mainWindow.listWidget_log.addItem("Embedding starting: " + str(addresses[connections.index(conn)][0]))    
+                    mainWindow.listWidget_log.addItem("Embedding starting: " + str(addresses[connections.index(conn)][0]))  
+                                        
                     stegoSamples, samplesUsed = DWTcrypt.dwtEncryptEncode(samplesOne, message, 2048, fileType)        
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
@@ -636,17 +749,16 @@ def threaded_client(conn, clientNum):
                       
                     mainWindow.listWidget_log.addItem("Steganography extracting completed: "+ str(addresses[connections.index(conn)][0]))
                     
-                    try:
-                        # Encrypt the secret message
-                        mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                        extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
-                    
-                    except Exception:
+                    # Encrypt the secret message
+                    mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
+                    extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
+              
+                    if (AES.bits2string(extractMessage) == "WRONG_KEY"):
+                        print("IN HERE")
                         fileType = '.txt'
-                        secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
+                        extractMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
                                                         
                     mainWindow.listWidget_log.addItem("AES decoding completed: "+ str(addresses[connections.index(conn)][0]))
-                    
                     
                     mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
     
@@ -668,6 +780,55 @@ def threaded_client(conn, clientNum):
                         
                     mainWindow.listWidget_log.addItem("Client received message: " + str(addresses[connections.index(conn)][0]))
                 
+                  
+                elif (method.decode() == "DWT_hybrid"):
+                    OBH = int(sockets.recv_one_message(conn).decode())
+                    mainWindow.listWidget_log.addItem("OBH = " + str(OBH) + ": "  + str(addresses[connections.index(conn)][0]))
+    
+                    mainWindow.listWidget_log.addItem("Extracting message: "+ str(addresses[connections.index(conn)][0]))
+    
+                    # Open the steganography file
+                    samplesOneStego, samplesTwoStego, rate = fp.getWaveSamples(str(clientNum) + "Stego" + ".wav")
+                    samplesOneStego = np.asarray(samplesOneStego, dtype=np.float32, order = 'C')*32768.0
+                    
+                    # Extract the wave samples from the host signal
+                    extractMessage, fileType = dwtHybrid.dwtHybridDecode(samplesOneStego, OBH)
+                      
+                    mainWindow.listWidget_log.addItem("Steganography extracting completed: "+ str(addresses[connections.index(conn)][0]))
+                    
+                    # Encrypt the secret message
+                    mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
+                    extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
+              
+                    if (AES.bits2string(extractMessage) == "WRONG_KEY"):
+                        print("IN HERE")
+                        fileType = '.txt'
+                        extractMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
+                                                        
+                    mainWindow.listWidget_log.addItem("AES decoding completed: "+ str(addresses[connections.index(conn)][0]))
+                    
+                    mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
+    
+                    if (fileType == ".wav"):
+                        fp.writeWaveMessageToFile(extractMessage, str(clientNum) + "msg" + fileType)
+                    
+                    else:
+                        fp.writeMessageBitsToFile(extractMessage, str(clientNum) + "msg" + fileType)
+                        
+                    mainWindow.listWidget_log.addItem("Writing message completed " + str(addresses[connections.index(conn)][0]))
+                    
+                    mainWindow.listWidget_log.addItem("Sending message to client: " + str(addresses[connections.index(conn)][0]))
+                    
+                    with open(str(clientNum) + "msg" + fileType, "rb") as f:
+                        data = f.read()
+                        sockets.send_one_message(conn, "RECFILE")
+                        sockets.send_one_file(conn, data)
+                        f.close()
+                        
+                    mainWindow.listWidget_log.addItem("Client received message: " + str(addresses[connections.index(conn)][0]))  
+                  
+                  
+                  
                 elif (method.decode() == "DWT_scale"):
                     LSBs = int(sockets.recv_one_message(conn).decode())
                     mainWindow.listWidget_log.addItem("OBH = " + str(LSBs) + ": "  + str(addresses[connections.index(conn)][0]))
@@ -681,18 +842,16 @@ def threaded_client(conn, clientNum):
                       
                     mainWindow.listWidget_log.addItem("Steganography extracting completed: "+ str(addresses[connections.index(conn)][0]))
                     
-                    try:
-                        # Encrypt the secret message
-                        mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                        extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
+                    # Encrypt the secret message
+                    mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
+                    extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
                     
-                    except Exception:
+                    if (AES.bits2string(extractMessage) == "WRONG_KEY"):
+                        print("IN HERE")
                         fileType = '.txt'
                         extractMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
                                                         
                     mainWindow.listWidget_log.addItem("AES decoding completed: "+ str(addresses[connections.index(conn)][0]))
-                    
-                    
                     mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
                     
       
@@ -714,6 +873,7 @@ def threaded_client(conn, clientNum):
                         
                     mainWindow.listWidget_log.addItem("Client received message: " + str(addresses[connections.index(conn)][0]))  
                   
+                  
                 # DWT encryption decoding
                 elif(method.decode() == "DWT_encode"):
                     
@@ -725,7 +885,6 @@ def threaded_client(conn, clientNum):
                     samples = samples.astype(np.float64, order='C') * 32768.0
                         
                     secretMessage, fileType = DWTcrypt.dwtEncryptDecode(list(samples), 2048)
-                                        
                     mainWindow.listWidget_log.addItem("Steganography extracting completed: "+ str(addresses[connections.index(conn)][0]))
     
                     # Write the message bits to a file and close the steganography file
@@ -734,47 +893,46 @@ def threaded_client(conn, clientNum):
                     if (fileType == ".wav"):
                         
                         
-                        try:
-                            # Encrypt the secret message
-                            mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                            secretMessage = AES.AESCipher(AESkeyDecode).decrypt(secretMessage).decode('utf-8')
-                        
-                        except Exception:
-                            fileType = '.txt'
-                            secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
-                                                        
-                        mainWindow.listWidget_log.addItem("AES decoding completed: "+ str(addresses[connections.index(conn)][0]))
-                 
+                       
+                        # Encrypt the secret message
+#                        mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
+#                        secretMessage = AES.string2bits(secretMessage)
+#                        secretMessage = AES.encryptBinaryString(secretMessage, AESkeyDecode)
+#                        secretMessage = AES.bits2string(secretMessage)
+#                        mainWindow.listWidget_log.addItem("AES decoding completed: "+ str(addresses[connections.index(conn)][0]))
+#                        
+#                        if (AES.bits2string(secretMessage) == "WRONG_KEY"):
+#                              fileType = '.txt'
+#                              secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
+#                              fp.writeMessageBitsToFile(secretMessage, str(clientNum) + "msg" + fileType)
+#                                                    
+#                        else:
+                       
                         # Convert to integer list of bits for embedding
                         binMessage = ''
-                        print("TESTING 1")
                         # Convert the binary stream to a ASCII string
                         for i in range(0, len(secretMessage)):
                             binMessage += AES.string2bits(secretMessage[i])
-                        print("TESTING 2")
                         fp.writeWaveMessageToFile(secretMessage, str(clientNum) + "msg" + fileType)
-                        print("TESTING 3")
-                    
+              
                     else:
-                        
-                        try:
                             # Encrypt the secret message
-                            print('BEFORE ENCRYPTION DECODING', secretMessage[0:20], AESkeyDecode[0:20])
-
-                            mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                            secretMessage = AES.AESCipher(AESkeyDecode).decrypt(secretMessage).decode('utf-8')
-                            print('AFTER ENCRYPTION DECODING', secretMessage[0:20], AESkeyDecode[0:20])
+#                            mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
+                            #secretMessage = AES.AESCipher(AESkeyDecode).decrypt(secretMessage)
+                            
+#                            mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
+#                            if (secretMessage == "WRONG_KEY"):
+#                                  print("IN HERE")
+#                                  fileType = '.txt'
+#                                  secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
+#                                  fp.writeMessageBitsToFile(secretMessage, str(clientNum) + "msg" + fileType)
+#      
+#                            else:
                             messageFileObj = open(str(clientNum) + "msg" + fileType, 'w')
                             messageFileObj.write(secretMessage)
                             messageFileObj.close()
-                        
-                        except Exception:
-                            print("This is the error")
-                            fileType = '.txt'
-                            secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
-                            fp.writeMessageBitsToFile(secretMessage, str(clientNum) + "msg" + fileType)
-                                
-                    mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
+                                      
+                    
                     
       
                         
@@ -810,15 +968,17 @@ def threaded_client(conn, clientNum):
                     
                     mainWindow.listWidget_log.addItem("Steganography extracting completed: "+ str(addresses[connections.index(conn)][0]))
            
-                    try:
-                        # Encrypt the secret message
-                        mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                        secretMessage = AES.decryptBinaryString(secretMessage, AESkeyDecode)
-                    
-                    except Exception:
-                        fileType = '.txt'
-                        secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
-                                                        
+                    # Encrypt the secret message
+                    mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
+                  
+                  
+                    secretMessage = AES.decryptBinaryString(secretMessage, AESkeyDecode)
+                    print(secretMessage)
+                    if (AES.bits2string(secretMessage) == "WRONG_KEY"):
+                          print("IN HERE")
+                          fileType = '.txt'
+                          secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
+                          
                     mainWindow.listWidget_log.addItem("AES decoding completed: "+ str(addresses[connections.index(conn)][0]))
     
                     

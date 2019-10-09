@@ -877,7 +877,7 @@
            <enum>QTabWidget::Rounded</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1107,6 +1107,64 @@
                </layout>
               </item>
               <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_18">
+                <item>
+                 <widget class="QRadioButton" name="radioButton_DWT_hybrid_encode">
+                  <property name="palette">
+                   <palette>
+                    <active>
+                     <colorrole role="Text">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
+                        <red>170</red>
+                        <green>0</green>
+                        <blue>0</blue>
+                       </color>
+                      </brush>
+                     </colorrole>
+                    </active>
+                    <inactive>
+                     <colorrole role="Text">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
+                        <red>170</red>
+                        <green>0</green>
+                        <blue>0</blue>
+                       </color>
+                      </brush>
+                     </colorrole>
+                    </inactive>
+                    <disabled>
+                     <colorrole role="Text">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
+                        <red>108</red>
+                        <green>108</green>
+                        <blue>108</blue>
+                       </color>
+                      </brush>
+                     </colorrole>
+                    </disabled>
+                   </palette>
+                  </property>
+                  <property name="text">
+                   <string>DWT Hybrid               </string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEdit_OBH_hybrid_encode">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
                <widget class="QRadioButton" name="radioButton_dwt_encoding">
                 <property name="text">
                  <string>DWT Encoding</string>
@@ -1309,6 +1367,64 @@
                       </item>
                       <item>
                        <widget class="QLineEdit" name="lineEdit_dwt_scale_decoding_LSB"/>
+                      </item>
+                     </layout>
+                    </item>
+                    <item>
+                     <layout class="QHBoxLayout" name="horizontalLayout_20">
+                      <item>
+                       <widget class="QRadioButton" name="radioButton_DWT_hybrid_decode">
+                        <property name="palette">
+                         <palette>
+                          <active>
+                           <colorrole role="Text">
+                            <brush brushstyle="SolidPattern">
+                             <color alpha="255">
+                              <red>170</red>
+                              <green>0</green>
+                              <blue>0</blue>
+                             </color>
+                            </brush>
+                           </colorrole>
+                          </active>
+                          <inactive>
+                           <colorrole role="Text">
+                            <brush brushstyle="SolidPattern">
+                             <color alpha="255">
+                              <red>170</red>
+                              <green>0</green>
+                              <blue>0</blue>
+                             </color>
+                            </brush>
+                           </colorrole>
+                          </inactive>
+                          <disabled>
+                           <colorrole role="Text">
+                            <brush brushstyle="SolidPattern">
+                             <color alpha="255">
+                              <red>108</red>
+                              <green>108</green>
+                              <blue>108</blue>
+                             </color>
+                            </brush>
+                           </colorrole>
+                          </disabled>
+                         </palette>
+                        </property>
+                        <property name="text">
+                         <string>DWT Hybrid         </string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="lineEdit_OBH_hybrid_decode">
+                        <property name="enabled">
+                         <bool>true</bool>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                       </widget>
                       </item>
                      </layout>
                     </item>
@@ -1698,11 +1814,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>399</x>
-     <y>316</y>
+     <y>293</y>
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>243</y>
+     <y>229</y>
     </hint>
    </hints>
   </connection>
@@ -1714,11 +1830,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>385</x>
-     <y>247</y>
+     <y>233</y>
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>249</y>
+     <y>235</y>
     </hint>
    </hints>
   </connection>
@@ -1734,7 +1850,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>243</y>
+     <y>229</y>
     </hint>
    </hints>
   </connection>
@@ -1746,11 +1862,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>400</x>
-     <y>279</y>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>280</y>
+     <y>262</y>
     </hint>
    </hints>
   </connection>
@@ -1762,7 +1878,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>385</x>
-     <y>247</y>
+     <y>233</y>
     </hint>
     <hint type="destinationlabel">
      <x>536</x>
@@ -1778,11 +1894,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>398</x>
-     <y>242</y>
+     <y>228</y>
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>243</y>
+     <y>229</y>
     </hint>
    </hints>
   </connection>
@@ -1794,11 +1910,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>386</x>
-     <y>219</y>
+     <y>205</y>
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>249</y>
+     <y>235</y>
     </hint>
    </hints>
   </connection>
@@ -1810,11 +1926,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>386</x>
-     <y>219</y>
+     <y>205</y>
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>221</y>
+     <y>207</y>
     </hint>
    </hints>
   </connection>
@@ -1826,7 +1942,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>400</x>
-     <y>279</y>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
      <x>762</x>
@@ -1846,7 +1962,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>280</y>
+     <y>262</y>
     </hint>
    </hints>
   </connection>
@@ -1858,11 +1974,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>400</x>
-     <y>279</y>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>280</y>
+     <y>262</y>
     </hint>
    </hints>
   </connection>
@@ -1874,11 +1990,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>385</x>
-     <y>247</y>
+     <y>233</y>
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>277</y>
+     <y>263</y>
     </hint>
    </hints>
   </connection>
@@ -1894,7 +2010,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>277</y>
+     <y>263</y>
     </hint>
    </hints>
   </connection>
@@ -1910,7 +2026,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>221</y>
+     <y>207</y>
     </hint>
    </hints>
   </connection>
@@ -1922,11 +2038,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>384</x>
-     <y>275</y>
+     <y>261</y>
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>249</y>
+     <y>235</y>
     </hint>
    </hints>
   </connection>
@@ -1938,11 +2054,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>384</x>
-     <y>275</y>
+     <y>261</y>
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>221</y>
+     <y>207</y>
     </hint>
    </hints>
   </connection>
@@ -1954,11 +2070,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>385</x>
-     <y>247</y>
+     <y>233</y>
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>221</y>
+     <y>207</y>
     </hint>
    </hints>
   </connection>
@@ -1970,11 +2086,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>386</x>
-     <y>219</y>
+     <y>205</y>
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>277</y>
+     <y>263</y>
     </hint>
    </hints>
   </connection>
@@ -1986,11 +2102,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>398</x>
-     <y>242</y>
+     <y>228</y>
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>317</y>
+     <y>294</y>
     </hint>
    </hints>
   </connection>
@@ -2002,11 +2118,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>400</x>
-     <y>279</y>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>317</y>
+     <y>294</y>
     </hint>
    </hints>
   </connection>
@@ -2018,11 +2134,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>384</x>
-     <y>275</y>
+     <y>261</y>
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>277</y>
+     <y>263</y>
     </hint>
    </hints>
   </connection>
@@ -2034,11 +2150,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>398</x>
-     <y>242</y>
+     <y>228</y>
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>280</y>
+     <y>262</y>
     </hint>
    </hints>
   </connection>
@@ -2050,11 +2166,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>400</x>
-     <y>279</y>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>243</y>
+     <y>229</y>
     </hint>
    </hints>
   </connection>
@@ -2070,7 +2186,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>758</x>
-     <y>249</y>
+     <y>235</y>
     </hint>
    </hints>
   </connection>
@@ -2086,7 +2202,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>317</y>
+     <y>294</y>
     </hint>
    </hints>
   </connection>
@@ -2098,7 +2214,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>398</x>
-     <y>242</y>
+     <y>228</y>
     </hint>
     <hint type="destinationlabel">
      <x>762</x>
@@ -2114,11 +2230,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>399</x>
-     <y>316</y>
+     <y>293</y>
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>280</y>
+     <y>262</y>
     </hint>
    </hints>
   </connection>
@@ -2146,7 +2262,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>384</x>
-     <y>275</y>
+     <y>261</y>
     </hint>
     <hint type="destinationlabel">
      <x>523</x>
@@ -2162,11 +2278,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>399</x>
-     <y>316</y>
+     <y>293</y>
     </hint>
     <hint type="destinationlabel">
      <x>761</x>
-     <y>317</y>
+     <y>294</y>
     </hint>
    </hints>
   </connection>
@@ -2178,11 +2294,267 @@
    <hints>
     <hint type="sourcelabel">
      <x>386</x>
-     <y>219</y>
+     <y>205</y>
     </hint>
     <hint type="destinationlabel">
      <x>531</x>
      <y>331</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_hybrid_encode</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>221</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>312</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_hybrid_encode</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>331</x>
+     <y>257</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>417</x>
+     <y>319</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_dwt_scaling_encode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_hybrid_encode</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>356</x>
+     <y>283</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>325</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_dwt_encoding</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_hybrid_encode</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>348</x>
+     <y>344</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>322</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_hybrid_encode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_hybrid_encode</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>339</x>
+     <y>321</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>419</x>
+     <y>321</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_hybrid_encode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>320</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>451</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_hybrid_encode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>308</x>
+     <y>318</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>437</x>
+     <y>256</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_hybrid_encode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_dwt_scale_encoding_LSB</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>296</x>
+     <y>314</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>411</x>
+     <y>281</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_hybrid_decode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_GA_key_3</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>369</x>
+     <y>280</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>404</x>
+     <y>195</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_hybrid_decode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_nr_3</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>348</x>
+     <y>279</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>435</x>
+     <y>229</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_hybrid_decode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_dwt_scale_decoding_LSB</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>327</x>
+     <y>276</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>436</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_hybrid_decode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_hybrid_decode</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>382</x>
+     <y>279</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>281</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_dwt_decoding</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_hybrid_decode</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>402</x>
+     <y>304</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>500</x>
+     <y>280</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_dwt_scaling_decode</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_hybrid_decode</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>252</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>472</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_DWT_3</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_hybrid_decode</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>303</x>
+     <y>227</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_GA_3</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_OBH_hybrid_decode</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>287</x>
+     <y>195</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>443</x>
+     <y>281</y>
     </hint>
    </hints>
   </connection>
