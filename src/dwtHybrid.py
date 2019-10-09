@@ -7,10 +7,6 @@ Created on Tue Oct  8 11:23:30 2019
 
 import numpy as np
 import dwtFirstPrinciples as dwt
-import fileprocessing as fp
-from copy import deepcopy
-import scipy.io.wavfile as scWave
-import ResultsAndTesting as RT
 
 # Function calculating the p value required to determine 
 # number of bits to embed

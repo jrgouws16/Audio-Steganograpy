@@ -20,6 +20,7 @@ Created on Mon Sep 30 23:18:51 2019
 from hashlib import md5
 from base64 import b64decode
 from base64 import b64encode
+import struct
 
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
@@ -30,6 +31,7 @@ def string2bits(s=''):
 
 def bits2string(b=None):
     return ''.join([chr(int(b[x:x+8], 2)) for x in range(0, len(b), 8)])
+
 
 
 class AESCipher:
@@ -48,8 +50,6 @@ class AESCipher:
         return unpad(self.cipher.decrypt(raw[AES.block_size:]), AES.block_size)
 
 def encryptBinaryString(binaryString, key):
-    
-  
     plainText = bits2string(binaryString)
     encrypted = AESCipher(key).encrypt(plainText).decode('utf-8')
     binaryEncrypted = string2bits(encrypted)
@@ -66,12 +66,14 @@ def decryptBinaryString(binaryString, key):
 
 if __name__ == '__main__':
     print('TESTING ENCRYPTION')
-    msg       = "This is AES encryption testing. If you can read this after decoding, it was succesfully encoded and decoded."
+    msg       = "This.ffffffffffffffffffffffffffffff\n"*10
     pwd       = "123456789"
-    message = string2bits(msg)
-    print(len(message))
-    encrypted = encryptBinaryString(message, pwd)
-    print(len(encrypted))
+
+    cipher = AESCipher(pwd).encrypt(msg).decode('utf-8')
+    print(AESCipher(pwd).decrypt(cipher).decode('utf-8'))
+    print(len(msg), "\n"+ str(len(cipher)))
+    
+    '''
     #print("Ciphertext...:", text_from_bits(encrypted))
     pwd = "123456789"
     print("TESTING DECRYPTION")
@@ -82,3 +84,5 @@ if __name__ == '__main__':
           
     else:
           print("Successful")
+          
+    '''

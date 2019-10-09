@@ -404,13 +404,13 @@ if (libraryImplement == True):
       fp.writeMessageBitsToFile(extractMessage, 'Media/dwtLibraryMessageExtract.jpeg')
       
 if (encryptDWTDriver == True):
-    myMessage = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n"*2000
+    myMessage = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n"*500
     print("Getting cover samples")
-    samples, samples2, rate = fp.getWaveSamples('Media/song.wav')
+    samples, samples2, rate = fp.getWaveSamples('Media/opera.wav')
     
     originalCoverSamples = deepcopy(samples)
     print("Embedding")
-    stegoSamples, samplesUsed, origCoeff = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 512, ".txt")
+    stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 512, ".txt")
 
     print("Getting difference")
 
@@ -432,8 +432,8 @@ if (encryptDWTDriver == True):
     
     
     
-    boodskap, fileType, gotCoeff = dwtEncrypt.dwtEncryptDecode(extractStegoSamples, 256)
-    
+    boodskap, fileType = dwtEncrypt.dwtEncryptDecode(extractStegoSamples, 256)
+    print(fileType)
     
     if (boodskap == myMessage):
           print("The message extracted is exactly the same as original message")

@@ -159,8 +159,8 @@ def threaded_client(conn, clientNum):
                     secretMessageObj.close()
                     mainWindow.listWidget_log.addItem("Message received: " + str(addresses[connections.index(conn)][0]))    
                 
-                AESkey = sockets.recv_one_message(conn).decode()
-                mainWindow.listWidget_log.addItem("AES key received - " + AESkey + ": " + str(addresses[connections.index(conn)][0]))
+                AESkeyEncode = sockets.recv_one_message(conn).decode()
+                mainWindow.listWidget_log.addItem("AES key received - " + AESkeyEncode + ": " + str(addresses[connections.index(conn)][0]))
                 
                 # Receive the encoding method
                 method = sockets.recv_one_message(conn)
@@ -203,7 +203,7 @@ def threaded_client(conn, clientNum):
                         
                         # Encrypt the secret message
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        secretMessage = AES.encryptBinaryString(secretMessage, AESkey)
+                        secretMessage = AES.encryptBinaryString(secretMessage, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
     
                         secretMessage = list(map(int, list(secretMessage)))
@@ -213,7 +213,7 @@ def threaded_client(conn, clientNum):
                         secretMessage = list(map(str, secretMessage))
                         secretMessage = ''.join(secretMessage)
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        secretMessage = AES.encryptBinaryString(secretMessage, AESkey)
+                        secretMessage = AES.encryptBinaryString(secretMessage, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         secretMessage = list(map(int, list(secretMessage)))
                     
@@ -306,7 +306,7 @@ def threaded_client(conn, clientNum):
                         # Convert to integer list of bits for embedding
                         message = "".join(intSamples[0])
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkey)
+                        message = AES.encryptBinaryString(message, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         
                         message = list(map(int, list(message)))
@@ -316,7 +316,7 @@ def threaded_client(conn, clientNum):
                         message = list(map(str, message))
                         message = "".join(message)
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkey)
+                        message = AES.encryptBinaryString(message, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         message = list(map(int, list(message)))
                         
@@ -411,10 +411,8 @@ def threaded_client(conn, clientNum):
                         
                         # Convert to integer list of bits for embedding
                         message = "".join(intSamples[0])
-                        print("Before encryption length", len(message))
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkey)
-                        print("After encryption length", len(message))
+                        message = AES.encryptBinaryString(message, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         
                         message = list(map(int, list(message)))
@@ -424,7 +422,7 @@ def threaded_client(conn, clientNum):
                         message = list(map(str, message))
                         message = "".join(message)
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkey)
+                        message = AES.encryptBinaryString(message, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         message = list(map(int, list(message)))
                         
@@ -506,14 +504,39 @@ def threaded_client(conn, clientNum):
                     samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + ".wav")
                     
                     message = ""
+                    print(fileType)
                     if (fileType == ".txt"):
                         
                         messageObject = open(str(clientNum) + "MSG" + fileType, "r")
     
                         # Extract the message as a string of characters
                         message = messageObject.read()
+                        
+                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
+                        print('BEFORE ENCRYPTION ENCODING', message[0:20], AESkeyEncode)
+                        message = AES.AESCipher(AESkeyEncode).encrypt(message).decode('utf-8')
+                        print('AFTER ENCRYPTION ENCODING', message[0:20], AESkeyEncode)
+                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
+                        
                         messageObject.close()
+                        
+                    else:
+                        # Get the audio samples in integer form
+                        intSamples = fp.extractWaveMessage(str(clientNum) + "MSG" + fileType)
+                        
+                        # Convert to integer list of bits for embedding
+                        message = "".join(intSamples[0])
+                        alphaMessage = ''
+                        
+#                         Convert the binary stream to a ASCII string
+                        for i in range(0, len(message), 8):
+                            alphaMessage += AES.bits2string(message[i: i + 8])
+                        
+                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
+                        message = AES.encryptBinaryString(message, AESkeyEncode)
+                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                                             
+                    mainWindow.listWidget_log.addItem("Embedding starting: " + str(addresses[connections.index(conn)][0]))    
                     stegoSamples, samplesUsed = DWTcrypt.dwtEncryptEncode(samplesOne, message, 2048, fileType)        
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
@@ -591,8 +614,8 @@ def threaded_client(conn, clientNum):
                 stegoObj.close()
                 mainWindow.listWidget_log.addItem("Stego received: " + str(addresses[connections.index(conn)][0]))
     
-                AESkey = sockets.recv_one_message(conn).decode()
-                mainWindow.listWidget_log.addItem("AES key received - " + AESkey + ": " + str(addresses[connections.index(conn)][0]))
+                AESkeyDecode = sockets.recv_one_message(conn).decode()
+                mainWindow.listWidget_log.addItem("AES key received - " + AESkeyDecode + ": " + str(addresses[connections.index(conn)][0]))
     
                 method = sockets.recv_one_message(conn)
                 
@@ -616,7 +639,7 @@ def threaded_client(conn, clientNum):
                     try:
                         # Encrypt the secret message
                         mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                        extractMessage = AES.decryptBinaryString(extractMessage, AESkey)
+                        extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
                     
                     except Exception:
                         fileType = '.txt'
@@ -661,17 +684,16 @@ def threaded_client(conn, clientNum):
                     try:
                         # Encrypt the secret message
                         mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                        extractMessage = AES.decryptBinaryString(extractMessage, AESkey)
+                        extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
                     
                     except Exception:
                         fileType = '.txt'
-                        secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
+                        extractMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
                                                         
                     mainWindow.listWidget_log.addItem("AES decoding completed: "+ str(addresses[connections.index(conn)][0]))
                     
                     
                     mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
-                    print(fileType)
                     
       
                     if (fileType == ".wav"):
@@ -710,15 +732,54 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
                     
                     if (fileType == ".wav"):
+                        
+                        
+                        try:
+                            # Encrypt the secret message
+                            mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
+                            secretMessage = AES.AESCipher(AESkeyDecode).decrypt(secretMessage).decode('utf-8')
+                        
+                        except Exception:
+                            fileType = '.txt'
+                            secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
+                                                        
+                        mainWindow.listWidget_log.addItem("AES decoding completed: "+ str(addresses[connections.index(conn)][0]))
+                 
+                        # Convert to integer list of bits for embedding
+                        binMessage = ''
+                        print("TESTING 1")
+                        # Convert the binary stream to a ASCII string
+                        for i in range(0, len(secretMessage)):
+                            binMessage += AES.string2bits(secretMessage[i])
+                        print("TESTING 2")
                         fp.writeWaveMessageToFile(secretMessage, str(clientNum) + "msg" + fileType)
+                        print("TESTING 3")
                     
                     else:
-                        messageFileObj = open(str(clientNum) + "msg" + fileType, 'w')
-                        messageFileObj.write(secretMessage)
-                        messageFileObj.close()
+                        
+                        try:
+                            # Encrypt the secret message
+                            print('BEFORE ENCRYPTION DECODING', secretMessage[0:20], AESkeyDecode[0:20])
+
+                            mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
+                            secretMessage = AES.AESCipher(AESkeyDecode).decrypt(secretMessage).decode('utf-8')
+                            print('AFTER ENCRYPTION DECODING', secretMessage[0:20], AESkeyDecode[0:20])
+                            messageFileObj = open(str(clientNum) + "msg" + fileType, 'w')
+                            messageFileObj.write(secretMessage)
+                            messageFileObj.close()
+                        
+                        except Exception:
+                            print("This is the error")
+                            fileType = '.txt'
+                            secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
+                            fp.writeMessageBitsToFile(secretMessage, str(clientNum) + "msg" + fileType)
+                                
+                    mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
+                    
+      
+                        
                         
                     mainWindow.listWidget_log.addItem("Writing message completed " + str(addresses[connections.index(conn)][0]))
-                    
                     mainWindow.listWidget_log.addItem("Sending message to client: " + str(addresses[connections.index(conn)][0]))
     
                     with open(str(clientNum) + "msg" + fileType, "rb") as f:
@@ -752,7 +813,7 @@ def threaded_client(conn, clientNum):
                     try:
                         # Encrypt the secret message
                         mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                        secretMessage = AES.decryptBinaryString(secretMessage, AESkey)
+                        secretMessage = AES.decryptBinaryString(secretMessage, AESkeyDecode)
                     
                     except Exception:
                         fileType = '.txt'

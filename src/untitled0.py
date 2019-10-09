@@ -1,12 +1,42 @@
-def school_round(a_in,n_in):
-    if (a_in * 10 ** (n_in + 1)) % 10 == 5:
-        return round(a_in + 1 / 10 ** (n_in + 1), n_in)
-    else:
-        return round(a_in, n_in)
-  
-a = [5.29999924337416, 0.0, 0.09097785002086312, 0.09200286137661351, 0.09304945191888692, 0.0939126193766242, 0.09529368730818533, 0.09598422127442063, 0.09702002222320516, 0.09805582317233075, 0.09874635713867974, 0.10012742507024086, 0.10116322601925276, 0.10202639347687636, 0.1028895609342726, 0.10401167862914917, 0.10496116283252377, 0.1059969637813083, 0.1070327647303202, 0.1080038281200757, 0.10893173313684201, 0.10999990286555317, 0.1108307015435912, 0.11186650249237573, 0.11298862018713862]
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
+import numpy as np
 
-for i in a:
-      print(school_round(i,3),end=" ")
-      
-      
+def bits2string(b=None):
+    return ''.join([chr(int(b[x:x+8], 2)) for x in range(0, len(b), 8)])
+def bitstring_to_bytes(s):
+    return int(s, 2).to_bytes(len(s) // 8, byteorder='big')
+def string2bits(s=''):
+    return "".join([bin(ord(x))[2:].zfill(8) for x in s])
+
+
+plainText = "hello"
+
+data = plainText.encode()
+
+key = get_random_bytes(16)
+cipher = AES.new(key, AES.MODE_CBC)
+ct_bytes = cipher.encrypt(pad(data, AES.block_size))
+
+total = ""
+for i in ct_bytes:
+    total+=np.binary_repr(i,8)
+
+myCipher = bits2string(total)
+
+print("CipherText = ", myCipher)
+
+myCipher = string2bits(myCipher)
+myCipher = bitstring_to_bytes(myCipher)
+
+iv = cipher.iv 
+
+try:
+     ct = myCipher
+     
+     cipher = AES.new(key, AES.MODE_CBC, iv)
+     pt = unpad(cipher.decrypt(ct), AES.block_size)
+     print("The message was: ", pt)
+except Exception:
+     print("Incorrect decryption")
