@@ -148,9 +148,6 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
           
           if (doBreak == True):
               break
-                
-      if (len(message) > 0):
-          print("Message bits unembedded:", len(message))
         
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
       
@@ -201,9 +198,7 @@ def dwtScaleDecode(stegoSamples, LSBs):
                         
                       if (len(message) == 27):
                           messageLength = int(message[0:26],2)
-                                             
-                          print(message[26])
-                          
+                                                                       
                           if (message[26] == '0'):
                               typeMessage = ".txt"
                                 

@@ -126,10 +126,6 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
           if (doBreak == True):
               break
               
-          
-      if (len(message) > 0):
-          print("Message bits unembedded:", len(message))
-              
       # Reconstruct the signal
       stegoSamples = []
       for i in range(0, len(coefficiets[1])):

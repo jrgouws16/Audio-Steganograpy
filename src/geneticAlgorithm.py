@@ -236,7 +236,6 @@ def insertMessage(samples, key, message, messageType):
         sampleIndex = sampleIndex + 1
         
         if (sampleIndex == len(messageSamples)):
-            print("File is too small to embed the message, breaking for loop")
             capacityWarning = True
             break
         

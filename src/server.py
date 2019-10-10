@@ -278,12 +278,12 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem(clients)
                                     
                     for i in connToSendTo:
+                        
+                        if (capacityWarning == True):
+                                sockets.send_one_message(i, 'WARN')  
+                                                          
                         with open(f_send, "rb") as f:
                             data = f.read()
-                            
-                            if (capacityWarning == True):
-                                sockets.send_one_message(i, 'WARN')
-                                
                             sockets.send_one_message(i, "RECFILE")
                             sockets.send_one_message(i, '.wav')
                             sockets.send_one_file(i, data)
@@ -386,12 +386,13 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem(clients)
                                     
                     for i in connToSendTo:
+                        
+                        if (capacityWarning == True):
+                                sockets.send_one_message(i, 'WARN')  
+                                continue
+                          
                         with open(f_send, "rb") as f:
                             data = f.read()
-                            
-                            if (capacityWarning == True):
-                                sockets.send_one_message(i, 'WARN')
-                            
                             sockets.send_one_message(i, "RECFILE")
                             sockets.send_one_message(i, '.wav')
                             sockets.send_one_file(i, data)
@@ -499,12 +500,13 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem(clients)
                                     
                     for i in connToSendTo:
-                        with open(f_send, "rb") as f:
+                          
+                          if (capacityWarning == True):
+                                sockets.send_one_message(i, 'WARN')  
+                                continue
+                        
+                          with open(f_send, "rb") as f:
                             data = f.read()
-                            
-                            if (capacityWarning == True):
-                                sockets.send_one_message(i, 'WARN')
-                            
                             sockets.send_one_message(i, "RECFILE")
                             sockets.send_one_message(i, '.wav')
                             sockets.send_one_file(i, data)
@@ -612,12 +614,13 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem(clients)
                                     
                     for i in connToSendTo:
-                        with open(f_send, "rb") as f:
+                        
+                          if (capacityWarning == True):
+                                sockets.send_one_message(i, 'WARN')  
+                                continue
+                        
+                          with open(f_send, "rb") as f:
                             data = f.read()
-                            
-                            if (capacityWarning == True):
-                                sockets.send_one_message(i, 'WARN')
-                            
                             sockets.send_one_message(i, "RECFILE")
                             sockets.send_one_message(i, '.wav')
                             sockets.send_one_file(i, data)
@@ -717,12 +720,13 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem(clients)
                                     
                     for i in connToSendTo:
+                        
+                        if (capacityWarning == True):
+                                sockets.send_one_message(i, 'WARN')  
+                                continue
+                          
                         with open(f_send, "rb") as f:
                             data = f.read()
-                            
-                            if (capacityWarning == True):
-                                sockets.send_one_message(i, 'WARN')
-                            
                             sockets.send_one_message(i, "RECFILE")
                             sockets.send_one_message(i, '.wav')
                             sockets.send_one_file(i, data)

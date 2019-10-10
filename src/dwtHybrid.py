@@ -125,9 +125,7 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
                   for k in range(len(binaryValue) - bits, len(binaryValue) - 3): 
                         binaryValue[k] = message[0]
                         message = message[1:]
-                        
-                        print(len(message))
-                        
+                                                
                         if (blockNumber == numBlocks - 1 and i == len(subbandCoeff) - 1 and j == len(subbandCoeff[i]) - 1 and len(message) > 0):
                             capacityWarning = True
                         
@@ -167,9 +165,6 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
           
           if (doBreak == True):
               break
-                
-      if (len(message) > 0):
-          print("Message bits unembedded:", len(message))
         
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
       
