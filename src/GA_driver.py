@@ -12,147 +12,150 @@ import ResultsAndTesting as RT
 from copy import deepcopy
 import scipy.io.wavfile as scWave
 import fileprocessing as fp
+import AES
 
-print("##################################################")
-print("######    Tesitng GA operations with Ei = 1 ######")
-print("##################################################")
-      
-sample = '1000000110000010'
+testBasics       = False
+testAudioMessage = False
+testTextMessage  = True
 
-print("Original amplitude:", int(sample, 2))
-print("The original sample is: ", sample)
 
-population, replacedBits = GA.generatePopulation(sample, '1')
-    
-print("")
-
-print("Population after one is inserted:")
-
-for i in population:
-    print(i)
-print("")
-
-print("Replaced bits are:", replacedBits)
-
-print("")
+if (testBasics == True):
+    print("##################################################")
+    print("######    Tesitng GA operations with Ei = 1 ######")
+    print("##################################################")
           
-population = GA.generateNextGeneration(population, replacedBits, '1')
-
-print("Second Generation (GA insertion)")
-for i in population:
-    print(i, "Amplitude:", np.abs(int(i, 2) - int(sample, 2)))
-
-print("")
-print("##################################################")
-print("######    Tesitng determine fittest individual ###")
-print("##################################################")
-      
-print(GA.determineFittest(sample, population))
-
-print("##################################################")
-print("######    Tesitng GA operations with Ei = 0 ######")
-print("##################################################")
-      
-sample = '1000000110000010'
-
-print("Original amplitude:", int(sample, 2))
-print("The original sample is: ", sample)
-
-population, replacedBits = GA.generatePopulation(sample, '0')
+    sample = '1000000110000010'
     
-print("")
-
-print("Population after one is inserted:")
-
-for i in population:
-    print(i)
-print("")
-
-print("Replaced bits are:", replacedBits)
-
-print("")
-          
-population = GA.generateNextGeneration(population, replacedBits, '0')
-
-print("Second Generation (GA insertion)")
-for i in population:
-    print(i, "Amplitude:", np.abs(int(i, 2) - int(sample, 2)))
+    print("Original amplitude:", int(sample, 2))
+    print("The original sample is: ", sample)
     
-print("")
- 
-print("##################################################")
-print("######    Tesitng determine fittest individual ###")
-print("##################################################")
-      
-print(GA.determineFittest(sample, population))
-
-
-print("##################################################")
-print("#    Tesitng the insertion algorithm as in paper #")
-print("##################################################")
-samples = ['1001010001001100','0101010111100111','0000100011110001'] * 10
-
-print("Before insertion")
-for i in samples:
-    print(i)
-    
-message = '1010'
-key = '1001001110100000'*2
-stego, samplesUsed, bitsInserted = GA.insertMessage(samples, key, message, 'txt')
-print(stego)
-print("Message is:", message)
-print("key is:", key)
-print("")
-
-print("After insertion")
-for i in stego:
-    print(i)
-
-print("##################################################")
-print("#   Tesitng the extraction algorithm as in paper #")
-print("##################################################")
-print(GA.extractMessage(stego, key))
-
-
-print("##################################################")
-print("#  Extensive testing of insertion and extraction #")
-print("##################################################")
-          
-# Generate the samples, key, and message      
-items = ['1','0']
-
-for numberTests in range(0, 1000):
-    samples = []
-    message = ''
-    key = "".join(random.choices(items, k = 26))
-    
-    for messageLength in range(0,100):
-        samples.append("".join(random.choices(items, k = 16)))
-        message += random.choice(items)
-        key += random.choice(items)
+    population, replacedBits = GA.generatePopulation(sample, '1')
         
-    for i in range(0, 26):
-        samples.append("".join(random.choices(items, k = 16)))
+    print("")
+    
+    print("Population after one is inserted:")
+    
+    for i in population:
+        print(i)
+    print("")
+    
+    print("Replaced bits are:", replacedBits)
+    
+    print("")
+              
+    population = GA.generateNextGeneration(population, replacedBits, '1')
+    
+    print("Second Generation (GA insertion)")
+    for i in population:
+        print(i, "Amplitude:", np.abs(int(i, 2) - int(sample, 2)))
+    
+    print("")
+    print("##################################################")
+    print("######    Tesitng determine fittest individual ###")
+    print("##################################################")
+          
+    print(GA.determineFittest(sample, population))
+    
+    print("##################################################")
+    print("######    Tesitng GA operations with Ei = 0 ######")
+    print("##################################################")
+          
+    sample = '1000000110000010'
+    
+    print("Original amplitude:", int(sample, 2))
+    print("The original sample is: ", sample)
+    
+    population, replacedBits = GA.generatePopulation(sample, '0')
         
-    stego, samplesUsed, bitsInserted = GA.insertMessage(samples, key, message, "txt")
-    extractedMsg, fileType = GA.extractMessage(stego, key)
-       
-
+    print("")
     
-    if (message != extractedMsg):
-        print("Failed at test", numberTests)
-        print("Message", message)
-        print("Extract", extractedMsg)
-        print("Error")
-        break
+    print("Population after one is inserted:")
     
-    elif (numberTests == 999):
-        print("Extensive testing: Passed all the tests")
-  
-
-print("##################################################")
-print("#        Hiding opera.wav into song.wav          #")
-print("##################################################")
+    for i in population:
+        print(i)
+    print("")
+    
+    print("Replaced bits are:", replacedBits)
+    
+    print("")
+              
+    population = GA.generateNextGeneration(population, replacedBits, '0')
+    
+    print("Second Generation (GA insertion)")
+    for i in population:
+        print(i, "Amplitude:", np.abs(int(i, 2) - int(sample, 2)))
+        
+    print("")
+     
+    print("##################################################")
+    print("######    Tesitng determine fittest individual ###")
+    print("##################################################")
+          
+    print(GA.determineFittest(sample, population))
+    
+    
+    print("##################################################")
+    print("#    Tesitng the insertion algorithm as in paper #")
+    print("##################################################")
+    samples = ['1001010001001100','0101010111100111','0000100011110001'] * 10
+    
+    print("Before insertion")
+    for i in samples:
+        print(i)
+        
+    message = '1010'
+    key = '1001001110100000'*2
+    stego, samplesUsed, bitsInserted, capacityWarning = GA.insertMessage(samples, key, message, 'txt')
+    print(stego)
+    print("Message is:", message)
+    print("key is:", key)
+    print("")
+    
+    print("After insertion")
+    for i in stego:
+        print(i)
+    
+    print("##################################################")
+    print("#   Tesitng the extraction algorithm as in paper #")
+    print("##################################################")
+    print(GA.extractMessage(stego, key))
+    
+    
+    print("##################################################")
+    print("#  Extensive testing of insertion and extraction #")
+    print("##################################################")
+              
+    # Generate the samples, key, and message      
+    items = ['1','0']
+    
+    for numberTests in range(0, 1000):
+        samples = []
+        message = ''
+        key = "".join(random.choices(items, k = 26))
+        
+        for messageLength in range(0,100):
+            samples.append("".join(random.choices(items, k = 16)))
+            message += random.choice(items)
+            key += random.choice(items)
+            
+        for i in range(0, 26):
+            samples.append("".join(random.choices(items, k = 16)))
+            
+        stego, samplesUsed, bitsInserted, capacityWarning = GA.insertMessage(samples, key, message, "txt")
+        extractedMsg, fileType = GA.extractMessage(stego, key)
+           
+    
+        
+        if (message != extractedMsg):
+            print("Failed at test", numberTests)
+            print("Message", message)
+            print("Extract", extractedMsg)
+            print("Error")
+            break
+        
+        elif (numberTests == 999):
+            print("Extensive testing: Passed all the tests")
+      
 
 # Function to extract the message from the stego file making use of 
 # Genetic Algorithm
@@ -181,7 +184,7 @@ def GA_encoding(coverSamples, secretMessage, key, frameRate, fileType):
         secretMessage = "".join(map(str,secretMessage))
     
         # Provide first audio channel samples and message samples to encode 
-        stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], key, "".join(map(str, secretMessage)), fileType)
+        stegoSamples, samplesUsed, bitsInserted, capacityWarning = GA.insertMessage(coverSamples[0], key, "".join(map(str, secretMessage)), fileType)
         
         # Convert the binary audio samples to decimal samples
         for i in range(0, len(stegoSamples)):
@@ -194,75 +197,137 @@ def GA_encoding(coverSamples, secretMessage, key, frameRate, fileType):
 
         return stegoSamples         
       
+if (testAudioMessage == True):
+ 
+    print("##################################################")
+    print("#        Hiding opera.wav into song.wav          #")
+    print("##################################################") 
+        
+    secretMessage = ""
+    
+    # Get the audio samples in integer form converted to binary
+    print("Getting message samples")
+    intSamples = fp.extractWaveMessage("Media/opera.wav")
+    
+    # Convert to integer list of bits for embedding
+    secretMessage = "".join(intSamples[0])
+    secretMessage = list(map(int, list(secretMessage)))
+    
+    print("Getting cover samples")
+    coverSamplesOne, coverSamplesTwo, rate = fp.getWaveSamples("Media/song.wav")
+    
+    for i in range(0, len(coverSamplesOne)):
+        if (coverSamplesOne[i] <= -32768):       
+                coverSamplesOne[i] += 1
+                
+    coverSamples = [coverSamplesOne, coverSamplesTwo]
+    
+    # Convert ASCII to binary 
+    binaryKey = fp.messageToBinary("xrdpkd8x")
+    binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
+    
+    print("Encoding")
+    stegoSamples = GA_encoding(coverSamples, secretMessage, binaryKey, rate, fileType)
+    
+    beforeWritingSamples = deepcopy(stegoSamples)
+    
+    print("Writing to stego file")
+    # Write to the stego audio file in wave format and close the song
+    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/ 32768.0
+    scWave.write("myGAtestingstego.wav", rate, stegoSamples)
+    
+    print("Reading from stego file")
+    stegoSamplesOne, stegoSamplesTwo, rate = fp.getWaveSamples("myGAtestingstego.wav")
+    stegoSamples = np.asarray(stegoSamplesOne, dtype=np.float32, order = 'C') * 32768.0
+    afterWritingSamples = deepcopy(stegoSamples)
+    # Get the secret message
+    print("Decoding")
+    secretMessageExtract, fileType = GA_decoding(list(stegoSamples), binaryKey)
+                   
+    print("Writing to extracted message file")
+    fp.writeWaveMessageToFile(secretMessageExtract, "extractedOpera.wav")
+    
+    startPrinting = 0
+    for i in range(0, len(secretMessageExtract)):
+       if (str(secretMessageExtract[i]) != str(secretMessage[i])):
+           startPrinting = 100
+           
+       if (startPrinting > 0):
+           print(str(secretMessageExtract[i]), str(secretMessage[i]))
+           startPrinting -= 1
+           
+       if (startPrinting == 1):
+           break
+          
       
-secretMessage = ""
+      
+if (testTextMessage == True):
+    stegoSamples = []
+        
+    # Get the string representation of the key in ASCII
+    keyString = 'GA_KEY'
+    AESkeyEncode = 'AES_key'
+    coverSamplesOne, coverSamplesTwo, rate = fp.getWaveSamples('Media/opera.wav')
+    
+    for i in range(0, len(coverSamplesOne)):
+        if (coverSamplesOne[i] <= -32768):       
+                coverSamplesOne[i] += 1
+    
+    coverSamples = [coverSamplesOne, coverSamplesTwo]
 
-# Get the audio samples in integer form converted to binary
-print("Getting message samples")
-intSamples = fp.extractWaveMessage("Media/opera.wav")
+    secretMessage = ""
+    
+    secretMessage = fp.getMessageBits('Media/text.txt')
+    secretMessage = list(map(str, secretMessage))
+    secretMessage = ''.join(secretMessage)
+    #secretMessage = AES.encryptBinaryString(secretMessage, AESkeyEncode)
+    
+    secretMessage = list(map(int, list(secretMessage)))
+    
+    # Convert ASCII to binary 
+    binaryKey = fp.messageToBinary(keyString)
+    binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
 
-# Convert to integer list of bits for embedding
-secretMessage = "".join(intSamples[0])
-secretMessage = list(map(int, list(secretMessage)))
+    stegoSamples = GA_encoding(coverSamples, secretMessage, binaryKey, rate, '.txt')
 
-print("Getting cover samples")
-coverSamplesOne, coverSamplesTwo, rate = fp.getWaveSamples("Media/song.wav")
+    originalStegoSamples = deepcopy(stegoSamples)
+    
+    noise = np.random.normal(0, 0.5, len(stegoSamples))
 
-for i in range(0, len(coverSamplesOne)):
-    if (coverSamplesOne[i] <= -32768):       
-            coverSamplesOne[i] += 1
-            
-coverSamples = [coverSamplesOne, coverSamplesTwo]
+    for i in range(0, len(stegoSamples)):
+          stegoSamples[i] += noise[i]   
+    
+    
+    # Write to the stego audio file in wave format and close the song
+    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/ 32768.0
+    scWave.write("GA_testing.wav", rate, stegoSamples)
+    
+    keyString = 'GA_KEY'
+    binaryKey = fp.messageToBinary(keyString)
 
-# Convert ASCII to binary 
-binaryKey = fp.messageToBinary("xrdpkd8x")
-binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
+    # Extract the samples from the stego file
+    stegoSamplesOne, stegoSamplesTwo, rate = fp.getWaveSamples("GA_testing.wav")
+    stegoSamples = np.asarray(stegoSamplesOne, dtype=np.float32, order = 'C') * 32768.0
+    
+    stegoSamples = list(stegoSamples)
+    stegoSamples = list(map(int, stegoSamples))
+           
+    
+    diff = []
+    for i in range(0,len(originalStegoSamples)):
+        diff.append(np.abs(originalStegoSamples[i] - stegoSamples[i]))
+        
+    print(max(diff))
+    
+    # Get the secret message
+    secretMessage, fileType = GA_decoding(list(stegoSamples), binaryKey)
+    
+   
+    #secretMessage = AES.decryptBinaryString(secretMessage, AESkeyEncode)
+#    if (AES.bits2string(secretMessage) == "WRONG_KEY"):
+#          fileType = '.txt'
+#          secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
 
-
-print("Encoding")
-stegoSamples = GA_encoding(coverSamples, secretMessage, binaryKey, rate, fileType)
-
-beforeWritingSamples = deepcopy(stegoSamples)
-
-print("Writing to stego file")
-# Write to the stego audio file in wave format and close the song
-stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/ 32768.0
-scWave.write("myGAtestingstego.wav", rate, stegoSamples)
+    fp.writeMessageBitsToFile(secretMessage, "testingNoiseMessage.txt")
       
-
-print("Reading from stego file")
-stegoSamplesOne, stegoSamplesTwo, rate = fp.getWaveSamples("myGAtestingstego.wav")
-stegoSamples = np.asarray(stegoSamplesOne, dtype=np.float32, order = 'C') * 32768.0
-afterWritingSamples = deepcopy(stegoSamples)
-# Get the secret message
-print("Decoding")
-secretMessageExtract, fileType = GA_decoding(list(stegoSamples), binaryKey)
-               
-print("Writing to extracted message file")
-fp.writeWaveMessageToFile(secretMessageExtract, "extractedOpera.wav")
-
-startPrinting = 0 
-for i in range(0, len(secretMessageExtract)):
-   if (str(secretMessageExtract[i]) != str(secretMessage[i])):
-       startPrinting = 100
-       
-   if (startPrinting > 0):
-       print(str(secretMessageExtract[i]), str(secretMessage[i]))
-       startPrinting-=1
-       
-   if (startPrinting == 1):
-       break
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+    

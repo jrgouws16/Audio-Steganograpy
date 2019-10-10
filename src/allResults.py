@@ -120,7 +120,7 @@ if doSongDataBase == True:
               
             # Provide first audio channel samples and message samples to encode 
             start_time = time.time()
-            stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), ".txt")
+            stegoSamples, samplesUsed, bitsInserted, capacityWarning = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), ".txt")
             print((time.time() - start_time), "seconds to execute embedding algorithm")          
             
             # Extract secret message
@@ -203,7 +203,7 @@ if doSongDataBase == True:
                   
                   secretMessage = "".join(map(str,secretMessage))
                   start_time = time.time()
-                  stegoSamples, samplesUsed = dwtOBH.dwtHaarEncode(coverSamples[0], secretMessage, j, 2048, "txt")
+                  stegoSamples, samplesUsed, capacityWarning = dwtOBH.dwtHaarEncode(coverSamples[0], secretMessage, j, 2048, "txt")
                   print((time.time() - start_time), "seconds to execute embedding algorithm")         
                     
                   # Get the characteristics of the stego file
@@ -241,7 +241,7 @@ if doSingleTest == True:
         secretMessage = "".join(map(str,secretMessage))
         start_time = time.time()
         print("starting encoding")
-        stegoSamples, samplesUsed = dwtOBH.dwtHaarEncode(coverSamples[0], secretMessage, 1, 1024, ".txt")
+        stegoSamples, samplesUsed, capacityWarning = dwtOBH.dwtHaarEncode(coverSamples[0], secretMessage, 1, 1024, ".txt")
         print((time.time() - start_time), "seconds to execute embedding algorithm")         
             
         # Get the characteristics of the stego file
@@ -286,7 +286,7 @@ if doSingleTest == True:
               
         # Provide first audio channel samples and message samples to encode 
         start_time = time.time()
-        stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), ".txt")
+        stegoSamples, samplesUsed, bitsInserted, capacityWarning = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)), ".txt")
         print((time.time() - start_time), "seconds to execute embedding algorithm")          
         # Convert the binary audio samples to decimal samples
         for i in range(0, len(stegoSamples)):
@@ -321,7 +321,7 @@ if doSingleTest == True:
         
         # Provide first audio channel samples and message samples to encode 
         start_time = time.time()
-        stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(coverSamples[0], secretMessage, 1024, ".txt")        
+        stegoSamples, samplesUsed, capacityWarning = dwtEncrypt.dwtEncryptEncode(coverSamples[0], secretMessage, 1024, ".txt")        
         
         print((time.time() - start_time), "seconds to execute embedding algorithm")          
               

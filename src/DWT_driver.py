@@ -34,9 +34,9 @@ plotUnderstanding        = False
 plotCorrectImplemnt      = False
 firstPrinciplesImplement = False
 libraryImplement         = False
-encryptDWTDriver         = True
+encryptDWTDriver         = False
 scaleDWTDriver           = False
-dwtHybridTest            = False
+dwtHybridTest            = True
 
 
 
@@ -343,7 +343,7 @@ if (firstPrinciplesImplement == True):
 #    message = "".join(list(map(str, message)))
     print(len(message))           
     print("Encoding")
-    stegoSamples, samplesUsed = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 512, ".wav")
+    stegoSamples, samplesUsed, capacityWarning = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 512, ".wav")
     print("Writing to stego file")  
       
     # Write to the stego audio file in wave format and close the song
@@ -410,7 +410,7 @@ if (encryptDWTDriver == True):
     
     originalCoverSamples = deepcopy(samples)
     print("Embedding")
-    stegoSamples, samplesUsed = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 512, ".txt")
+    stegoSamples, samplesUsed, capacityWarning = dwtEncrypt.dwtEncryptEncode(list(samples), myMessage, 512, ".txt")
 
     print("Getting difference")
 
@@ -461,8 +461,7 @@ if (scaleDWTDriver == True):
       
       originalSamples = deepcopy(samples)
       print("Encoding")
-      stegoSamples, used = dwtScale.dwtScaleEncode(samples, binaryMessage, ".txt", 6)
-      
+      stegoSamples, used, capacityWarning = dwtScale.dwtScaleEncode(samples, binaryMessage, ".txt", 6)
       stegoSamples = np.asarray(stegoSamples)
       
       stegoSamples = stegoSamples.astype(np.float32, order='C') / 32768.0
@@ -471,6 +470,12 @@ if (scaleDWTDriver == True):
       print("Reading from stego file")
       rate, stegoSamples = scWave.read('Media/testing123.wav')
       stegoSamples = stegoSamples.astype(np.float64, order='C') * 32768.0
+           
+#      noise = np.random.normal(0, 0.01, len(stegoSamples))
+#      print(noise)
+#      for i in range(0, len(stegoSamples)):
+#          stegoSamples[i] += noise[i]
+#      
       print("Decoding")
       message,typeMessage = dwtScale.dwtScaleDecode(list(stegoSamples), 6)
       
@@ -496,7 +501,7 @@ if (dwtHybridTest == True):
     
     originalSamples = deepcopy(samples)
     print("Encoding")
-    stegoSamples, used = dwtHybrid.dwtHybridEncode(samples, binaryMessage, ".wav", 7)
+    stegoSamples, used, capacityWarning = dwtHybrid.dwtHybridEncode(samples, binaryMessage, ".wav", 7)
      
     stegoSamples = np.asarray(stegoSamples)
       

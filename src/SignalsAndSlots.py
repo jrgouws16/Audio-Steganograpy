@@ -23,14 +23,20 @@ def saveFile():
                                         title = "Select file",
                                         filetypes = (("(.wav)","*.wav"),
                                                      ("(.txt)","*.txt")))
-
-def saveMessage():
+    
+def saveTextFile():
     root = tk.Tk()
     root.withdraw()
     return filedialog.asksaveasfilename(initialdir = "/",
                                         title = "Select file",
-                                        filetypes = (("(.wav)","*.wav"),
-                                                     ("(.txt)","*.txt")))
+                                        filetypes = (("txt files","*.txt"),("txt files","*.txt")))
+
+def saveWaveFile():
+    root = tk.Tk()
+    root.withdraw()
+    return filedialog.asksaveasfilename(initialdir = "/",
+                                        title = "Select file",
+                                        filetypes = (("wav files","*.wav"),("wav files","*.wav")))
 
 class SigSlot(QObject):
     # Define a new signal called 'trigger' that has no arguments.
@@ -66,6 +72,49 @@ class fileSaveSigSlot(QObject):
     def handle_trigger(self):
           self.filePath = saveFile()
           self.setPath = True          
+
+
+class textFileSaveSigSlot(QObject):
+
+    # Define a new signal called 'trigger' that has no arguments.
+    trigger = pyqtSignal()
+    filePath = ""
+    setPath = False
+
+    def connect(self):
+        # Connect the trigger signal to a slot.
+        self.trigger.connect(self.handle_trigger)
+
+    def emit(self):
+        # Emit the signal.
+        self.trigger.emit()
+
+    def handle_trigger(self):
+          self.filePath = saveTextFile()
+          self.setPath = True   
+          
+          
+class wavFileSaveSigSlot(QObject):
+
+    # Define a new signal called 'trigger' that has no arguments.
+    trigger = pyqtSignal()
+    filePath = ""
+    setPath = False
+
+    def connect(self):
+        # Connect the trigger signal to a slot.
+        self.trigger.connect(self.handle_trigger)
+
+    def emit(self):
+        # Emit the signal.
+        self.trigger.emit()
+
+    def handle_trigger(self):
+          self.filePath = saveWaveFile()
+          self.setPath = True   
+
+
+
                     
 class showInfoSigSlot(QObject):
 

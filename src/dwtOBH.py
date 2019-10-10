@@ -57,9 +57,7 @@ def getCapacity(coverSamples, OBH, blockLength):
 def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
       samplesUsed = 0 
       doBreak     = False
-      originalMessageLen = len(message)
-      progress = 0
-      
+      capacityWarning = False
       # Get the approximate coefficients and detail coefficients of the signal
       coefficients = dwt.getCoefficients(coverSamples, blockLength)
       # Embed the messagelength within the message
@@ -78,9 +76,6 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
       
       for block in range(0, len(coefficients[1])):
             
-            if (int(100 - 100*len(message)/originalMessageLen)>progress):
-                  progress = int(100 - 100*len(message)/originalMessageLen)
-                  print(progress, end =" ")
             
             for i in range(0, len(coefficients[1][block])):
                   
@@ -103,8 +98,12 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
                               break
                                           
                   binCoeff = "".join(binCoeff)
-
+                  
                   coefficients[1][block][i] = int(binCoeff,2)
+                  
+                  if (block == len(coefficients[1]) - 1 and i == len(coefficients[1][block]) - 1 and len(message)>0):
+                      capacityWarning = True
+            
                   
                   if (doBreak == True):
                         break
@@ -121,7 +120,7 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
           
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]    
           
-      return stegoSamples + unaltered, samplesUsed
+      return stegoSamples + unaltered, samplesUsed, capacityWarning
 
 # Function to decode a message from a stego audio file using the Haar DWT transform
 # Takes in list of integer stego file samples

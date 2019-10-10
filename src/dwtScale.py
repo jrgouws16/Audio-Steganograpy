@@ -5,9 +5,6 @@ Created on Tue Sep 24 21:51:34 2019
 
 @author: johan
 """
-embeddingProcess   = 0.0
-extractingProcess  = 0.0
-
 
 import dwtFirstPrinciples as dwt
 import numpy as np
@@ -52,16 +49,15 @@ def getCapacity(coverSamples, LSBs):
 # performed each time.
 # Returns a list of integer stego file samples
 def dwtScaleEncode(coverSamples, message, messageType, LSBs):
-      global embeddingProcess
       samplesUsed = 0
       stegoSamples = []
       coverSamples = list(coverSamples)
       messageLength = len(message)
       numBlocks     = int(len(coverSamples)/512) 
       doBreak       = False  
-      blockNumber   = 0     
-      originalMessageLength = len(message)
-      embeddingProcess = 0.0      
+      blockNumber   = 0    
+      capacityWarning = False
+      
       # Get the type of message
       # 0 is a textmessage and 1 is a wave message
       typeMessage = ""
@@ -86,11 +82,7 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
           for i in range(0, len(coefficiets[1])):
               for j in range(0, len(coefficiets[1][i]), 16):
                   subbandCoeff.append(coefficiets[1][i][j:j + 16])
-                  
-          if (int(100 - 100 * len(message)/originalMessageLength )>embeddingProcess):        
-                embeddingProcess = int(100 - 100 * len(message)/originalMessageLength )
-                print(embeddingProcess, end =" ")
-                  
+                                    
           # Scale each subband by the maximum value inside the subband
           for i in range(0, len(subbandCoeff)):
               scalingValue = max(subbandCoeff[i])
@@ -130,6 +122,12 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
                   if (scalingValue != 0):
                       subbandCoeff[i][j] = (binaryToInt(binaryValue) + fraction)/scalingValue
      
+        
+        
+                  if (blockNumber == numBlocks - 1 and j == len(subbandCoeff[i]) - 1 and len(message)>0):
+                      capacityWarning = True
+        
+        
                   if (doBreak == True):
                       break
               
@@ -156,7 +154,7 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
         
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
       
-      return stegoSamples + unaltered, samplesUsed
+      return stegoSamples + unaltered, samplesUsed, capacityWarning
 
 def dwtScaleDecode(stegoSamples, LSBs):
       message = ""

@@ -33,6 +33,36 @@ def binaryToInt(binaryString):
     else:
         return int(binaryString, 2)
     
+    
+def getCapacity(coverSamples, OBH):
+      capacity = 0
+      numBlocks     = int(len(coverSamples)/512) 
+      blockNumber   = 0     
+
+      for blockNumber in range(0, numBlocks):
+          # Reconstruct the coefficients into 32 subbands of 16 coeff each
+          subbandCoeff = []
+      
+          # Get the approximate coefficients and detail coefficients of the signal
+          coefficiets = dwt.getLevelCoefficients(5, coverSamples[blockNumber*512:blockNumber*512 + 512])
+          subbandCoeff.append(coefficiets[0])
+          for i in range(0, len(coefficiets[1])):
+              for j in range(0, len(coefficiets[1][i]), 16):
+                  subbandCoeff.append(coefficiets[1][i][j:j + 16])
+                  
+          # Scale each subband by the maximum value inside the subband
+          for i in range(0, len(subbandCoeff)):
+              scalingValue = max(subbandCoeff[i])
+              scalingValue = 100
+              
+              for j in range(0, len(subbandCoeff[i])):
+                  subbandCoeff[i][j] = subbandCoeff[i][j] * scalingValue  
+                  bits = calcPower(subbandCoeff[i][j]) - OBH
+                  capacity += bits - 3
+                  
+      return capacity
+    
+    
 # Function to encode a message within a audio file using the Haar DWT transform
 # Takes in list of integer cover file samples
 # Takes in a string of binary message bits
@@ -47,6 +77,7 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
       numBlocks     = int(len(coverSamples)/512) 
       doBreak       = False  
       blockNumber   = 0     
+      capacityWarning = False
 
       # Get the type of message
       # 0 is a textmessage and 1 is a wave message
@@ -95,9 +126,17 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
                         binaryValue[k] = message[0]
                         message = message[1:]
                         
+                        print(len(message))
+                        
+                        if (blockNumber == numBlocks - 1 and i == len(subbandCoeff) - 1 and j == len(subbandCoeff[i]) - 1 and len(message) > 0):
+                            capacityWarning = True
+                        
+                        
                         if (len(message) == 0):
                             doBreak = True
                             break
+                  
+                  
 
                   binaryValue[-1] = '0'
                   binaryValue[-2] = '0'
@@ -134,7 +173,8 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
         
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
       
-      return stegoSamples + unaltered, samplesUsed
+      
+      return stegoSamples + unaltered, samplesUsed, capacityWarning
 
 def dwtHybridDecode(stegoSamples, OBH):
       message = ""

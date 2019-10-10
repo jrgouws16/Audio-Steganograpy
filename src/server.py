@@ -5,12 +5,12 @@ Created on Mon Aug 26 20:47:42 2019
 @author: Johan Gouws
 """
 from PyQt5 import QtWidgets, uic
+from copy import deepcopy
 import socket
 import threading
 import sys
 import fileprocessing as fp
 import sockets
-from copy import deepcopy
 import geneticAlgorithm as GA
 import dwtOBH
 import dwtScale
@@ -41,7 +41,7 @@ def GA_encoding(coverSamples, secretMessage, key, frameRate, fileType):
         secretMessage = "".join(map(str,secretMessage))
     
         # Provide first audio channel samples and message samples to encode 
-        stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], key, "".join(map(str, secretMessage)), fileType)
+        stegoSamples, samplesUsed, bitsInserted, capacityWarning = GA.insertMessage(coverSamples[0], key, "".join(map(str, secretMessage)), fileType)
         
         # Convert the binary audio samples to decimal samples
         for i in range(0, len(stegoSamples)):
@@ -53,8 +53,6 @@ def GA_encoding(coverSamples, secretMessage, key, frameRate, fileType):
             if (stegoSamples[i] > 32767):
                 stegoSamples[i] = 32767
         
-        
-        
         # Get the characteristics of the stego file
         infoMessage = "Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples."
         infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
@@ -63,7 +61,7 @@ def GA_encoding(coverSamples, secretMessage, key, frameRate, fileType):
         # Show the results of the stego quality of the stego file
         mainWindow.listWidget_log.addItem(infoMessage)
                 
-        return stegoSamples   
+        return stegoSamples, capacityWarning   
     
 # Function to extract the message from the stego file making use of 
 # Genetic Algorithm
@@ -105,6 +103,14 @@ def threaded_client(conn, clientNum):
                     OBH = int(OBH.decode())
                     samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Capacity" + ".wav")
                     capacity = dwtOBH.getCapacity(samplesOne, OBH, 2048)
+                    sockets.send_one_message(conn, "Capacity")
+                    sockets.send_one_message(conn, str(capacity))
+                    
+                elif (method.decode() == "DWT_hybrid"):
+                    OBH = sockets.recv_one_message(conn)
+                    OBH = int(OBH.decode())
+                    samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Capacity" + ".wav")
+                    capacity = dwtHybrid.getCapacity(samplesOne, OBH)
                     sockets.send_one_message(conn, "Capacity")
                     sockets.send_one_message(conn, str(capacity))
                     
@@ -222,7 +228,8 @@ def threaded_client(conn, clientNum):
                     binaryKey = fp.messageToBinary(keyString.decode())
                     binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
     
-                    stegoSamples = GA_encoding(coverSamples, secretMessage, binaryKey, rate, fileType)
+                    stegoSamples, capacityWarning = GA_encoding(coverSamples, secretMessage, binaryKey, rate, fileType)
+                    
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
                     
                     # Write to the stego audio file in wave format and close the song
@@ -273,7 +280,12 @@ def threaded_client(conn, clientNum):
                     for i in connToSendTo:
                         with open(f_send, "rb") as f:
                             data = f.read()
+                            
+                            if (capacityWarning == True):
+                                sockets.send_one_message(i, 'WARN')
+                                
                             sockets.send_one_message(i, "RECFILE")
+                            sockets.send_one_message(i, '.wav')
                             sockets.send_one_file(i, data)
                             f.close()
                     mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
@@ -324,7 +336,7 @@ def threaded_client(conn, clientNum):
                     
                     message = "".join(list(map(str, message)))
                 
-                    stegoSamples, samplesUsed = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 2048, fileType)
+                    stegoSamples, samplesUsed, capacityWarning = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 2048, fileType)
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
                     # Write to the stego audio file in wave format and close the song
@@ -376,7 +388,12 @@ def threaded_client(conn, clientNum):
                     for i in connToSendTo:
                         with open(f_send, "rb") as f:
                             data = f.read()
+                            
+                            if (capacityWarning == True):
+                                sockets.send_one_message(i, 'WARN')
+                            
                             sockets.send_one_message(i, "RECFILE")
+                            sockets.send_one_message(i, '.wav')
                             sockets.send_one_file(i, data)
                             f.close()
                         
@@ -432,7 +449,7 @@ def threaded_client(conn, clientNum):
                     
                     message = "".join(list(map(str, message)))
                 
-                    stegoSamples, samplesUsed = dwtHybrid.dwtHybridEncode(samplesOne, message, fileType, OBH)
+                    stegoSamples, samplesUsed, capacityWarning = dwtHybrid.dwtHybridEncode(samplesOne, message, fileType, OBH)
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
                     # Write to the stego audio file in wave format and close the song
@@ -484,7 +501,12 @@ def threaded_client(conn, clientNum):
                     for i in connToSendTo:
                         with open(f_send, "rb") as f:
                             data = f.read()
+                            
+                            if (capacityWarning == True):
+                                sockets.send_one_message(i, 'WARN')
+                            
                             sockets.send_one_message(i, "RECFILE")
+                            sockets.send_one_message(i, '.wav')
                             sockets.send_one_file(i, data)
                             f.close()
                         
@@ -540,7 +562,7 @@ def threaded_client(conn, clientNum):
                         
                     message = "".join(list(map(str, message)))
                 
-                    stegoSamples, samplesUsed = dwtScale.dwtScaleEncode(samplesOne, message, fileType, LSBs)
+                    stegoSamples, samplesUsed, capacityWarning = dwtScale.dwtScaleEncode(samplesOne, message, fileType, LSBs)
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
                     # Write to the stego audio file in wave format and close the song
@@ -592,7 +614,12 @@ def threaded_client(conn, clientNum):
                     for i in connToSendTo:
                         with open(f_send, "rb") as f:
                             data = f.read()
+                            
+                            if (capacityWarning == True):
+                                sockets.send_one_message(i, 'WARN')
+                            
                             sockets.send_one_message(i, "RECFILE")
+                            sockets.send_one_message(i, '.wav')
                             sockets.send_one_file(i, data)
                             f.close()
                         
@@ -615,21 +642,12 @@ def threaded_client(conn, clientNum):
                     samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + ".wav")
                     
                     message = ""
-                    print(fileType)
                     if (fileType == ".txt"):
                         
                         messageObject = open(str(clientNum) + "MSG" + fileType, "r")
     
                         # Extract the message as a string of characters
                         message = messageObject.read()
-                        
-#                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-#                        message = AES.string2bits(message)
-#                        message = AES.encryptBinaryString(message, AESkeyEncode)
-#                        message = AES.bits2string(message)
-#                        
-#                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
-#                        
                         messageObject.close()
                         
                     else:
@@ -643,14 +661,10 @@ def threaded_client(conn, clientNum):
                         # Convert the binary stream to a ASCII string
                         for i in range(0, len(message), 8):
                             alphaMessage += AES.bits2string(message[i: i + 8])
-                        
-#                        mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-#                        message = AES.encryptBinaryString(message, AESkeyEncode)
-#                        mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                                             
                     mainWindow.listWidget_log.addItem("Embedding starting: " + str(addresses[connections.index(conn)][0]))  
                                         
-                    stegoSamples, samplesUsed = DWTcrypt.dwtEncryptEncode(samplesOne, message, 2048, fileType)        
+                    stegoSamples, samplesUsed, capacityWarning = DWTcrypt.dwtEncryptEncode(samplesOne, message, 2048, fileType)        
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
                     # Write to the stego audio file in wave format and close the song
@@ -705,7 +719,12 @@ def threaded_client(conn, clientNum):
                     for i in connToSendTo:
                         with open(f_send, "rb") as f:
                             data = f.read()
+                            
+                            if (capacityWarning == True):
+                                sockets.send_one_message(i, 'WARN')
+                            
                             sockets.send_one_message(i, "RECFILE")
+                            sockets.send_one_message(i, '.wav')
                             sockets.send_one_file(i, data)
                             f.close()
                         
@@ -754,7 +773,6 @@ def threaded_client(conn, clientNum):
                     extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
               
                     if (AES.bits2string(extractMessage) == "WRONG_KEY"):
-                        print("IN HERE")
                         fileType = '.txt'
                         extractMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
                                                         
@@ -775,6 +793,7 @@ def threaded_client(conn, clientNum):
                     with open(str(clientNum) + "msg" + fileType, "rb") as f:
                         data = f.read()
                         sockets.send_one_message(conn, "RECFILE")
+                        sockets.send_one_message(i, fileType)
                         sockets.send_one_file(conn, data)
                         f.close()
                         
@@ -801,7 +820,6 @@ def threaded_client(conn, clientNum):
                     extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
               
                     if (AES.bits2string(extractMessage) == "WRONG_KEY"):
-                        print("IN HERE")
                         fileType = '.txt'
                         extractMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
                                                         
@@ -822,6 +840,7 @@ def threaded_client(conn, clientNum):
                     with open(str(clientNum) + "msg" + fileType, "rb") as f:
                         data = f.read()
                         sockets.send_one_message(conn, "RECFILE")
+                        sockets.send_one_message(i, fileType)
                         sockets.send_one_file(conn, data)
                         f.close()
                         
@@ -847,7 +866,6 @@ def threaded_client(conn, clientNum):
                     extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
                     
                     if (AES.bits2string(extractMessage) == "WRONG_KEY"):
-                        print("IN HERE")
                         fileType = '.txt'
                         extractMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
                                                         
@@ -868,6 +886,7 @@ def threaded_client(conn, clientNum):
                     with open(str(clientNum) + "msg" + fileType, "rb") as f:
                         data = f.read()
                         sockets.send_one_message(conn, "RECFILE")
+                        sockets.send_one_message(i, fileType)
                         sockets.send_one_file(conn, data)
                         f.close()
                         
@@ -891,23 +910,7 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
                     
                     if (fileType == ".wav"):
-                        
-                        
-                       
-                        # Encrypt the secret message
-#                        mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-#                        secretMessage = AES.string2bits(secretMessage)
-#                        secretMessage = AES.encryptBinaryString(secretMessage, AESkeyDecode)
-#                        secretMessage = AES.bits2string(secretMessage)
-#                        mainWindow.listWidget_log.addItem("AES decoding completed: "+ str(addresses[connections.index(conn)][0]))
-#                        
-#                        if (AES.bits2string(secretMessage) == "WRONG_KEY"):
-#                              fileType = '.txt'
-#                              secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
-#                              fp.writeMessageBitsToFile(secretMessage, str(clientNum) + "msg" + fileType)
-#                                                    
-#                        else:
-                       
+
                         # Convert to integer list of bits for embedding
                         binMessage = ''
                         # Convert the binary stream to a ASCII string
@@ -916,18 +919,7 @@ def threaded_client(conn, clientNum):
                         fp.writeWaveMessageToFile(secretMessage, str(clientNum) + "msg" + fileType)
               
                     else:
-                            # Encrypt the secret message
-#                            mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                            #secretMessage = AES.AESCipher(AESkeyDecode).decrypt(secretMessage)
-                            
-#                            mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
-#                            if (secretMessage == "WRONG_KEY"):
-#                                  print("IN HERE")
-#                                  fileType = '.txt'
-#                                  secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
-#                                  fp.writeMessageBitsToFile(secretMessage, str(clientNum) + "msg" + fileType)
-#      
-#                            else:
+
                             messageFileObj = open(str(clientNum) + "msg" + fileType, 'w')
                             messageFileObj.write(secretMessage)
                             messageFileObj.close()
@@ -943,6 +935,7 @@ def threaded_client(conn, clientNum):
                     with open(str(clientNum) + "msg" + fileType, "rb") as f:
                         data = f.read()
                         sockets.send_one_message(conn, "RECFILE")
+                        sockets.send_one_message(i, fileType)
                         sockets.send_one_file(conn, data)
                         f.close()
                         
@@ -973,9 +966,7 @@ def threaded_client(conn, clientNum):
                   
                   
                     secretMessage = AES.decryptBinaryString(secretMessage, AESkeyDecode)
-                    print(secretMessage)
                     if (AES.bits2string(secretMessage) == "WRONG_KEY"):
-                          print("IN HERE")
                           fileType = '.txt'
                           secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
                           
@@ -997,6 +988,7 @@ def threaded_client(conn, clientNum):
                     with open(str(clientNum) + "msg" + fileType, "rb") as f:
                         data = f.read()
                         sockets.send_one_message(conn, "RECFILE")
+                        sockets.send_one_message(i, fileType)
                         sockets.send_one_file(conn, data)
                         f.close()
                         

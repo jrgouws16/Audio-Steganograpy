@@ -63,7 +63,7 @@ def testGA(song, key):
         coverSamples[0][i] = "{0:016b}".format(coverSamples[0][i])
 
     secretMessage = "".join(map(str,secretMessage))
-    stegoSamples, samplesUsed, bitsInserted = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)))
+    stegoSamples, samplesUsed, bitsInserted, capacityWarning = GA.insertMessage(coverSamples[0], binaryKey, "".join(map(str, secretMessage)))
         
     print("Message bits inserted", bitsInserted)
     print("Samples used", samplesUsed)

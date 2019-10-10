@@ -39,9 +39,9 @@ def getCapacity(coverSamples, blockLength):
       
       for blockNumber in range(0, len(coefficiets[1])):
           for i in range(0, len(coefficiets[1][blockNumber])):
-              bits += 1
+              bits += 8
               
-      return bits
+      return bits - 50
 
 # Function to encode a message within a audio file using the Haar DWT transform
 # Takes in list of integer cover file samples
@@ -51,6 +51,8 @@ def getCapacity(coverSamples, blockLength):
 # Returns a list of integer stego file samples
 def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
       samplesUsed = 0
+      
+      capacityWarning = False
       
       # Embed the messagelength within the message
       messageLength = len(message)
@@ -92,16 +94,9 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
       message.insert(0, typeMessage)
       message.insert(0, messageLength)
            
-      
-      
-      progress = 0
-      original = len(message)
-
-
       for blockNumber in range(0, len(coefficiets[1])):
           for i in range(0, len(coefficiets[1][blockNumber])):
-              progress = 100 - len(message)/original*100
-              print(int(progress), end  = " ")
+
       
               # Replace the coefficient by the encrypted ascii char
               
@@ -119,6 +114,9 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
 
               message = message[1:]
               samplesUsed = blockNumber * blockLength + (i + 1)*2
+              
+              if (blockNumber == len(coefficiets[1]) - 1 and i == len(coefficiets[1][blockNumber]) - 1 and len(message) > 0):
+                  capacityWarning = True
               
               # If the message is embedded, break
               if (len(message) == 0):
@@ -141,7 +139,7 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
       
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
 
-      return stegoSamples + unaltered, samplesUsed
+      return stegoSamples + unaltered, samplesUsed, capacityWarning
 
 def dwtEncryptDecode(stegoSamples, blockLength):
       # Get the approximate coefficients and detail coefficients of the signal

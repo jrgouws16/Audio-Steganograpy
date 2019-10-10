@@ -162,8 +162,12 @@ def determineFittest(originalSample, population):
     return returnIndex
 
 def insertMessage(samples, key, message, messageType):
-    messageSamples = deepcopy(samples[28:])
-    infoSamples    = deepcopy(samples[0:28])
+    messageSamples  = deepcopy(samples[28:])
+    infoSamples     = deepcopy(samples[0:28])
+    
+    # Flag that will be set to true if the message was not fully embedded, due
+    # to the cover file being too small
+    capacityWarning = False
     
     skipIndex = 0
     sampleIndex = 0
@@ -233,6 +237,7 @@ def insertMessage(samples, key, message, messageType):
         
         if (sampleIndex == len(messageSamples)):
             print("File is too small to embed the message, breaking for loop")
+            capacityWarning = True
             break
         
     messageLength = '{0:026b}'.format(messageBitsEmbedded)
@@ -258,7 +263,7 @@ def insertMessage(samples, key, message, messageType):
     for i in range(0, len(stegoInfoSamples)):
         stegoInfoSamples[i] = "{0:016b}".format(stegoInfoSamples[i])
 
-    return stegoInfoSamples + messageSamples, sampleIndex, messageBitsEmbedded
+    return stegoInfoSamples + messageSamples, sampleIndex, messageBitsEmbedded, capacityWarning
        
 def extractMessage(samples, key):
     messageSamples = deepcopy(samples[28:])
