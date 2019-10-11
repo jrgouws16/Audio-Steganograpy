@@ -279,4 +279,14 @@ abcdefghijklmnopqrstuvwxyz
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
 abcdefghijklmnopqrstuvwxyz
 """"""""""""""""""""""""""
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+01234567890123456789024680
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+!!!!!!!!!!!!!!!!!!!!!!!!!!
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+@@@@@@@@@@@@@@@@@@@@@@@@@@
 

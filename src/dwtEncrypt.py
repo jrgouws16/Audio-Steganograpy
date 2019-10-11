@@ -95,9 +95,11 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
       message.insert(0, messageLength)
            
       for blockNumber in range(0, len(coefficiets[1])):
+            
+          samplesUsed = (blockNumber + 1) * blockLength
+            
           for i in range(0, len(coefficiets[1][blockNumber])):
 
-      
               # Replace the coefficient by the encrypted ascii char
               
               coefficiets[1][blockNumber][i] = int(coefficiets[1][blockNumber][i]/10)
@@ -113,7 +115,6 @@ def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
               coefficiets[1][blockNumber][i] = coefficiets[1][blockNumber][i] * 10
 
               message = message[1:]
-              samplesUsed = blockNumber * blockLength + (i + 1)*2
               
               if (blockNumber == len(coefficiets[1]) - 1 and i == len(coefficiets[1][blockNumber]) - 1 and len(message) > 0):
                   capacityWarning = True

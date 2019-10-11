@@ -76,11 +76,11 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
       
       for block in range(0, len(coefficients[1])):
             
+            samplesUsed = blockLength * (block + 1)
             
             for i in range(0, len(coefficients[1][block])):
                   
                   bits = calcPower(coefficients[1][block][i]) - OBH - 2
-                  samplesUsed += 2
                   
                   if (bits < 1):
                         continue

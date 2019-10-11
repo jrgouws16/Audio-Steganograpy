@@ -76,6 +76,8 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
           # Reconstruct the coefficients into 32 subbands of 16 coeff each
           subbandCoeff = []
       
+          samplesUsed = (blockNumber + 1) * 512
+      
           # Get the approximate coefficients and detail coefficients of the signal
           coefficiets = dwt.getLevelCoefficients(5, coverSamples[blockNumber*512:blockNumber*512 + 512])
           subbandCoeff.append(coefficiets[0])
@@ -89,7 +91,6 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
               scalingValue = 100
               
               for j in range(0, len(subbandCoeff[i])):
-                  samplesUsed += 1
                   
                   subbandCoeff[i][j] = subbandCoeff[i][j] * scalingValue  
                   intValue = int(subbandCoeff[i][j])

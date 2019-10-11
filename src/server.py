@@ -54,14 +54,13 @@ def GA_encoding(coverSamples, secretMessage, key, frameRate, fileType):
                 stegoSamples[i] = 32767
         
         # Get the characteristics of the stego file
-        infoMessage = "Embedded " + str(bitsInserted) + " bits into " + str(samplesUsed) + " samples."
+        infoMessage = "Embedded " + str(round(bitsInserted/samplesUsed, 5)) + " bits per sample on average."
         infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
         infoMessage += ".\nCapacity of " + str(RT.getCapacity(secretMessage, samplesUsed, frameRate)) + " kbps."       
-            
         # Show the results of the stego quality of the stego file
         mainWindow.listWidget_log.addItem(infoMessage)
                 
-        return stegoSamples, capacityWarning   
+        return stegoSamples, capacityWarning, infoMessage
     
 # Function to extract the message from the stego file making use of 
 # Genetic Algorithm
@@ -228,7 +227,10 @@ def threaded_client(conn, clientNum):
                     binaryKey = fp.messageToBinary(keyString.decode())
                     binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
     
-                    stegoSamples, capacityWarning = GA_encoding(coverSamples, secretMessage, binaryKey, rate, fileType)
+                    stegoSamples, capacityWarning, infoMessage = GA_encoding(coverSamples, secretMessage, binaryKey, rate, fileType)
+                    sockets.send_one_message(conn, "Stats")
+                    sockets.send_one_message(conn, infoMessage)
+
                     
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
                     
@@ -336,9 +338,21 @@ def threaded_client(conn, clientNum):
                     
                     message = "".join(list(map(str, message)))
                 
+                    originalCoverSamples = deepcopy(samplesOne) 
+                  
                     stegoSamples, samplesUsed, capacityWarning = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 2048, fileType)
+                    
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
+      
+                    # Get the characteristics of the stego file
+                    infoMessage = "Embedded " + str(round(len(message)/samplesUsed, 5)) + " bits per sample on average."
+                    infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
+                    infoMessage += ".\nCapacity of " + str(RT.getCapacity(message, samplesUsed, rate)) + " kbps."       
+                    sockets.send_one_message(conn, "Stats")
+                    sockets.send_one_message(conn, infoMessage)
+      
+      
                     # Write to the stego audio file in wave format and close the song
                     mainWindow.listWidget_log.addItem("Writing stego to file")
                     stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
@@ -450,9 +464,21 @@ def threaded_client(conn, clientNum):
                     
                     message = "".join(list(map(str, message)))
                 
+                    originalCoverSamples = deepcopy(samplesOne)
+                  
                     stegoSamples, samplesUsed, capacityWarning = dwtHybrid.dwtHybridEncode(samplesOne, message, fileType, OBH)
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
+      
+                    # Get the characteristics of the stego file
+                    infoMessage = "Embedded " + str(round(len(message)/samplesUsed, 5)) + " bits per sample on average."
+                    infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
+                    infoMessage += ".\nCapacity of " + str(RT.getCapacity(message, samplesUsed, rate)) + " kbps."       
+                    sockets.send_one_message(conn, "Stats")
+                    sockets.send_one_message(conn, infoMessage)
+      
+      
+      
                     # Write to the stego audio file in wave format and close the song
                     mainWindow.listWidget_log.addItem("Writing stego to file")
                     stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
@@ -563,9 +589,18 @@ def threaded_client(conn, clientNum):
                         
                         
                     message = "".join(list(map(str, message)))
-                
+                    originalCoverSamples = deepcopy(samplesOne)
                     stegoSamples, samplesUsed, capacityWarning = dwtScale.dwtScaleEncode(samplesOne, message, fileType, LSBs)
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
+                    
+                    
+                    # Get the characteristics of the stego file
+                    infoMessage = "Embedded " + str(round(len(message)/samplesUsed, 5)) + " bits per sample on average."
+                    infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
+                    infoMessage += ".\nCapacity of " + str(RT.getCapacity(message, samplesUsed, rate)) + " kbps."       
+                    sockets.send_one_message(conn, "Stats")
+                    sockets.send_one_message(conn, infoMessage)
+      
     
                     # Write to the stego audio file in wave format and close the song
                     mainWindow.listWidget_log.addItem("Writing stego to file")
@@ -666,9 +701,16 @@ def threaded_client(conn, clientNum):
                             alphaMessage += AES.bits2string(message[i: i + 8])
                                             
                     mainWindow.listWidget_log.addItem("Embedding starting: " + str(addresses[connections.index(conn)][0]))  
-                                        
+                    originalCoverSamples = deepcopy(samplesOne)
                     stegoSamples, samplesUsed, capacityWarning = DWTcrypt.dwtEncryptEncode(samplesOne, message, 2048, fileType)        
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
+                    
+                    # Get the characteristics of the stego file
+                    infoMessage = "Embedded " + str(round(len(message)/samplesUsed, 5)) + " bits per sample on average."
+                    infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
+                    infoMessage += ".\nCapacity of " + str(RT.getCapacity(message*8, samplesUsed, rate)) + " kbps."       
+                    sockets.send_one_message(conn, "Stats")
+                    sockets.send_one_message(conn, infoMessage)
     
                     # Write to the stego audio file in wave format and close the song
                     mainWindow.listWidget_log.addItem("Writing stego to file")

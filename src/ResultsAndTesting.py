@@ -40,9 +40,6 @@ def getSNR(originalSamples, embeddedSamples):
 # Give only the message bits that were encoded as well as the amount of samples 
 # used to embed the message. The framerate is from the wave file 
 def getCapacity(secretMessage, samplesUsed, frameRate):
-      print("Message bits ->", len(secretMessage))
-      print("Samples used ->", samplesUsed)
-      print("FrameRate    ->", frameRate)
       return round((len(secretMessage)/(samplesUsed/frameRate))/1000, 2)
 
 ###############################################################################

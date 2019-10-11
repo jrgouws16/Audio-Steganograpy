@@ -94,6 +94,9 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
       message = '{0:026b}'.format(messageLength) + typeMessage + message
      
       for blockNumber in range(0, numBlocks):
+            
+          samplesUsed = (blockNumber + 1) * 512
+            
           # Reconstruct the coefficients into 32 subbands of 16 coeff each
           subbandCoeff = []
       
@@ -110,7 +113,6 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
               scalingValue = 100
               
               for j in range(0, len(subbandCoeff[i])):
-                  samplesUsed += 1
                   
                   subbandCoeff[i][j] = subbandCoeff[i][j] * scalingValue  
                   intValue = int(subbandCoeff[i][j])

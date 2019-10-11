@@ -25,6 +25,8 @@ invalidCover.info = "Provide a valid cover wave file."
 capacityWarning = SS.showInfoSigSlot()
 capacityWarning.title = 'CapacityWarning'
 capacityWarning.info = 'The cover file is too small for the message provided'
+
+embeddedStats = SS.showInfoSigSlot()
 errorMsg = SS.showInfoSigSlot()
 
 server = []
@@ -74,7 +76,6 @@ def fileReceiveThread():
                     if (data.decode() == "RECFILE"):
                         
                         fileType = sockets.recv_one_message(server[-1]).decode()
-                        print(fileType)
                         data = sockets.recv_one_message(server[-1])
                         
                         if (fileType == '.wav'):
@@ -101,8 +102,13 @@ def fileReceiveThread():
                             f.write(data)
                             f.close()
                         
-                    if (data.decode() == "WARN"):
+                    elif (data.decode() == "WARN"):
                         capacityWarning.emit()
+                        
+                    elif (data.decode() == "Stats"):
+                        embeddedStats.title = 'Steganographic file results'
+                        embeddedStats.info = sockets.recv_one_message(server[-1]).decode()
+                        embeddedStats.emit()
                         
                     elif (data.decode() == "Capacity"):
                         capacity = sockets.recv_one_message(server[-1])
@@ -543,6 +549,7 @@ if __name__ == "__main__":
     errorMsg.connect()
     invalidCover.connect()
     capacityWarning.connect()
+    embeddedStats.connect()
 
     # Guide user to provide values 1, 2, 3 or 4
     mainWindow.lineEdit_OBH.setPlaceholderText("OBH")
