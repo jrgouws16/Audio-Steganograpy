@@ -79,7 +79,7 @@ for path in allPaths:
                                         
                         originalCoverSamples = deepcopy(samplesOne) 
                                           
-                        stegoSamples, samplesUsed, capacityWarning = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 2048, '.txt')
+                        stegoSamples, samplesUsed, capacityWarning = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 512, '.txt')
                                             
                         if (capacityWarning == True):
                               capacityWarnings += 1

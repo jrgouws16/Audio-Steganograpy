@@ -67,7 +67,7 @@ for path in allPaths:
                   messageObject.close()
                                           
                   originalCoverSamples = deepcopy(samplesOne)
-                  stegoSamples, samplesUsed, capacityWarning = dwtEncrypt.dwtEncryptEncode(samplesOne, message, 2048, '.txt')        
+                  stegoSamples, samplesUsed, capacityWarning = dwtEncrypt.dwtEncryptEncode(samplesOne, message, 512, '.txt')        
                                       
                   SNR = RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] )
                   capacity = RT.getCapacity(message*8, samplesUsed, rate)

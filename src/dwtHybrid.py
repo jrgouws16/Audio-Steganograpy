@@ -124,7 +124,7 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
                   binaryValue = np.binary_repr(intValue, binaryWidth)
                   binaryValue = list(binaryValue)
                   
-                  for k in range(len(binaryValue) - bits, len(binaryValue) - 3): 
+                  for k in range(len(binaryValue) - bits - 3, len(binaryValue) - 3): 
                         binaryValue[k] = message[0]
                         message = message[1:]
                                                 
@@ -213,7 +213,7 @@ def dwtHybridDecode(stegoSamples, OBH):
                   binaryValue = list(binaryValue)
                   
 
-                  for k in range(len(binaryValue) - bits, len(binaryValue) - 3):
+                  for k in range(len(binaryValue) - bits - 3, len(binaryValue) - 3):
                         
                       message += binaryValue[k]
                         

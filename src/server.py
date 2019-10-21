@@ -101,7 +101,7 @@ def threaded_client(conn, clientNum):
                     OBH = sockets.recv_one_message(conn)
                     OBH = int(OBH.decode())
                     samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Capacity" + ".wav")
-                    capacity = dwtOBH.getCapacity(samplesOne, OBH, 2048)
+                    capacity = dwtOBH.getCapacity(samplesOne, OBH, 512)
                     sockets.send_one_message(conn, "Capacity")
                     sockets.send_one_message(conn, str(capacity))
                     
@@ -123,7 +123,7 @@ def threaded_client(conn, clientNum):
                     
                 elif (method.decode() == "DWT_encode"):
                     samplesOne, samplesTwo, rate = fp.getWaveSamples(str(clientNum) + "Capacity" + ".wav")
-                    capacity = DWTcrypt.getCapacity(samplesOne, 2048)
+                    capacity = DWTcrypt.getCapacity(samplesOne, 512)
                     sockets.send_one_message(conn, "Capacity")
                     sockets.send_one_message(conn, str(capacity))
                     
@@ -340,7 +340,7 @@ def threaded_client(conn, clientNum):
                 
                     originalCoverSamples = deepcopy(samplesOne) 
                   
-                    stegoSamples, samplesUsed, capacityWarning = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 2048, fileType)
+                    stegoSamples, samplesUsed, capacityWarning = dwtOBH.dwtHaarEncode(samplesOne, message, OBH, 512, fileType)
                     
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
     
@@ -702,7 +702,7 @@ def threaded_client(conn, clientNum):
                                             
                     mainWindow.listWidget_log.addItem("Embedding starting: " + str(addresses[connections.index(conn)][0]))  
                     originalCoverSamples = deepcopy(samplesOne)
-                    stegoSamples, samplesUsed, capacityWarning = DWTcrypt.dwtEncryptEncode(samplesOne, message, 2048, fileType)        
+                    stegoSamples, samplesUsed, capacityWarning = DWTcrypt.dwtEncryptEncode(samplesOne, message, 512, fileType)        
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
                     
                     # Get the characteristics of the stego file
@@ -810,7 +810,7 @@ def threaded_client(conn, clientNum):
                     samplesOneStego = np.asarray(samplesOneStego, dtype=np.float32, order = 'C')*32768.0
                     
                     # Extract the wave samples from the host signal
-                    extractMessage, fileType = dwtOBH.dwtHaarDecode(samplesOneStego, OBH, 2048)
+                    extractMessage, fileType = dwtOBH.dwtHaarDecode(samplesOneStego, OBH, 512)
                       
                     mainWindow.listWidget_log.addItem("Steganography extracting completed: "+ str(addresses[connections.index(conn)][0]))
                     
@@ -949,7 +949,7 @@ def threaded_client(conn, clientNum):
  
                     samples = samples.astype(np.float64, order='C') * 32768.0
                         
-                    secretMessage, fileType = DWTcrypt.dwtEncryptDecode(list(samples), 2048)
+                    secretMessage, fileType = DWTcrypt.dwtEncryptDecode(list(samples), 512)
                     mainWindow.listWidget_log.addItem("Steganography extracting completed: "+ str(addresses[connections.index(conn)][0]))
     
                     # Write the message bits to a file and close the steganography file

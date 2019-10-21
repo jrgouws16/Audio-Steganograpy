@@ -19,36 +19,36 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 50
+numSongsPerGenre = 5
 textMessage = True
 
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
 x = np.asarray(x)
 
-SNRAlt = [0,0,0,0,0,0,0]
-SNRBlu = [0,0,0,0,0,0,0]
-SNREle = [0,0,0,0,0,0,0]
-SNRJzz = [0,0,0,0,0,0,0]
-SNRPop = [0,0,0,0,0,0,0]
-SNRRoc = [0,0,0,0,0,0,0]
+SNRAlt = [0,0,0,0,0,0,0,0,0,0,0]
+SNRBlu = [0,0,0,0,0,0,0,0,0,0,0]
+SNREle = [0,0,0,0,0,0,0,0,0,0,0]
+SNRJzz = [0,0,0,0,0,0,0,0,0,0,0]
+SNRPop = [0,0,0,0,0,0,0,0,0,0,0]
+SNRRoc = [0,0,0,0,0,0,0,0,0,0,0]
 
-CapAlt = [0,0,0,0,0,0,0]
-CapBlu = [0,0,0,0,0,0,0]
-CapEle = [0,0,0,0,0,0,0]
-CapJzz = [0,0,0,0,0,0,0]
-CapPop = [0,0,0,0,0,0,0]
-CapRoc = [0,0,0,0,0,0,0]
+CapAlt = [0,0,0,0,0,0,0,0,0,0,0]
+CapBlu = [0,0,0,0,0,0,0,0,0,0,0]
+CapEle = [0,0,0,0,0,0,0,0,0,0,0]
+CapJzz = [0,0,0,0,0,0,0,0,0,0,0]
+CapPop = [0,0,0,0,0,0,0,0,0,0,0]
+CapRoc = [0,0,0,0,0,0,0,0,0,0,0]
 
-SamAlt = [0,0,0,0,0,0,0]
-SamBlu = [0,0,0,0,0,0,0]
-SamEle = [0,0,0,0,0,0,0]
-SamJzz = [0,0,0,0,0,0,0]
-SamPop = [0,0,0,0,0,0,0]
-SamRoc = [0,0,0,0,0,0,0]
+SamAlt = [0,0,0,0,0,0,0,0,0,0,0]
+SamBlu = [0,0,0,0,0,0,0,0,0,0,0]
+SamEle = [0,0,0,0,0,0,0,0,0,0,0]
+SamJzz = [0,0,0,0,0,0,0,0,0,0,0]
+SamPop = [0,0,0,0,0,0,0,0,0,0,0]
+SamRoc = [0,0,0,0,0,0,0,0,0,0,0]
 
-counter = numSongsPerGenre * 6 * 7
+counter = numSongsPerGenre * 6 * 11
 capacityWarnings = 0
-LSBs = [1,2,3,4,5,6]
+LSBs = [1,2,3,4,5,6,7,8,9,10,11]
 
 for path in allPaths:
       coverFiles = []
@@ -93,34 +93,34 @@ for path in allPaths:
                         
                         
                         if (path == 'C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative'):
-                             SNRAlt[LSB] += SNR
-                             CapAlt[LSB] += capacity
-                             SamAlt[LSB] += samplesUsed
+                             SNRAlt[LSB-1] += SNR
+                             CapAlt[LSB-1] += capacity
+                             SamAlt[LSB-1] += samplesUsed
                              
                         if (path == 'C:/Users/Johan Gouws/Desktop/GenresDatabase/Blues'):
-                             SNRBlu[LSB] += SNR
-                             CapBlu[LSB] += capacity
-                             SamBlu[LSB] += samplesUsed
+                             SNRBlu[LSB-1] += SNR
+                             CapBlu[LSB-1] += capacity
+                             SamBlu[LSB-1] += samplesUsed
                              
                         if (path == 'C:/Users/Johan Gouws/Desktop/GenresDatabase/Electronic'):
-                             SNREle[LSB] += SNR
-                             CapEle[LSB] += capacity
-                             SamEle[LSB] += samplesUsed
+                             SNREle[LSB-1] += SNR
+                             CapEle[LSB-1] += capacity
+                             SamEle[LSB-1] += samplesUsed
                              
                         if (path == 'C:/Users/Johan Gouws/Desktop/GenresDatabase/Jazz'):
-                             SNRJzz[LSB] += SNR
-                             CapJzz[LSB] += capacity
-                             SamJzz[LSB] += samplesUsed
+                             SNRJzz[LSB-1] += SNR
+                             CapJzz[LSB-1] += capacity
+                             SamJzz[LSB-1] += samplesUsed
                              
                         if (path == 'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop'):
-                             SNRPop[LSB] += SNR
-                             CapPop[LSB] += capacity
-                             SamPop[LSB] += samplesUsed
+                             SNRPop[LSB-1] += SNR
+                             CapPop[LSB-1] += capacity
+                             SamPop[LSB-1] += samplesUsed
                              
                         if (path == 'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock'):
-                             SNRRoc[LSB] += SNR
-                             CapRoc[LSB] += capacity
-                             SamRoc[LSB] += samplesUsed
+                             SNRRoc[LSB-1] += SNR
+                             CapRoc[LSB-1] += capacity
+                             SamRoc[LSB-1] += samplesUsed
                        
                        
                   print("capacityWarnings = ", capacityWarnings)
@@ -130,10 +130,10 @@ for path in allPaths:
 for LSB in LSBs:
       plt.figure(4)
       plt.title('SNR')
-      plt.plot(x, [SNRAlt[LSB]/numSongsPerGenre,SNRBlu[LSB]/numSongsPerGenre,SNREle[LSB]/numSongsPerGenre,SNRJzz[LSB]/numSongsPerGenre,SNRPop[LSB]/numSongsPerGenre,SNRRoc[LSB]/numSongsPerGenre])
+      plt.plot(x, [SNRAlt[LSB-1]/numSongsPerGenre,SNRBlu[LSB-1]/numSongsPerGenre,SNREle[LSB-1]/numSongsPerGenre,SNRJzz[LSB-1]/numSongsPerGenre,SNRPop[LSB-1]/numSongsPerGenre,SNRRoc[LSB-1]/numSongsPerGenre])
       plt.figure(5)
       plt.title('Capacity')
-      plt.plot(x, [CapAlt[LSB]*1000/44100/numSongsPerGenre,CapBlu[LSB]*1000/44100/numSongsPerGenre,CapEle[LSB]*1000/44100/numSongsPerGenre,CapJzz[LSB]*1000/44100/numSongsPerGenre,CapPop[LSB]*1000/44100/numSongsPerGenre,CapRoc[LSB]*1000/44100/numSongsPerGenre])
+      plt.plot(x, [CapAlt[LSB-1]*1000/44100/numSongsPerGenre,CapBlu[LSB-1]*1000/44100/numSongsPerGenre,CapEle[LSB-1]*1000/44100/numSongsPerGenre,CapJzz[LSB-1]*1000/44100/numSongsPerGenre,CapPop[LSB-1]*1000/44100/numSongsPerGenre,CapRoc[LSB-1]*1000/44100/numSongsPerGenre])
       plt.figure(6)
       plt.title('Samples Used')
-      plt.plot(x, [SamAlt[LSB]/numSongsPerGenre,SamBlu[LSB]/numSongsPerGenre,SamEle[LSB]/numSongsPerGenre,SamJzz[LSB]/numSongsPerGenre,SamPop[LSB]/numSongsPerGenre,SamRoc[LSB]/numSongsPerGenre])
+      plt.plot(x, [SamAlt[LSB-1]/numSongsPerGenre,SamBlu[LSB-1]/numSongsPerGenre,SamEle[LSB-1]/numSongsPerGenre,SamJzz[LSB-1]/numSongsPerGenre,SamPop[LSB-1]/numSongsPerGenre,SamRoc[LSB-1]/numSongsPerGenre])
