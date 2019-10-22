@@ -839,7 +839,7 @@ def threaded_client(conn, clientNum):
                     with open(str(clientNum) + "msg" + fileType, "rb") as f:
                         data = f.read()
                         sockets.send_one_message(conn, "RECFILE")
-                        sockets.send_one_message(i, fileType)
+                        sockets.send_one_message(conn, fileType)
                         sockets.send_one_file(conn, data)
                         f.close()
                         
@@ -886,7 +886,7 @@ def threaded_client(conn, clientNum):
                     with open(str(clientNum) + "msg" + fileType, "rb") as f:
                         data = f.read()
                         sockets.send_one_message(conn, "RECFILE")
-                        sockets.send_one_message(i, fileType)
+                        sockets.send_one_message(conn, fileType)
                         sockets.send_one_file(conn, data)
                         f.close()
                         
@@ -932,7 +932,7 @@ def threaded_client(conn, clientNum):
                     with open(str(clientNum) + "msg" + fileType, "rb") as f:
                         data = f.read()
                         sockets.send_one_message(conn, "RECFILE")
-                        sockets.send_one_message(i, fileType)
+                        sockets.send_one_message(conn, fileType)
                         sockets.send_one_file(conn, data)
                         f.close()
                         
@@ -1034,7 +1034,7 @@ def threaded_client(conn, clientNum):
                     with open(str(clientNum) + "msg" + fileType, "rb") as f:
                         data = f.read()
                         sockets.send_one_message(conn, "RECFILE")
-                        sockets.send_one_message(i, fileType)
+                        sockets.send_one_message(conn, fileType)
                         sockets.send_one_file(conn, data)
                         f.close()
                         
