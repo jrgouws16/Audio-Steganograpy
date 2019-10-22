@@ -19,7 +19,7 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 5
+numSongsPerGenre = 1
 textMessage = True
 
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']

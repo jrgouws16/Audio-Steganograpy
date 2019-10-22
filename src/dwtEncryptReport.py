@@ -18,7 +18,7 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 50
+numSongsPerGenre = 1
 textMessage = True
 
 SNRAlt = 0
@@ -104,6 +104,7 @@ for path in allPaths:
                        SNRRoc += SNR
                        CapRoc += capacity
                        SamRoc += samplesUsed
+                       
                        
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
 x = np.asarray(x)       
