@@ -229,7 +229,7 @@ for OBH_index in range(0, len(OBHs)):
       plt.plot(x, [CapAlt[OBH_index]*1000/44100/numSongsPerGenre,CapBlu[OBH_index]*1000/44100/numSongsPerGenre,CapEle[OBH_index]*1000/44100/numSongsPerGenre,CapJzz[OBH_index]*1000/44100/numSongsPerGenre,CapPop[OBH_index]*1000/44100/numSongsPerGenre,CapRoc[OBH_index]*1000/44100/numSongsPerGenre], label= "OBHs = " + str(OBHs[OBH_index]))
       plt.legend(loc='best')
       
-print("#################  Statistics for the OBH encoding algorithm     #############")
+print("#################  Statistics for the Hybrid encoding algorithm     #############")
 for i in range(0, len(OBHs)):
       print("#########################  OBHs =", OBHs[i], "##########################" )      
       print("--------  SNR  ")
@@ -291,7 +291,7 @@ for i in range(0, len(OBHs)):
       print("--------  Average embedding time  ") 
       print("# Embedding Time    ",totalEncodingTime[i]/(numSongsPerGenre * 6), "seconds")   
 
-print("#################  Statistics for the Scale extraction algorithm     #############")
+print("#################  Statistics for the Hybrid extraction algorithm     #############")
 print("--------  Number of errors made with extraction", messageErrors) 
       
 for i in range(0, len(OBHs)):

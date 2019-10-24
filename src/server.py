@@ -698,12 +698,17 @@ def threaded_client(conn, clientNum):
                         alphaMessage = ''
                         
                         # Convert the binary stream to a ASCII string
-                        for i in range(0, len(message), 8):
-                            alphaMessage += AES.bits2string(message[i: i + 8])
-                                            
+                        for i in range(0, len(message), 4):
+                              alphaMessage += AES.bits2string('0010' + message[i: i + 4])
+
+                            
                     mainWindow.listWidget_log.addItem("Embedding starting: " + str(addresses[connections.index(conn)][0]))  
                     originalCoverSamples = deepcopy(samplesOne)
-                    stegoSamples, samplesUsed, capacityWarning = DWTcrypt.dwtEncryptEncode(samplesOne, message, 512, fileType)        
+                    if (fileType == '.txt'):
+                          stegoSamples, samplesUsed, capacityWarning = DWTcrypt.dwtEncryptEncode(samplesOne, message, 512, fileType)        
+                          
+                    else:
+                          stegoSamples, samplesUsed, capacityWarning = DWTcrypt.dwtEncryptEncode(samplesOne, alphaMessage, 512, fileType)        
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
                     
                     # Get the characteristics of the stego file
@@ -957,13 +962,13 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("Writing message to file " + str(addresses[connections.index(conn)][0]))
                     
                     if (fileType == ".wav"):
-
                         # Convert to integer list of bits for embedding
                         binMessage = ''
                         # Convert the binary stream to a ASCII string
                         for i in range(0, len(secretMessage)):
-                            binMessage += AES.string2bits(secretMessage[i])
-                        fp.writeWaveMessageToFile(secretMessage, str(clientNum) + "msg" + fileType)
+                            binMessage += AES.string2bits(secretMessage[i])[4:]                                          
+                            
+                        fp.writeWaveMessageToFile(binMessage, str(clientNum) + "msg" + fileType)
               
                     else:
 

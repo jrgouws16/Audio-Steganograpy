@@ -51,7 +51,7 @@ def getCapacity(coverSamples, blockLength):
 # Returns a list of integer stego file samples
 def dwtEncryptEncode(coverSamples, message, blockLength, messageType):
       samplesUsed = 0
-      
+      print(len(message))
       capacityWarning = False
       
       # Embed the messagelength within the message
