@@ -26,6 +26,7 @@ import AES
 serverThread = []
 connections  = []
 addresses    = []
+attemptsLeft = []
 
 clientsConnected = 0
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1117,6 +1118,7 @@ def endServer():
       global addresses
       global serverThread
       global clientsConnected
+      global attemptsLeft
       
       for filename in os.listdir():
           if (filename.endswith('.txt') or filename.endswith('.wav')):

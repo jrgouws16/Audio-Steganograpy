@@ -28,18 +28,27 @@ def plotAmpDifference(originalSamples, stegoSamples):
 # Do not include samples where not message bits were hidden within
 def getSNR(originalSamples, embeddedSamples):
     
-    totalOriginal = math.pow(sum(originalSamples), 2)
+    totalOriginal = 0
+    
+    originalSamples = np.array(originalSamples, dtype=np.float64)
+    embeddedSamples = np.array(embeddedSamples, dtype=np.float64)
     difference = 0
     
     for i in range(0, len(originalSamples)):
+        totalOriginal += originalSamples[i]**2
         difference += (originalSamples[i] - embeddedSamples[i])**2 
         
+        
     SNR = 10*np.log10(totalOriginal/difference)
-    
+
     return SNR
     
 # Gives a range of 0 - 1, where 1 is ideal
 def getSPCC(originalSamples, stegoSamples):
+      
+      originalSamples = np.array(originalSamples, dtype=np.float64)
+      stegoSamples = np.array(stegoSamples, dtype=np.float64)
+      
       avgOriginal = sum(originalSamples)/len(originalSamples)
       avgStego = sum(stegoSamples)/len(stegoSamples)
       
@@ -62,19 +71,15 @@ def getSPCC(originalSamples, stegoSamples):
             total += ((originalSamples[i] - avgOriginal)*(stegoSamples[i] - avgStego))
             
       total = total/denominator
-            
-      return total**2
+      result = total**2    
+      return result
       
 
 
 # Average square of the differences between the input and the output signal
 def getMSE(orig, steg):
-      total = 0
       
-      for i in range(0, len(orig)):
-            total += (orig[i] - steg[i])**2
-            
-      return total/len(orig)
+      return np.square(np.subtract(np.asarray(orig, dtype=np.float64), np.asarray(steg, dtype=np.float64))).mean()
 
 # Measures the maximum SNR of a given signal
 def getPSNR(orig, steg):
@@ -82,21 +87,28 @@ def getPSNR(orig, steg):
       
 def getPRD(orig, steg):
       numerator   = 0
-      denominator = sum(orig)
+      denominator = 0
+      
+      orig = np.array(orig, dtype=np.float64)
+      steg = np.array(steg, dtype=np.float64)
       
       for i in range(0, len(orig)):
-            numerator += (orig[i] - steg[i])**2
+            numerator   += (orig[i] - steg[i])**2
+            denominator += orig[i] ** 2
             
-      return math.sqrt(numerator/denominator)
+      result = math.sqrt(numerator/denominator)
+      
+      return result
 
-x = [5,3,12,4,9,10,11,12,13,14,15,16]
-y = [5,3,12,3,8,9,10,11,12,13,14,15]
+x = [-5, 3,-12, 4]
+y = [-4, 1,-4, 12]
 
-#print(getSNR(x,y))
-#print(getSPCC(x,y))
-#print(getMSE(x,y))
-#print(getPSNR(x,y))
-#print(getPRD(x,y))
+
+#print("SNR",getSNR(x,y))
+#print("SPCC",getSPCC(x,y))
+#print("MSE",getMSE(x,y))
+#print("PSNR",getPSNR(x,y))
+#print("PRD",getPRD(x,y))
       
       
 # Give only the message bits that were encoded as well as the amount of samples 
