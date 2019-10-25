@@ -18,7 +18,7 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 100
+numSongsPerGenre = 1
 
 for audioOrText in [False]:
       

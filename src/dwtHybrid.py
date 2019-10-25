@@ -78,7 +78,7 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
       doBreak       = False  
       blockNumber   = 0     
       capacityWarning = False
-
+      
       # Get the type of message
       # 0 is a textmessage and 1 is a wave message
       typeMessage = ""
@@ -92,7 +92,7 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
       # Insert the type of message as the second element and the message length 
       # as the first element
       message = '{0:026b}'.format(messageLength) + typeMessage + message
-     
+      
       for blockNumber in range(0, numBlocks):
             
           samplesUsed = (blockNumber + 1) * 512
@@ -118,35 +118,40 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
                   intValue = int(subbandCoeff[i][j])
                   
                   bits = calcPower(subbandCoeff[i][j]) - OBH
-                  fraction = subbandCoeff[i][j] - intValue
                   
-                  binaryWidth = 25
-                  binaryValue = np.binary_repr(intValue, binaryWidth)
-                  binaryValue = list(binaryValue)
-                  
-                  for k in range(len(binaryValue) - bits, len(binaryValue) - 3): 
-                        binaryValue[k] = message[0]
-                        message = message[1:]
-                                                
-                        if (blockNumber == numBlocks - 1 and i == len(subbandCoeff) - 1 and j == len(subbandCoeff[i]) - 1 and len(message) > 0):
-                            capacityWarning = True
-                        
-                        
-                        if (len(message) == 0):
-                            doBreak = True
-                            break
-                  
-                  
+                  if (bits < 0):
+                        bits = 0
 
-                  binaryValue[-1] = '0'
-                  binaryValue[-2] = '0'
-                  binaryValue[-3] = '1'
+                  if (bits > 3):
+                  
+                        binaryWidth = 25
+                        binaryValue = np.binary_repr(intValue, binaryWidth)
+                        binaryValue = list(binaryValue)
+                        
+                        for k in range(len(binaryValue) - bits, len(binaryValue) - 3): 
+                              binaryValue[k] = message[0]
+                              message = message[1:]
+                                                      
+                              
+                              if (len(message) == 0):
+                                  doBreak = True
+                                  break
+                        
+                        binaryValue[-1] = '0'
+                        binaryValue[-2] = '0'
+                        binaryValue[-3] = '1'
                                           
-                  binaryValue = "".join(binaryValue)          
+                        binaryValue = "".join(binaryValue)          
      
-                  if (scalingValue != 0):
-                      subbandCoeff[i][j] = (binaryToInt(binaryValue) + fraction)/scalingValue
+                        if (scalingValue != 0):
+                            subbandCoeff[i][j] = (binaryToInt(binaryValue))/scalingValue
      
+                  else:
+                        subbandCoeff[i][j] = subbandCoeff[i][j]/scalingValue 
+      
+                  if (blockNumber == numBlocks - 1 and i == len(subbandCoeff) - 1 and j == len(subbandCoeff[i]) - 1 and len(message) > 0):
+                                  capacityWarning = True
+      
                   if (doBreak == True):
                       break
               
@@ -176,7 +181,6 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
 def dwtHybridDecode(stegoSamples, OBH):
       message = ""
       stegoSamples = list(stegoSamples)
-      
       # Embed the messagelength within the message
       messageLength = 0
       numBlocks     = int(len(stegoSamples)/512) 
@@ -205,32 +209,38 @@ def dwtHybridDecode(stegoSamples, OBH):
                   
                   subbandCoeff[i][j] = subbandCoeff[i][j] * scalingValue  
                   bits = calcPower(subbandCoeff[i][j]) - OBH
-                  intValue = int(subbandCoeff[i][j])                  
                   
-                  binaryWidth = 25
+                  if (bits < 0):
+                        bits = 0
                   
-                  binaryValue = np.binary_repr(intValue, binaryWidth)
-                  binaryValue = list(binaryValue)
                   
-
-                  for k in range(len(binaryValue) - bits, len(binaryValue) - 3):
+                  if (bits > 3):
                         
-                      message += binaryValue[k]
+                        intValue = int(subbandCoeff[i][j])                  
+                  
+                        binaryWidth = 25
                         
-                      if (len(message) == 27):
-                          messageLength = int(message[0:26],2)
-                         
-                          if (message[26] == '0'):
-                              typeMessage = ".txt"
-                                
-                          else:
-                              typeMessage = ".wav"
-                                
-                      if (len(message) == messageLength + 27):
-                          doBreak = True
-                          break
+                        binaryValue = np.binary_repr(intValue, binaryWidth)
+                        binaryValue = list(binaryValue)
+                        
+                        for k in range(len(binaryValue) - bits, len(binaryValue) - 3):
+                              
+                            message += binaryValue[k]
+                              
+                            if (len(message) == 27):
+                                messageLength = int(message[0:26],2)
+                               
+                                if (message[26] == '0'):
+                                    typeMessage = ".txt"
+                                      
+                                else:
+                                    typeMessage = ".wav"
+                                      
+                            if (len(message) == messageLength + 27):
+                                doBreak = True
+                                break
                                   
-                  binaryValue = "".join(binaryValue)          
+                        binaryValue = "".join(binaryValue)          
 
                   if (doBreak == True):
                       break
@@ -245,4 +255,4 @@ def dwtHybridDecode(stegoSamples, OBH):
           if (doBreak == True):
               break
       
-      return message[27:], typeMessage  
+      return message[27:], typeMessage

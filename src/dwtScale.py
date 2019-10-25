@@ -94,7 +94,6 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
                   
                   subbandCoeff[i][j] = subbandCoeff[i][j] * scalingValue  
                   intValue = int(subbandCoeff[i][j])
-                  fraction = subbandCoeff[i][j] - intValue
                   
                   binaryWidth = 25
                   binaryValue = np.binary_repr(intValue, binaryWidth)
@@ -121,7 +120,7 @@ def dwtScaleEncode(coverSamples, message, messageType, LSBs):
                   binaryValue = "".join(binaryValue)          
      
                   if (scalingValue != 0):
-                      subbandCoeff[i][j] = (binaryToInt(binaryValue) + fraction)/scalingValue
+                      subbandCoeff[i][j] = (binaryToInt(binaryValue))/scalingValue
      
         
         

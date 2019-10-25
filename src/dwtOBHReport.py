@@ -19,12 +19,12 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 100
+numSongsPerGenre = 1
 
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
 x = np.asarray(x)
 
-OBHs = [0,1,2,3,4]
+OBHs = [0,1,2]
 
 for audioOrText in [False]:
       

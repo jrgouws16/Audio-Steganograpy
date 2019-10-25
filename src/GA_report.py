@@ -74,7 +74,7 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
 
 for audioOrText in [False]:
       
-      numSongsPerGenre = 100
+      numSongsPerGenre = 1
       
       belowSNR  = [0, 0, 0, 0, 0, 0]
       

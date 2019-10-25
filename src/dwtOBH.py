@@ -80,26 +80,28 @@ def dwtHaarEncode(coverSamples, message, OBH, blockLength, messageType):
             
             for i in range(0, len(coefficients[1][block])):
                   
-                  bits = calcPower(coefficients[1][block][i]) - OBH - 2
+                  bits = calcPower(coefficients[1][block][i]) - OBH
                   
-                  if (bits < 1):
-                        continue
+                  if (bits < 0):
+                        bits = 0
                   
-                  binCoeff = "{0:016b}".format(int(coefficients[1][block][i]))
-                  binCoeff = list(binCoeff)
-                  binCoeff[-1] = '0'
-                  binCoeff[-2] = '1'
+                  if (bits > 2):
                   
-                  for j in range(-1 * bits, 0):
-                        binCoeff[j - 2] = message[0]
-                        message = message[1:]
-                        if (len(message) == 0):
-                              doBreak = True
-                              break
+                        binCoeff = "{0:016b}".format(int(coefficients[1][block][i]))
+                        binCoeff = list(binCoeff)
+                        binCoeff[-1] = '0'
+                        binCoeff[-2] = '1'
+                  
+                        for j in range(-1 * bits, -2):
+                              binCoeff[j] = message[0]
+                              message = message[1:]
+                              if (len(message) == 0):
+                                    doBreak = True
+                                    break
                                           
-                  binCoeff = "".join(binCoeff)
+                        binCoeff = "".join(binCoeff)
                   
-                  coefficients[1][block][i] = int(binCoeff,2)
+                        coefficients[1][block][i] = int(binCoeff,2)
                   
                   if (block == len(coefficients[1]) - 1 and i == len(coefficients[1][block]) - 1 and len(message)>0):
                       capacityWarning = True
@@ -142,27 +144,31 @@ def dwtHaarDecode(stegoSamples, OBH, blockLength):
                   
             for i in range(0, len(coefficients[1][block])):
                   
-                  bits = calcPower(coefficients[1][block][i]) - OBH - 2
-                  if (bits < 0):
-                        continue
-                  binCoeff = "{0:016b}".format(int(coefficients[1][block][i]))
-                  binCoeff = list(binCoeff)
+                  bits = calcPower(coefficients[1][block][i]) - OBH
                   
-                  for j in range(-1 * bits, 0):
-                        message += binCoeff[j - 2]
-                                         
-                        if (len(message) == messageLength + 28 and messageLength != 0):
-                              doBreak = True
-                              break
+                  if (bits < 0):
+                        bits = 0
+                  
+                  if (bits > 2):
+                  
+                        binCoeff = "{0:016b}".format(int(coefficients[1][block][i]))
+                        binCoeff = list(binCoeff)
                         
-                        if (len(message) == 28):
-                              messageLength = int(message[0:26], 2)
-                             
-                              if (message[26:28] == '00'):
-                                    typeMessage = '.txt'
-    
-                              elif (message[26:28] == '01'):
-                                    typeMessage = '.wav'
+                        for j in range(-1 * bits, -2):
+                              message += binCoeff[j]
+                                               
+                              if (len(message) == messageLength + 28 and messageLength != 0):
+                                    doBreak = True
+                                    break
+                              
+                              if (len(message) == 28):
+                                    messageLength = int(message[0:26], 2)
+                                   
+                                    if (message[26:28] == '00'):
+                                          typeMessage = '.txt'
+          
+                                    elif (message[26:28] == '01'):
+                                          typeMessage = '.wav'
                                          
                   
                   if (doBreak == True):
