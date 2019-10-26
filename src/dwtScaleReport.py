@@ -10,7 +10,7 @@ import time
 import os
 import AES
 
-textMessage = True
+textMessage = False
 
 allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Blues',
@@ -19,7 +19,7 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 1
+numSongsPerGenre = 100
 
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
 x = np.asarray(x)
@@ -241,12 +241,12 @@ for audioOrText in [False]:
                   plt.grid()
                   plt.ylabel('SNR (dB)')
                   plt.plot(x, [SNRAlt[LSB_index]/numSongsPerGenre,SNRBlu[LSB_index]/numSongsPerGenre,SNREle[LSB_index]/numSongsPerGenre,SNRJzz[LSB_index]/numSongsPerGenre,SNRPop[LSB_index]/numSongsPerGenre,SNRRoc[LSB_index]/numSongsPerGenre], label= "LSBs = " + str(LSBs[LSB_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   plt.figure(14)
                   plt.grid()
                   plt.ylabel('Capacity (bits per 16 bit cover sample)')
                   plt.plot(x, [CapAlt[LSB_index]*1000/44100/numSongsPerGenre,CapBlu[LSB_index]*1000/44100/numSongsPerGenre,CapEle[LSB_index]*1000/44100/numSongsPerGenre,CapJzz[LSB_index]*1000/44100/numSongsPerGenre,CapPop[LSB_index]*1000/44100/numSongsPerGenre,CapRoc[LSB_index]*1000/44100/numSongsPerGenre], label= "LSBs = " + str(LSBs[LSB_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   
             print("#################  Statistics for the Scale encoding algorithm     #############")
             for i in range(0, len(LSBs)):
@@ -327,12 +327,12 @@ for audioOrText in [False]:
                   plt.grid()
                   plt.ylabel('SNR (dB)')
                   plt.plot(x, [SNRAlt[LSB_index]/numSongsPerGenre,SNRBlu[LSB_index]/numSongsPerGenre,SNREle[LSB_index]/numSongsPerGenre,SNRJzz[LSB_index]/numSongsPerGenre,SNRPop[LSB_index]/numSongsPerGenre,SNRRoc[LSB_index]/numSongsPerGenre], label= "LSBs = " + str(LSBs[LSB_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   plt.figure(16)
                   plt.grid()
                   plt.ylabel('Capacity (bits per 16 bit cover sample)')
                   plt.plot(x, [CapAlt[LSB_index]*1000/44100/numSongsPerGenre,CapBlu[LSB_index]*1000/44100/numSongsPerGenre,CapEle[LSB_index]*1000/44100/numSongsPerGenre,CapJzz[LSB_index]*1000/44100/numSongsPerGenre,CapPop[LSB_index]*1000/44100/numSongsPerGenre,CapRoc[LSB_index]*1000/44100/numSongsPerGenre], label= "LSBs = " + str(LSBs[LSB_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   
             print("#################  Statistics for the Scale encoding algorithm     #############")
             for i in range(0, len(LSBs)):

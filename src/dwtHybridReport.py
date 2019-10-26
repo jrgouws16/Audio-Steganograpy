@@ -18,15 +18,15 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 1
+numSongsPerGenre = 100
 textMessage = True
 
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
 x = np.asarray(x)
 
-OBHs = [1,2,5,7,9]
+OBHs = [8,9,10]
 
-for audioOrText in [False]:
+for audioOrText in [True]:
 
       
       counter = numSongsPerGenre * 6 * len(OBHs)
@@ -82,7 +82,9 @@ for audioOrText in [False]:
       totalDecodingTime = [0]*len(OBHs)
       
       
-      messageErrors = 0
+      messageErrors = []
+      for i in range(0,6):
+            messageErrors.append([0]*len(OBHs))
       
       
       for path in allPaths:
@@ -151,11 +153,6 @@ for audioOrText in [False]:
       
                               extractMessage = AES.decryptBinaryString(extractMessage, "THIS_IS_THE_KEY_USED_FOR_AES_ENCRYPTION")
                          
-                              if (extractMessage != originalMessage):
-                                    print(type(extractMessage), type(originalMessage[0:10]))
-                                    messageErrors += 1      
-                                    print(t)
-                                                                                   
                               # Get the characteristics of the stego file
                               SNR = RT.getSNR(originalCoverSamples[0:samplesUsed], samplesOneStego[0:samplesUsed] )
                               capacity = RT.getCapacity(message, samplesUsed, rate)
@@ -175,7 +172,11 @@ for audioOrText in [False]:
                                    PRDAlt[OBH_index]    += prd
                                    MSEAlt[OBH_index]    += mse
                                    PSNRAlt[OBH_index]   += psnr
-                                   
+                              
+                                   if (extractMessage != originalMessage):
+                                          messageErrors[0][OBH_index] += 1      
+                                          print(t)
+                              
                                    if (SNR < 20):
                                          belowSNR[0][OBH_index] = belowSNR[0][OBH_index] + 1
                                    
@@ -187,6 +188,10 @@ for audioOrText in [False]:
                                    MSEBlu[OBH_index]    += mse
                                    PSNRBlu[OBH_index]   += psnr
       
+                                   if (extractMessage != originalMessage):
+                                          messageErrors[1][OBH_index] += 1      
+                                          print(t)
+      
                                    if (SNR < 20):
                                          belowSNR[1][OBH_index] = belowSNR[1][OBH_index] + 1
                                    
@@ -197,7 +202,11 @@ for audioOrText in [False]:
                                    PRDEle[OBH_index]    += prd
                                    MSEEle[OBH_index]    += mse
                                    PSNREle[OBH_index]   += psnr
-      
+                                   
+                                   if (extractMessage != originalMessage):
+                                          messageErrors[2][OBH_index] += 1      
+                                          print(t)
+                                   
                                    if (SNR < 20):
                                          belowSNR[2][OBH_index] += 1
                                    
@@ -209,6 +218,10 @@ for audioOrText in [False]:
                                    MSEJzz[OBH_index]    += mse
                                    PSNRJzz[OBH_index]   += psnr
                                   
+                                   if (extractMessage != originalMessage):
+                                          messageErrors[3][OBH_index] += 1      
+                                          print(t) 
+                                   
                                    if (SNR < 20):
                                          belowSNR[3][OBH_index] += 1
       
@@ -220,6 +233,10 @@ for audioOrText in [False]:
                                    MSEPop[OBH_index]    += mse
                                    PSNRPop[OBH_index]   += psnr
       
+                                   if (extractMessage != originalMessage):
+                                          messageErrors[4][OBH_index] += 1      
+                                          print(t)
+      
                                    if (SNR < 20):
                                          belowSNR[4][OBH_index] += 1
       
@@ -230,6 +247,10 @@ for audioOrText in [False]:
                                    PRDRoc[OBH_index]    += prd
                                    MSERoc[OBH_index]    += mse
                                    PSNRRoc[OBH_index]   += psnr
+      
+                                   if (extractMessage != originalMessage):
+                                          messageErrors[5][OBH_index] += 1      
+                                          print(t)
       
                                    if (SNR < 20):
                                          belowSNR[5][OBH_index] += 1
@@ -243,12 +264,12 @@ for audioOrText in [False]:
                   plt.grid()
                   plt.ylabel('SNR (dB)')
                   plt.plot(x, [SNRAlt[OBH_index]/numSongsPerGenre,SNRBlu[OBH_index]/numSongsPerGenre,SNREle[OBH_index]/numSongsPerGenre,SNRJzz[OBH_index]/numSongsPerGenre,SNRPop[OBH_index]/numSongsPerGenre,SNRRoc[OBH_index]/numSongsPerGenre], label= "OBHs = " + str(OBHs[OBH_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   plt.figure(22)
                   plt.grid()
                   plt.ylabel('Capacity (bits per 16 bit cover sample)')
                   plt.plot(x, [CapAlt[OBH_index]*1000/44100/numSongsPerGenre,CapBlu[OBH_index]*1000/44100/numSongsPerGenre,CapEle[OBH_index]*1000/44100/numSongsPerGenre,CapJzz[OBH_index]*1000/44100/numSongsPerGenre,CapPop[OBH_index]*1000/44100/numSongsPerGenre,CapRoc[OBH_index]*1000/44100/numSongsPerGenre], label= "OBHs = " + str(OBHs[OBH_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   
             print("#################  Statistics for the Hybrid encoding algorithm     #############")
             for i in range(0, len(OBHs)):
@@ -313,7 +334,16 @@ for audioOrText in [False]:
                   print("# Embedding Time    ",totalEncodingTime[i]/(numSongsPerGenre * 6), "seconds")   
             
             print("#################  Statistics for the Hybrid extraction algorithm     #############")
-            print("--------  Number of errors made with extraction", messageErrors) 
+            print("--------  Number of errors made with extraction") 
+            
+            for i in range(0, len(OBHs)):
+                  print('OBH =', str(OBHs[i]))
+                  print("# Alterantive",messageErrors[0][i])
+                  print("# Blues      ",messageErrors[1][i])
+                  print("# Electronic ",messageErrors[2][i])
+                  print("# Jazz       ",messageErrors[3][i])
+                  print("# Pop        ",messageErrors[4][i])
+                  print("# Rock       ",messageErrors[5][i]) 
                   
             for i in range(0, len(OBHs)):
                         
@@ -328,12 +358,12 @@ for audioOrText in [False]:
                   plt.grid()
                   plt.ylabel('SNR (dB)')
                   plt.plot(x, [SNRAlt[OBH_index]/numSongsPerGenre,SNRBlu[OBH_index]/numSongsPerGenre,SNREle[OBH_index]/numSongsPerGenre,SNRJzz[OBH_index]/numSongsPerGenre,SNRPop[OBH_index]/numSongsPerGenre,SNRRoc[OBH_index]/numSongsPerGenre], label= "OBHs = " + str(OBHs[OBH_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   plt.figure(24)
                   plt.grid()
                   plt.ylabel('Capacity (bits per 16 bit cover sample)')
                   plt.plot(x, [CapAlt[OBH_index]*1000/44100/numSongsPerGenre,CapBlu[OBH_index]*1000/44100/numSongsPerGenre,CapEle[OBH_index]*1000/44100/numSongsPerGenre,CapJzz[OBH_index]*1000/44100/numSongsPerGenre,CapPop[OBH_index]*1000/44100/numSongsPerGenre,CapRoc[OBH_index]*1000/44100/numSongsPerGenre], label= "OBHs = " + str(OBHs[OBH_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   
             print("#################  Statistics for the Hybrid encoding algorithm     #############")
             for i in range(0, len(OBHs)):
@@ -398,7 +428,15 @@ for audioOrText in [False]:
                   print("# Embedding Time    ",totalEncodingTime[i]/(numSongsPerGenre * 6), "seconds")   
             
             print("#################  Statistics for the Hybrid extraction algorithm     #############")
-            print("--------  Number of errors made with extraction", messageErrors) 
+            print("--------  Number of errors made with extraction")
+            for i in range(0, len(OBHs)):
+                  print('OBH =', str(OBHs[i]))
+                  print("# Alterantive",messageErrors[0][i])
+                  print("# Blues      ",messageErrors[1][i])
+                  print("# Electronic ",messageErrors[2][i])
+                  print("# Jazz       ",messageErrors[3][i])
+                  print("# Pop        ",messageErrors[4][i])
+                  print("# Rock       ",messageErrors[5][i]) 
                   
             for i in range(0, len(OBHs)):
                         

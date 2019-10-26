@@ -14,7 +14,7 @@ def calcPower(coefficient):
     p = 0
     
     coefficient = np.abs(coefficient)
-          
+    
     for i in range(0,25):
         if ((2 ** i) > coefficient):
             p = i - 1
@@ -22,6 +22,10 @@ def calcPower(coefficient):
         
     if (p == -1):
         p = 0
+
+    if (coefficient > 2**23):
+        p = 23
+          
         
     return p
 
@@ -70,6 +74,9 @@ def getCapacity(coverSamples, OBH):
 # performed each time.
 # Returns a list of integer stego file samples
 def dwtHybridEncode(coverSamples, message, messageType, OBH):
+      allPowers = []
+      allCoeff = []
+      
       samplesUsed = 0
       stegoSamples = []
       coverSamples = list(coverSamples)
@@ -119,16 +126,16 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
                   
                   bits = calcPower(subbandCoeff[i][j]) - OBH
                   
-                  if (bits < 0):
-                        bits = 0
-
-                  if (bits > 3):
+                  binaryWidth = 25
+                  binaryValue = np.binary_repr(intValue, binaryWidth)
+                  binaryValue = list(binaryValue)
                   
-                        binaryWidth = 25
-                        binaryValue = np.binary_repr(intValue, binaryWidth)
-                        binaryValue = list(binaryValue)
+                  allPowers.append(calcPower(subbandCoeff[i][j]))
+                  allCoeff.append(subbandCoeff[i][j])
+                                   
+                  if (len(binaryValue) - bits < len(binaryValue) - 2):
                         
-                        for k in range(len(binaryValue) - bits, len(binaryValue) - 3): 
+                        for k in range(len(binaryValue) - bits, len(binaryValue) - 2): 
                               binaryValue[k] = message[0]
                               message = message[1:]
                                                       
@@ -137,18 +144,16 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
                                   doBreak = True
                                   break
                         
-                        binaryValue[-1] = '0'
-                        binaryValue[-2] = '0'
-                        binaryValue[-3] = '1'
-                                          
-                        binaryValue = "".join(binaryValue)          
+                              binaryValue[-1] = '0'
+                              binaryValue[-2] = '1'
+                              
+                                    
+                  binaryValue = "".join(binaryValue)          
      
-                        if (scalingValue != 0):
-                            subbandCoeff[i][j] = (binaryToInt(binaryValue))/scalingValue
+                  if (scalingValue != 0):
+                      subbandCoeff[i][j] = (binaryToInt(binaryValue))/scalingValue
      
-                  else:
-                        subbandCoeff[i][j] = subbandCoeff[i][j]/scalingValue 
-      
+                  
                   if (blockNumber == numBlocks - 1 and i == len(subbandCoeff) - 1 and j == len(subbandCoeff[i]) - 1 and len(message) > 0):
                                   capacityWarning = True
       
@@ -176,9 +181,11 @@ def dwtHybridEncode(coverSamples, message, messageType, OBH):
       unaltered = coverSamples[-1*(len(coverSamples) - len(stegoSamples)):]
       
       
-      return stegoSamples + unaltered, samplesUsed, capacityWarning
+      return stegoSamples + unaltered, samplesUsed, capacityWarning#,allPowers,allCoeff
 
 def dwtHybridDecode(stegoSamples, OBH):
+      allPowers = []
+      allCoeff = []
       message = ""
       stegoSamples = list(stegoSamples)
       # Embed the messagelength within the message
@@ -209,21 +216,19 @@ def dwtHybridDecode(stegoSamples, OBH):
                   
                   subbandCoeff[i][j] = subbandCoeff[i][j] * scalingValue  
                   bits = calcPower(subbandCoeff[i][j]) - OBH
+                  allPowers.append(calcPower(subbandCoeff[i][j]))
+                  allCoeff.append(subbandCoeff[i][j])
                   
-                  if (bits < 0):
-                        bits = 0
+                  intValue = int(subbandCoeff[i][j])                  
                   
-                  
-                  if (bits > 3):
+                  binaryWidth = 25
+                  binaryValue = np.binary_repr(intValue, binaryWidth)
+                  binaryValue = list(binaryValue)
+
+                  if (len(binaryValue) - bits < len(binaryValue) - 2):
                         
-                        intValue = int(subbandCoeff[i][j])                  
-                  
-                        binaryWidth = 25
                         
-                        binaryValue = np.binary_repr(intValue, binaryWidth)
-                        binaryValue = list(binaryValue)
-                        
-                        for k in range(len(binaryValue) - bits, len(binaryValue) - 3):
+                        for k in range(len(binaryValue) - bits, len(binaryValue) - 2):
                               
                             message += binaryValue[k]
                               
@@ -240,7 +245,7 @@ def dwtHybridDecode(stegoSamples, OBH):
                                 doBreak = True
                                 break
                                   
-                        binaryValue = "".join(binaryValue)          
+                    
 
                   if (doBreak == True):
                       break
@@ -255,4 +260,4 @@ def dwtHybridDecode(stegoSamples, OBH):
           if (doBreak == True):
               break
       
-      return message[27:], typeMessage
+      return message[27:], typeMessage#,allPowers, allCoeff

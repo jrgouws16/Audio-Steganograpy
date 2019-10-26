@@ -19,7 +19,7 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 1
+numSongsPerGenre = 100
 
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
 x = np.asarray(x)
@@ -238,12 +238,12 @@ for audioOrText in [False]:
                   plt.grid()
                   plt.ylabel('SNR (dB)')
                   plt.plot(x, [SNRAlt[OBH_index]/numSongsPerGenre,SNRBlu[OBH_index]/numSongsPerGenre,SNREle[OBH_index]/numSongsPerGenre,SNRJzz[OBH_index]/numSongsPerGenre,SNRPop[OBH_index]/numSongsPerGenre,SNRRoc[OBH_index]/numSongsPerGenre], label= "OBHs = " + str(OBHs[OBH_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   plt.figure(18)
                   plt.grid()
                   plt.ylabel('Capacity (bits per 16 bit cover sample)')
                   plt.plot(x, [CapAlt[OBH_index]*1000/44100/numSongsPerGenre,CapBlu[OBH_index]*1000/44100/numSongsPerGenre,CapEle[OBH_index]*1000/44100/numSongsPerGenre,CapJzz[OBH_index]*1000/44100/numSongsPerGenre,CapPop[OBH_index]*1000/44100/numSongsPerGenre,CapRoc[OBH_index]*1000/44100/numSongsPerGenre], label= "OBHs = " + str(OBHs[OBH_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   
             print("#################  Statistics for the OBH encoding algorithm     #############")
             for i in range(0, len(OBHs)):
@@ -323,12 +323,12 @@ for audioOrText in [False]:
                   plt.grid()
                   plt.ylabel('SNR (dB)')
                   plt.plot(x, [SNRAlt[OBH_index]/numSongsPerGenre,SNRBlu[OBH_index]/numSongsPerGenre,SNREle[OBH_index]/numSongsPerGenre,SNRJzz[OBH_index]/numSongsPerGenre,SNRPop[OBH_index]/numSongsPerGenre,SNRRoc[OBH_index]/numSongsPerGenre], label= "OBHs = " + str(OBHs[OBH_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   plt.figure(20)
                   plt.grid()
                   plt.ylabel('Capacity (bits per 16 bit cover sample)')
                   plt.plot(x, [CapAlt[OBH_index]*1000/44100/numSongsPerGenre,CapBlu[OBH_index]*1000/44100/numSongsPerGenre,CapEle[OBH_index]*1000/44100/numSongsPerGenre,CapJzz[OBH_index]*1000/44100/numSongsPerGenre,CapPop[OBH_index]*1000/44100/numSongsPerGenre,CapRoc[OBH_index]*1000/44100/numSongsPerGenre], label= "OBHs = " + str(OBHs[OBH_index]))
-                  plt.legend(loc='best')
+                  plt.legend(loc='upper right')
                   
             print("#################  Statistics for the OBH encoding algorithm     #############")
             for i in range(0, len(OBHs)):

@@ -74,7 +74,7 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
 
 for audioOrText in [False]:
       
-      numSongsPerGenre = 1
+      numSongsPerGenre = 100
       
       belowSNR  = [0, 0, 0, 0, 0, 0]
       
@@ -301,21 +301,6 @@ for audioOrText in [False]:
             plt.xlabel('Song genre')
             plt.ylabel('SNR (dB)')
             plt.plot(x, [SNRAlt/numSongsPerGenre,SNRBlu/numSongsPerGenre,SNREle/numSongsPerGenre,SNRJzz/numSongsPerGenre,SNRPop/numSongsPerGenre,SNRRoc/numSongsPerGenre])
-            plt.figure(2)
-            plt.grid()
-            plt.xlabel('Song genre')
-            plt.ylabel('PRD')
-            plt.plot(x, [PRDAlt/numSongsPerGenre,PRDBlu/numSongsPerGenre,PRDEle/numSongsPerGenre,PRDJzz/numSongsPerGenre,PRDPop/numSongsPerGenre,PRDRoc/numSongsPerGenre])
-            plt.figure(3)
-            plt.grid()
-            plt.xlabel('Song genre')
-            plt.ylabel('SPCC')
-            plt.plot(x, [SPCCAlt/numSongsPerGenre,SPCCBlu/numSongsPerGenre,SPCCEle/numSongsPerGenre,SPCCJzz/numSongsPerGenre,SPCCPop/numSongsPerGenre,SPCCRoc/numSongsPerGenre])
-            plt.figure(4)
-            plt.grid()
-            plt.xlabel('Song genre')
-            plt.ylabel('MSE')
-            plt.plot(x, [MSEAlt/numSongsPerGenre,MSEBlu/numSongsPerGenre,MSEEle/numSongsPerGenre,MSEJzz/numSongsPerGenre,MSEPop/numSongsPerGenre,MSERoc/numSongsPerGenre])
             plt.figure(5)
             plt.grid()
             plt.xlabel('Song genre')
@@ -401,21 +386,6 @@ for audioOrText in [False]:
             plt.xlabel('Song genre')
             plt.ylabel('SNR (dB)')
             plt.plot(x, [SNRAlt/numSongsPerGenre,SNRBlu/numSongsPerGenre,SNREle/numSongsPerGenre,SNRJzz/numSongsPerGenre,SNRPop/numSongsPerGenre,SNRRoc/numSongsPerGenre])
-            plt.figure(8)
-            plt.grid()
-            plt.xlabel('Song genre')
-            plt.ylabel('PRD')
-            plt.plot(x, [PRDAlt/numSongsPerGenre,PRDBlu/numSongsPerGenre,PRDEle/numSongsPerGenre,PRDJzz/numSongsPerGenre,PRDPop/numSongsPerGenre,PRDRoc/numSongsPerGenre])
-            plt.figure(9)
-            plt.grid()
-            plt.xlabel('Song genre')
-            plt.ylabel('SPCC')
-            plt.plot(x, [SPCCAlt/numSongsPerGenre,SPCCBlu/numSongsPerGenre,SPCCEle/numSongsPerGenre,SPCCJzz/numSongsPerGenre,SPCCPop/numSongsPerGenre,SPCCRoc/numSongsPerGenre])
-            plt.figure(10)
-            plt.grid()
-            plt.xlabel('Song genre')
-            plt.ylabel('MSE')
-            plt.plot(x, [MSEAlt/numSongsPerGenre,MSEBlu/numSongsPerGenre,MSEEle/numSongsPerGenre,MSEJzz/numSongsPerGenre,MSEPop/numSongsPerGenre,MSERoc/numSongsPerGenre])
             plt.figure(11)
             plt.grid()
             plt.xlabel('Song genre')
