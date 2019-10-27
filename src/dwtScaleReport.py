@@ -11,7 +11,8 @@ import os
 import AES
 
 textMessage = False
-
+originalDecSamples = []
+totalNoiseSNR = 0
 allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Blues',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Electronic',
@@ -19,12 +20,14 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 100
+numSongsPerGenre = 10
 
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
 x = np.asarray(x)
 
-LSBs = [1,5,10,14]
+LSBs = [14]
+#LSBs = [1,5,10,14]
+
 
 for audioOrText in [False]:
       
@@ -117,7 +120,8 @@ for audioOrText in [False]:
                                        
                               # Get the audio samples in integer form
                               intSamples = fp.extractWaveMessage('C:/Users/Johan Gouws/Desktop/Audio-Steganograpy/src/Media/ShortOpera.wav')
-                              
+                              rate,originalDecSamples=scWave.read('C:/Users/Johan Gouws/Desktop/Audio-Steganograpy/src/Media/ShortOpera.wav')
+              
                               # Convert to integer list of bits for embedding
                               message = "".join(intSamples[0])
                               originalMessage = deepcopy(message)
@@ -231,7 +235,20 @@ for audioOrText in [False]:
                        
       
                         
+                        fp.writeWaveMessageToFile(extractMessage, 'toExtractSong.wav')
+                                                
+                        rate,toNoiseSamples = scWave.read('toExtractSong.wav')
                         
+                        mu, sigma = 0, 0.5 # mean and standard deviation
+                        noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
+                        noisySamples = []
+                        
+                        for i in range(0,len(toNoiseSamples)):
+                              noisySamples.append(toNoiseSamples[i]+noise[i])
+                              
+                        totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)    
+
+                    
       if (audioOrText == True):
             print("########################################################")
             print("##############   TEXT MESSAGE INFORMATION ##############")
@@ -403,3 +420,4 @@ for audioOrText in [False]:
                         
                   print("# Extraction Time for LSBs = " + str(LSBs[i]),totalDecodingTime[i]/(numSongsPerGenre * 6), "seconds")   
 
+print("SCALE SNR 14",totalNoiseSNR/60)

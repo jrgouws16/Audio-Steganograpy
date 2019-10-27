@@ -1,14 +1,15 @@
 import ResultsAndTesting as RT
-import dwtEncrypt
+import dwtOBH
 import fileprocessing as fp
 import numpy as np
 import matplotlib.pyplot as plt
-import dwtScale
+
 import scipy.io.wavfile as scWave
 from copy import deepcopy
 import time
 import os
 import AES
+import dwtHybrid
 
 textMessage = True
 originalDecSamples = []
@@ -34,48 +35,48 @@ for t in range(0,len(coverFiles)):
                                 
             message = ""
                     
-            message = ""
-            message = fp.getMessageBits('C:/Users/Johan Gouws/Desktop/Audio-Steganograpy/src/Media/text.txt')
-            message = list(map(str, message))
-            message = "".join(message)
-            originalMessage = deepcopy(message)
-            message = AES.encryptBinaryString(message, AESkeyEncode)
-            message = list(map(int, list(message)))
-            message = "".join(list(map(str, message)))
+            if (audioOrText == True):
+                  message = fp.getMessageBits('C:/Users/Johan Gouws/Desktop/text.txt')
+                  message = list(map(str, message))
+                  message = "".join(message)
+                  originalMessage = deepcopy(message)
+                  message = AES.encryptBinaryString(message, AESkeyEncode)
+                  message = list(map(int, list(message)))
+                  message = "".join(list(map(str, message)))
             
            
             originalCoverSamples = deepcopy(samplesOne) 
                               
             currentTime = time.time()
-            stegoSamples, samplesUsed, capacityWarning = dwtScale.dwtScaleEncode(samplesOne, message, '.txt', 12)
+            stegoSamples, samplesUsed, capacityWarning = dwtHybrid.dwtHybridEncode(samplesOne, message, '.txt', 8)
             
             stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/ 32768.0
             
             
             fileLoc = ''
             if (t == 0):
-                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/scale_alt_txt.wav", rate, stegoSamples)
-                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/scale_alt_txt.wav"
+                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/hybrid_alt_txt.wav", rate, stegoSamples)
+                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/hybrid_alt_txt.wav"
             elif(t==1):
-                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/scale_blu_txt.wav", rate, stegoSamples)
-                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/scale_blu_txt.wav"
+                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/hybrid_blu_txt.wav", rate, stegoSamples)
+                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/hybrid_blu_txt.wav"
             elif(t==2):
-                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/scale_ele_txt.wav", rate, stegoSamples)
-                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/scale_ele_txt.wav"
+                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/hybrid_ele_txt.wav", rate, stegoSamples)
+                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/hybrid_ele_txt.wav"
             elif(t==3):
-                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/scale_jzz_txt.wav", rate, stegoSamples)
-                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/scale_jzz_txt.wav"
+                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/hybrid_jzz_txt.wav", rate, stegoSamples)
+                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/hybrid_jzz_txt.wav"
             elif(t==4):
-                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/scale_pop_txt.wav", rate, stegoSamples)
-                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/scale_pop_txt.wav"
+                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/hybrid_pop_txt.wav", rate, stegoSamples)
+                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/hybrid_pop_txt.wav"
             elif(t==5):
-                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/scale_rock_txt.wav", rate, stegoSamples)   
-                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/scale_rock_txt.wav"
+                  scWave.write("C:/Users/Johan Gouws/Desktop/Survey/hybrid_rock_txt.wav", rate, stegoSamples)   
+                  fileLoc = "C:/Users/Johan Gouws/Desktop/Survey/hybrid_rock_txt.wav"
             # Get the characteristics of the stego file
             
             stegoSamplesOne, stegoSamplesTwo, rate = fp.getWaveSamples(fileLoc)
             stegoSamples = np.asarray(stegoSamplesOne, dtype=np.float32, order = 'C') * 32768.0
             
             SNR = RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] )
-            print(len(message)/samplesUsed)
-            #print(SNR)
+            
+            print(SNR)

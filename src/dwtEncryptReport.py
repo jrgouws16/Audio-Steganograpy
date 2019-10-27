@@ -10,7 +10,8 @@ import time
 import os
 import AES
 
-
+originalDecSamples = []
+totalNoiseSNR = 0
 allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Blues',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Electronic',
@@ -18,9 +19,9 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 100
+numSongsPerGenre = 10
 
-for audioOrText in [True]:
+for audioOrText in [False]:
       
       belowSNR  = [0, 0, 0, 0, 0, 0]
       
@@ -99,7 +100,8 @@ for audioOrText in [True]:
                   else:
                         # Get the audio samples in integer form
                         intSamples = fp.extractWaveMessage('C:/Users/Johan Gouws/Desktop/Audio-Steganograpy/src/Media/ShortOpera.wav')
-                        
+                        rate,originalDecSamples=scWave.read('C:/Users/Johan Gouws/Desktop/Audio-Steganograpy/src/Media/ShortOpera.wav')
+
                         # Convert to integer list of bits for embedding
                         message = "".join(intSamples[0])
                         alphaMessage = ''
@@ -220,7 +222,26 @@ for audioOrText in [True]:
                              belowSNR[5] += 1
                        
                        
-                             
+                  binMessage = ''
+                  # Convert the binary stream to a ASCII string
+                  for i in range(0, len(secretMessage)):
+                      binMessage += AES.string2bits(secretMessage[i])[4:]    
+      
+      
+                  fp.writeWaveMessageToFile(binMessage, 'toExtractSong.wav')
+                                          
+                  rate,toNoiseSamples = scWave.read('toExtractSong.wav')
+                  
+                  mu, sigma = 0, 0.5 # mean and standard deviation
+                  noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
+                  noisySamples = []
+                  
+                  for i in range(0,len(toNoiseSamples)):
+                        noisySamples.append(toNoiseSamples[i]+noise[i])
+                        
+                  totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)
+
+                       
       x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
       x = np.asarray(x)       
       
@@ -393,3 +414,4 @@ for audioOrText in [True]:
             print("--------  Number of errors made with extraction", messageErrors) 
                   
             print("# Extraction Time    ",totalDecodingTime/(numSongsPerGenre * 6), "seconds")   
+print("ENCRYPT SNR",totalNoiseSNR/60)

@@ -10,6 +10,8 @@ import time
 import os
 import AES
 
+originalDecSamples = []
+totalNoiseSNR = 0
 
 allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Blues',
@@ -18,16 +20,17 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 100
+numSongsPerGenre = 10
 textMessage = True
 
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
 x = np.asarray(x)
 
-OBHs = [8,9,10]
+#OBHs = [8,9,10]
+OBHs = [8]
+for audioOrText in [False]:
 
-for audioOrText in [True]:
-
+      
       
       counter = numSongsPerGenre * 6 * len(OBHs)
       
@@ -118,7 +121,7 @@ for audioOrText in [True]:
                               else:
                                     # Get the audio samples in integer form
                                     intSamples = fp.extractWaveMessage('C:/Users/Johan Gouws/Desktop/Audio-Steganograpy/src/Media/ShortOpera.wav')
-                
+                                    rate,originalDecSamples=scWave.read('C:/Users/Johan Gouws/Desktop/Audio-Steganograpy/src/Media/ShortOpera.wav')
                                     # Convert to integer list of bits for embedding
                                     message = "".join(intSamples[0])
                                     originalMessage = deepcopy(message)
@@ -248,12 +251,29 @@ for audioOrText in [True]:
                                    MSERoc[OBH_index]    += mse
                                    PSNRRoc[OBH_index]   += psnr
       
+      
+            
                                    if (extractMessage != originalMessage):
                                           messageErrors[5][OBH_index] += 1      
                                           print(t)
       
                                    if (SNR < 20):
                                          belowSNR[5][OBH_index] += 1
+                             
+                              
+                              fp.writeWaveMessageToFile(extractMessage, 'toExtractSong.wav')
+                              
+                              rate,toNoiseSamples = scWave.read('toExtractSong.wav')
+                              
+                              mu, sigma = 0, 0.5 # mean and standard deviation
+                              noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
+                              noisySamples = []
+                              
+                              for i in range(0,len(toNoiseSamples)):
+                                    noisySamples.append(toNoiseSamples[i]+noise[i])
+                                    
+                              totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)
+                              
       
       if (audioOrText == True):
             print("########################################################")
@@ -441,3 +461,5 @@ for audioOrText in [True]:
             for i in range(0, len(OBHs)):
                         
                   print("# Extraction Time for OBHs = " + str(OBHs[i]),totalDecodingTime[i]/(numSongsPerGenre * 6), "seconds")   
+
+print("Hybrid SNR 8",totalNoiseSNR/60)

@@ -16,7 +16,8 @@ import time
 import os
 import AES
 
-
+originalDecSamples = []
+totalNoiseSNR = 0
 
 def GA_encoding(coverSamples, secretMessage, key, frameRate, fileType):
         # Deepcopy for calculating the SNR
@@ -74,7 +75,7 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
 
 for audioOrText in [False]:
       
-      numSongsPerGenre = 100
+      numSongsPerGenre = 10
       
       belowSNR  = [0, 0, 0, 0, 0, 0]
       
@@ -171,6 +172,7 @@ for audioOrText in [False]:
                   else:
                         # Get the audio samples in integer form converted to binary
                         intSamples = fp.extractWaveMessage('C:/Users/Johan Gouws/Desktop/Audio-Steganograpy/src/Media/ShortOpera.wav')
+                        rate,originalDecSamples=scWave.read('C:/Users/Johan Gouws/Desktop/Audio-Steganograpy/src/Media/ShortOpera.wav')
     
                         # Convert to integer list of bits for embedding
                         secretMessage = "".join(intSamples[0])
@@ -288,7 +290,22 @@ for audioOrText in [False]:
                        
                         
                   totalEncodingTime += embedTime
+             
+                  
+                  fp.writeWaveMessageToFile(extractMessage, 'toExtractSong.wav')
+                                          
+                  rate,toNoiseSamples = scWave.read('toExtractSong.wav')
+                  
+                  mu, sigma = 0, 0.5 # mean and standard deviation
+                  noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
+                  noisySamples = []
+                  
+                  for i in range(0,len(toNoiseSamples)):
+                        noisySamples.append(toNoiseSamples[i]+noise[i])
                         
+                  totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)            
+                  
+                  
       x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
       x = np.asarray(x)       
       
@@ -463,7 +480,7 @@ for audioOrText in [False]:
             print("# Extraction Time    ",totalDecodingTime/(numSongsPerGenre * 6), "seconds")   
                   
                   
-                  
+print("GA SNR",totalNoiseSNR/60)
                   
                   
             
