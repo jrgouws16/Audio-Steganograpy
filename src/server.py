@@ -37,7 +37,8 @@ changeUnamePword.info = "Username and password changed successfully."
 serverThread = []
 connections  = []
 addresses    = []
-attemptsLeft = []
+ips          = []
+attempts     = []
 
 clientsConnected = 0
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -91,10 +92,11 @@ def GA_decoding(stegoSamples, key):
 
 def threaded_client(conn, clientNum):
     global clientsConnected
+    global attempts
+    
     mainWindow.listWidget_log.addItem("Client thread created successfully")  
     fileType = ''
     authenticated = False
-    
     
     while True:
 #        try:
@@ -113,13 +115,17 @@ def threaded_client(conn, clientNum):
                   compUsername = compUsernameObj.read()
                   compPassword = compPasswordObj.read()
                   
-                  if (compUsername == username and compPassword == password):
+                  if (compUsername == username and compPassword == password and attempts[connections.index(conn)]):
                         authenticated = True
                         sockets.send_one_message(conn, "Authenticated")
                         
                   else:
                         sockets.send_one_message(conn, "Not_authenticated")
-                        sockets.send_one_message(conn, "1")
+                        
+                        if (attempts[connections.index(conn)] > 0):
+                              attempts[connections.index(conn)] -= 1
+                        
+                        sockets.send_one_message(conn, str(attempts[connections.index(conn)]))
 
             
             elif (message.decode() == "Capacity" and authenticated == True):
@@ -1085,8 +1091,8 @@ def threaded_client(conn, clientNum):
                   clientsConnected -= 1
                   mainWindow.label_num_clients.setText("Clients connected: " + str(clientsConnected))
                   connections[connections.index(conn)].close()
-                  del addresses[connections.index(conn)]
-                  del connections[connections.index(conn)]
+                  addresses[connections.index(conn)] = None
+                  connections[connections.index(conn)] = None
                   break
                                 
             else:
@@ -1121,14 +1127,36 @@ def acceptClients(param):
               conn, addr = s.accept()
               s.setblocking(1)  # prevents timeout
               mainWindow.listWidget_log.addItem("Client " + str(addr) + " connected on port " + mainWindow.lineEdit_port.text())
-              connections.append(conn)
-              addresses.append(addr)
-              
-              clientThread = threading.Thread(target=threaded_client, args=(connections[-1], addr,))
-              clientThread.isDaemon = True
-              clientThread.start()
-              clientsConnected += 1
-              mainWindow.label_num_clients.setText("Clients connected: " + str(clientsConnected))
+
+              if (addr[0] in ips):
+                    addresses[ips.index(addr[0])] = addr
+                    connections[ips.index(addr[0])] = conn
+                    if (attempts[ips.index(addr[0])] == 0):
+                          clientThread = threading.Thread(target=threaded_client, args=(connections[ips.index(addr[0])], addr,))
+                          clientThread.isDaemon = True
+                          clientThread.start()
+                          clientsConnected += 1
+                          sockets.send_one_message(conn, "Not_authenticated")
+                          sockets.send_one_message(conn, str(attempts[connections.index(conn)]))
+                          
+                    else:
+                          clientThread = threading.Thread(target=threaded_client, args=(connections[ips.index(addr[0])], addr,))
+                          clientThread.isDaemon = True
+                          clientThread.start()
+                          clientsConnected += 1
+                          sockets.send_one_message(conn, str(attempts[connections.index(conn)]))
+                          
+              else:
+                    connections.append(conn)
+                    addresses.append(addr)
+                    ips.append(addr[0])
+                    attempts.append(3)
+                    
+                    clientThread = threading.Thread(target=threaded_client, args=(connections[-1], addr,))
+                    clientThread.isDaemon = True
+                    clientThread.start()
+                    clientsConnected += 1
+                    mainWindow.label_num_clients.setText("Clients connected: " + str(clientsConnected))
                               
           except Exception:
                 mainWindow.listWidget_log.addItem("Socket unexpectedly closed. Server will shut down")
@@ -1155,7 +1183,7 @@ def endServer():
       global addresses
       global serverThread
       global clientsConnected
-      global attemptsLeft
+      global attempts
       
       for filename in os.listdir():
           if (filename.endswith('.txt') or filename.endswith('.wav')):
@@ -1175,6 +1203,7 @@ def endServer():
       del addresses[:]
       del connections[:]
       del serverThread[:]
+      del attempts[:]
       
       clientsConnected = 0
       

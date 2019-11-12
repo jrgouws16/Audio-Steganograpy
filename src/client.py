@@ -38,14 +38,21 @@ errorMsg = SS.showInfoSigSlot()
 
 server = []
 connectedToServer = False
+authenticatedByServer = False
 
 def connectToServer():
     global server
     global connectedToServer
+    global authenticatedByServer
     
-    if (len(server) != 0):
+    if (len(server) != 0 and authenticatedByServer == True):
         SS.showErrorMessage("Established Connection","You are already connected to a server.")
         
+    elif(len(server) != 0 and authenticatedByServer == False):
+        sockets.send_one_message(server[-1], 'Authenticate')
+        sockets.send_one_message(server[-1], AES.encryptBinaryString(AES.string2bits(mainWindow.lineEdit_username.text()), mainWindow.lineEdit_username.text()))
+        sockets.send_one_message(server[-1], AES.encryptBinaryString(AES.string2bits(mainWindow.lineEdit_password.text()), mainWindow.lineEdit_password.text()))
+    
     else:
         HOST = mainWindow.lineEdit_server_ip.text()
         PORT = int(mainWindow.lineEdit_server_port.text())
@@ -56,8 +63,6 @@ def connectToServer():
               s.connect((HOST, PORT))
               server.append(s)  
             
-              
-            
               # Send the encode command to the server
               sockets.send_one_message(server[-1], 'Authenticate')
               sockets.send_one_message(server[-1], AES.encryptBinaryString(AES.string2bits(mainWindow.lineEdit_username.text()), mainWindow.lineEdit_username.text()))
@@ -66,6 +71,8 @@ def connectToServer():
               mainWindow.label_server_status.setText("Status: Connected")
               connectedToServer = True
            
+                  
+            
         except Exception:
               SS.showErrorMessage("Error Connecting", "Server unavailable.")
               s.close()
@@ -73,6 +80,8 @@ def connectToServer():
 
 def disconnectFromServer():
     global connectedToServer
+    global authenticatedByServer
+    
     connectedToServer = False
     sockets.send_one_message(server[-1], "Disconnect")
     time.sleep(0.1)
@@ -81,6 +90,8 @@ def disconnectFromServer():
     mainWindow.label_server_status.setText("Status: Disonnected")
 
 def fileReceiveThread():
+      global authenticatedByServer
+      
       while True:
         if (len(server) > 0):
             try:
@@ -136,6 +147,7 @@ def fileReceiveThread():
                     elif (data.decode() == "Disconnect"):
                         server[-1].close()
                         del server[:]
+                        authenticatedByServer = False
                         mainWindow.label_server_status.setText("Status: Disonnected")
                       
                         
@@ -144,6 +156,7 @@ def fileReceiveThread():
                         
                     elif (data.decode() == "Authenticated"):
                           authenticated.emit()
+                          authenticatedByServer = True
                           mainWindow.pushButton_cover_capacity.setEnabled(True)
                           mainWindow.pushButton_decode.setEnabled(True)
                           mainWindow.pushButton_encode.setEnabled(True)
@@ -151,6 +164,7 @@ def fileReceiveThread():
                           
                     elif (data.decode() == "Not_authenticated"):
                           attemptsLeft = sockets.recv_one_message(server[-1]).decode()
+                          authenticatedByServer = False
                           
                           if (attemptsLeft == '0'):
                                 notAuthenticated.info = "You have no attempts left and are blocked from the server"
