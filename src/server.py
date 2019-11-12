@@ -22,6 +22,17 @@ import time
 import scipy.io.wavfile as scWave
 import numpy as np
 import AES
+import SignalsAndSlots as SS
+
+wrongUnamePword = SS.showErrorSigSlot()
+wrongUnamePword.title = "Wrong username and password"
+wrongUnamePword.info = "Enter the correct username and password combination and try again."
+rightUnamePword = SS.showInfoSigSlot()
+rightUnamePword.title = "Correct username and password"
+rightUnamePword.info = "Server accessed successfully."
+changeUnamePword = SS.showInfoSigSlot()
+changeUnamePword.title = "Change successful"
+changeUnamePword.info = "Username and password changed successfully."
 
 serverThread = []
 connections  = []
@@ -82,15 +93,36 @@ def threaded_client(conn, clientNum):
     global clientsConnected
     mainWindow.listWidget_log.addItem("Client thread created successfully")  
     fileType = ''
+    authenticated = False
+    
     
     while True:
 #        try:
             message = sockets.recv_one_message(conn)
-            
+            print(message)   
             if (message == None):
                   break
-              
-            elif (message.decode() == "Capacity"):
+            
+            elif (message.decode() == "Authenticate"):
+                  username = sockets.recv_one_message(conn).decode()
+                  password = sockets.recv_one_message(conn).decode()
+                  
+                  compUsernameObj = open('UnamePword/username.txt', 'r')
+                  compPasswordObj = open('UnamePword/password.txt', 'r')
+                  
+                  compUsername = compUsernameObj.read()
+                  compPassword = compPasswordObj.read()
+                  
+                  if (compUsername == username and compPassword == password):
+                        authenticated = True
+                        sockets.send_one_message(conn, "Authenticated")
+                        
+                  else:
+                        sockets.send_one_message(conn, "Not_authenticated")
+                        sockets.send_one_message(conn, "1")
+
+            
+            elif (message.decode() == "Capacity" and authenticated == True):
                 cover = open(str(clientNum) + "Capacity" + ".wav", "wb")
                 data = sockets.recv_one_message(conn)
                 cover.write(data)
@@ -134,7 +166,7 @@ def threaded_client(conn, clientNum):
                     sockets.send_one_message(conn, str(len(samplesOne)*1.5))
               
             # If it is needed to encode the message into the audio    
-            elif (message.decode() == "Encode"):
+            elif (message.decode() == "Encode" and authenticated == True):
                 
                 mainWindow.listWidget_log.addItem("Client " + str(addresses[connections.index(conn)][0]) + " requested encoding.")
                 
@@ -788,7 +820,7 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("Invalid Encoding Method selected.")
                   
                     
-            elif (message.decode() == "Decode"):
+            elif (message.decode() == "Decode" and authenticated == True):
                 # Receive the message file
                 
                 mainWindow.listWidget_log.addItem("Receiving stego: " + str(addresses[connections.index(conn)][0]))
@@ -1148,6 +1180,60 @@ def endServer():
       
       mainWindow.label_num_clients.setText("Clients connected: " + str(clientsConnected))
 
+def authenticateServerAccess():
+      file = open('UnamePword/username.txt', 'r')
+      uName = file.read()
+      file.close()
+      
+      file = open('UnamePword/password.txt', 'r')
+      pWord = file.read()
+      file.close()
+            
+      uName = AES.bits2string(AES.decryptBinaryString(uName, mainWindow.lineEdit_username.text()))
+      pWord = AES.bits2string(AES.decryptBinaryString(pWord, mainWindow.lineEdit_password.text()))
+      
+      if (mainWindow.lineEdit_username.text() == uName and mainWindow.lineEdit_password.text() == pWord):
+            mainWindow.pushButton_start.setEnabled(True)
+            mainWindow.pushButton_stop.setEnabled(True)
+            rightUnamePword.emit()
+      else:
+            wrongUnamePword.emit()
+      
+def logoff():
+    mainWindow.pushButton_start.setEnabled(False)
+    mainWindow.pushButton_stop.setEnabled(False)
+
+def change():
+      file = open('UnamePword/username.txt', 'r')
+      uName = file.read()
+      file.close()
+      
+      file = open('UnamePword/password.txt', 'r')
+      pWord = file.read()
+      file.close()
+            
+      uName = AES.bits2string(AES.decryptBinaryString(uName, mainWindow.lineEdit_username.text()))
+      pWord = AES.bits2string(AES.decryptBinaryString(pWord, mainWindow.lineEdit_password.text()))
+      
+      if (mainWindow.lineEdit_username.text() == uName and mainWindow.lineEdit_password.text() == pWord):
+            
+            newName = mainWindow.lineEdit_new_username.text()
+            newPwd = mainWindow.lineEdit_new_password.text()
+            
+            newName = AES.AESCipher(newName).encrypt(newName)
+            newPwd = AES.AESCipher(newPwd).encrypt(newPwd)
+            
+            file = open('UnamePword/username.txt', 'w')
+            file.write(AES.string2bits(newName))
+            file.close()
+            
+            file = open('UnamePword/password.txt', 'w')
+            file.write(AES.string2bits(newPwd))
+            file.close()
+            changeUnamePword.emit()
+      else:
+            wrongUnamePword.emit()
+
 if __name__ == "__main__":
     
     # Create a QtWidget application
@@ -1157,9 +1243,18 @@ if __name__ == "__main__":
     mainWindow = uic.loadUi("ServerGUI.ui")
     mainWindow.pushButton_start.clicked.connect(startServerThread)
     mainWindow.pushButton_stop.clicked.connect(endServer)
-    
+    mainWindow.pushButton_login.clicked.connect(authenticateServerAccess)
+    mainWindow.pushButton_logoff.clicked.connect(logoff)
+    mainWindow.pushButton_change.clicked.connect(change)
+    wrongUnamePword.connect()
+    rightUnamePword.connect()
+    changeUnamePword.connect()
     # Set the GUI background to specified image
     mainWindow.setStyleSheet("QMainWindow {border-image: url(Media/music.jpg) 0 0 0 0 stretch stretch}")
+    
+    
+    mainWindow.pushButton_start.setEnabled(False)
+    mainWindow.pushButton_stop.setEnabled(False)
     
     # Execute and show the user interface
     mainWindow.show()

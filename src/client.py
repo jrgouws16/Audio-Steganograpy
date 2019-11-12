@@ -12,6 +12,7 @@ import fileprocessing as fp
 import SignalsAndSlots as SS
 import threading
 import time
+import AES
 
 signalSaveFile = SS.fileSaveSigSlot()
 signalSaveTextFile = SS.textFileSaveSigSlot()
@@ -25,6 +26,12 @@ invalidCover.info = "Provide a valid cover wave file."
 capacityWarning = SS.showInfoSigSlot()
 capacityWarning.title = 'CapacityWarning'
 capacityWarning.info = 'The cover file is too small for the message provided'
+authenticated = SS.showInfoSigSlot()
+authenticated.title = 'Authentication successful'
+authenticated.info = 'Username and password entered correctly.'
+notAuthenticated = SS.showInfoSigSlot()
+notAuthenticated.title = 'Authentication unsuccessful'
+notAuthenticated.info = 'Username and password not entered correctly.'
 
 embeddedStats = SS.showInfoSigSlot()
 errorMsg = SS.showInfoSigSlot()
@@ -46,10 +53,18 @@ def connectToServer():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         try:
-            s.connect((HOST, PORT))
-            server.append(s)  
-            mainWindow.label_server_status.setText("Status: Connected")
-            connectedToServer = True
+              s.connect((HOST, PORT))
+              server.append(s)  
+            
+              
+            
+              # Send the encode command to the server
+              sockets.send_one_message(server[-1], 'Authenticate')
+              sockets.send_one_message(server[-1], AES.encryptBinaryString(AES.string2bits(mainWindow.lineEdit_username.text()), mainWindow.lineEdit_username.text()))
+              sockets.send_one_message(server[-1], AES.encryptBinaryString(AES.string2bits(mainWindow.lineEdit_password.text()), mainWindow.lineEdit_password.text()))
+            
+              mainWindow.label_server_status.setText("Status: Connected")
+              connectedToServer = True
            
         except Exception:
               SS.showErrorMessage("Error Connecting", "Server unavailable.")
@@ -102,6 +117,7 @@ def fileReceiveThread():
                             f.write(data)
                             f.close()
                         
+                                             
                     elif (data.decode() == "WARN"):
                         capacityWarning.emit()
                         
@@ -121,17 +137,28 @@ def fileReceiveThread():
                         server[-1].close()
                         del server[:]
                         mainWindow.label_server_status.setText("Status: Disonnected")
-                        
-                    elif (data.decode() == "ProgressEmbed"):
-                        percentage = sockets.recv_one_message(server[-1])
-                        mainWindow.progressBar_embedding.setValue(int(percentage))
-                        
-                    elif (data.decode() == "ProgressExtract"):
-                        percentage = sockets.recv_one_message(server[-1])
-                        mainWindow.progressBar_extracting.setValue(int(percentage))
+                      
                         
                     elif (data.decode() == "SENT_SUCCESS"):
                         msgDelivered.emit()
+                        
+                    elif (data.decode() == "Authenticated"):
+                          authenticated.emit()
+                          mainWindow.pushButton_cover_capacity.setEnabled(True)
+                          mainWindow.pushButton_decode.setEnabled(True)
+                          mainWindow.pushButton_encode.setEnabled(True)
+
+                          
+                    elif (data.decode() == "Not_authenticated"):
+                          attemptsLeft = sockets.recv_one_message(server[-1]).decode()
+                          
+                          if (attemptsLeft == '0'):
+                                notAuthenticated.info = "You have no attempts left and are blocked from the server"
+                          
+                          else:
+                                notAuthenticated.info = 'Wrong username and password enetered.\nAttempts left:'+ str(attemptsLeft)
+                          
+                          notAuthenticated.emit()
                 
             except Exception:
                 continue
@@ -486,6 +513,9 @@ if __name__ == "__main__":
     # Create a QtWidget application
     app = QtWidgets.QApplication([])
 
+   
+
+
     # Load the user interface designed on Qt Designer
     mainWindow = uic.loadUi("ClientGUI.ui")
     
@@ -550,6 +580,8 @@ if __name__ == "__main__":
     invalidCover.connect()
     capacityWarning.connect()
     embeddedStats.connect()
+    authenticated.connect()
+    notAuthenticated.connect()
 
     # Guide user to provide values 1, 2, 3 or 4
     mainWindow.lineEdit_OBH.setPlaceholderText("OBH")
@@ -560,7 +592,12 @@ if __name__ == "__main__":
     
     # Set the GUI background to specified image
     mainWindow.setStyleSheet("QMainWindow {border-image: url(Media/music.jpg) 0 0 0 0 stretch stretch}")
-    mainWindow.tabWidget.setStyleSheet("QWidget {background-color: grey }")
+    mainWindow.tabWidget.setStyleSheet("QWidget {background-color: white }")
+
+    mainWindow.pushButton_encode.setEnabled(False)
+    mainWindow.pushButton_cover_capacity.setEnabled(False)
+    mainWindow.pushButton_decode.setEnabled(False)
+
     # Execute and show the user interface
     mainWindow.show()
     app.exec()

@@ -208,7 +208,6 @@ def binaryToInt(binaryString):
     else:
         return int(binaryString, 2)
 
-
 def writeWaveMessageToFile(binString, file):
       samples = []
       rate = 8192

@@ -133,6 +133,25 @@ class showInfoSigSlot(QObject):
 
     def handle_trigger(self):
           showInfoMessage(self.title, self.info)
+          
+class showErrorSigSlot(QObject):
+
+    # Define a new signal called 'trigger' that has no arguments.
+    trigger = pyqtSignal()
+    info = ""
+    title = ""
+
+    def connect(self):
+        # Connect the trigger signal to a slot.
+        self.trigger.connect(self.handle_trigger)
+
+    def emit(self):
+        # Emit the signal.
+        self.trigger.emit()
+
+    def handle_trigger(self):
+          showErrorMessage(self.title, self.info)
+
 
 class progressSigSlot(QObject):
     # Define a new signal called 'trigger' that has no arguments.

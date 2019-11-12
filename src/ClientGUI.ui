@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>788</width>
-    <height>494</height>
+    <width>778</width>
+    <height>466</height>
    </rect>
   </property>
   <property name="palette">
@@ -877,7 +877,7 @@
            <enum>QTabWidget::Rounded</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1509,7 +1509,7 @@
               <x>10</x>
               <y>10</y>
               <width>486</width>
-              <height>286</height>
+              <height>344</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1579,7 +1579,7 @@
                     </font>
                    </property>
                    <property name="text">
-                    <string>Server IP address</string>
+                    <string>Server IP address:</string>
                    </property>
                   </widget>
                  </item>
@@ -1604,12 +1604,66 @@
                     </font>
                    </property>
                    <property name="text">
-                    <string>Port to connect     </string>
+                    <string>Port to connect:    </string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QLineEdit" name="lineEdit_server_port">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_5">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_21">
+                 <item>
+                  <widget class="QLabel" name="label_username">
+                   <property name="font">
+                    <font>
+                     <family>Century Schoolbook L</family>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Username:              </string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="lineEdit_username">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_22">
+                 <item>
+                  <widget class="QLabel" name="label_password">
+                   <property name="font">
+                    <font>
+                     <family>Century Schoolbook L</family>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Password:                </string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="lineEdit_password">
                    <property name="text">
                     <string/>
                    </property>
@@ -1797,7 +1851,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>788</width>
+     <width>778</width>
      <height>21</height>
     </rect>
    </property>

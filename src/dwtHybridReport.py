@@ -20,15 +20,18 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 10
+numSongsPerGenre = 100
 textMessage = True
 
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
 x = np.asarray(x)
 
-#OBHs = [8,9,10]
-OBHs = [8]
-for audioOrText in [False]:
+OBHs = [8,9,10]
+  
+errorSNR = [[],[],[]]
+
+#OBHs = [8]
+for audioOrText in [True]:
 
       
       
@@ -168,6 +171,35 @@ for audioOrText in [False]:
                               counter -= 1      
                               
                               
+                              if (extractMessage != originalMessage):
+                                    embed = []
+                                    extract = []
+                        
+                                    minVal = len(extractMessage)
+                                    if (len(originalMessage) < minVal):
+                                          minVal = len(originalMessage)
+                        
+                                    if (audioOrText == False):
+                              
+                                          for dec in range(0,minVal,16):
+                                                binSample = extractMessage[dec:dec+16]
+                                                embed.append(fp.binaryToInt(binSample))
+                                                binSample = originalMessage[dec:dec+16]
+                                                extract.append(fp.binaryToInt(binSample))
+                                                
+                                          errorSNR[OBH_index].append(RT.getSNR(embed,extract))
+                              
+                                    else:
+                                          for dec in range(0,minVal,8):
+                                                binSample = extractMessage[dec:dec+8]
+                                                embed.append(fp.binaryToInt(binSample))
+                                                binSample = originalMessage[dec:dec+8]
+                                                extract.append(fp.binaryToInt(binSample))
+                                                
+                                          errorSNR[OBH_index].append(RT.getSNR(embed,extract))
+                              
+                              
+                              
                               if (path == 'C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative'):
                                    SNRAlt[OBH_index]    += SNR
                                    CapAlt[OBH_index]    += capacity
@@ -261,18 +293,18 @@ for audioOrText in [False]:
                                          belowSNR[5][OBH_index] += 1
                              
                               
-                              fp.writeWaveMessageToFile(extractMessage, 'toExtractSong.wav')
-                              
-                              rate,toNoiseSamples = scWave.read('toExtractSong.wav')
-                              
-                              mu, sigma = 0, 0.5 # mean and standard deviation
-                              noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
-                              noisySamples = []
-                              
-                              for i in range(0,len(toNoiseSamples)):
-                                    noisySamples.append(toNoiseSamples[i]+noise[i])
-                                    
-                              totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)
+#                              fp.writeWaveMessageToFile(extractMessage, 'toExtractSong.wav')
+#                              
+#                              rate,toNoiseSamples = scWave.read('toExtractSong.wav')
+#                              
+#                              mu, sigma = 0, 0.5 # mean and standard deviation
+#                              noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
+#                              noisySamples = []
+#                              
+#                              for i in range(0,len(toNoiseSamples)):
+#                                    noisySamples.append(toNoiseSamples[i]+noise[i])
+#                                    
+#                              totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)
                               
       
       if (audioOrText == True):
@@ -463,3 +495,9 @@ for audioOrText in [False]:
                   print("# Extraction Time for OBHs = " + str(OBHs[i]),totalDecodingTime[i]/(numSongsPerGenre * 6), "seconds")   
 
 print("Hybrid SNR 8",totalNoiseSNR/60)
+
+for i in range(0, len(errorSNR)):
+      if (len(errorSNR[i])!=0):
+            
+            print("ErrorSNR" + str(OBHs[i]), sum(errorSNR[i])/len(errorSNR[i]), len(errorSNR[i]),"SONGS")      
+

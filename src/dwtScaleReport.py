@@ -20,13 +20,13 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 10
+numSongsPerGenre = 100
 
 x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
 x = np.asarray(x)
 
-LSBs = [14]
-#LSBs = [1,5,10,14]
+LSBs = [1,5,10,14]
+errorSNR = [[],[],[],[]]
 
 
 for audioOrText in [False]:
@@ -152,6 +152,31 @@ for audioOrText in [False]:
                         
                         if (extractMessage != originalMessage):
                               messageErrors += 1      
+                              embed = []
+                              extract = []
+                  
+                              minVal = len(extractMessage)
+                              if (len(originalMessage) < minVal):
+                                    minVal = len(originalMessage)
+                  
+                              if (audioOrText == False):
+                        
+                                    for dec in range(0,minVal,16):
+                                          binSample = extractMessage[dec:dec+16]
+                                          embed.append(fp.binaryToInt(binSample))
+                                          binSample = originalMessage[dec:dec+16]
+                                          extract.append(fp.binaryToInt(binSample))
+                                          
+                                    errorSNR[LSB_index].append(RT.getSNR(embed,extract))
+                        
+                              else:
+                                    for dec in range(0,minVal,8):
+                                          binSample = extractMessage[dec:dec+8]
+                                          embed.append(fp.binaryToInt(binSample))
+                                          binSample = originalMessage[dec:dec+8]
+                                          extract.append(fp.binaryToInt(binSample))
+                                          
+                                    errorSNR[LSB_index].append(RT.getSNR(embed,extract))
                               print(t)
                         
                         
@@ -234,19 +259,19 @@ for audioOrText in [False]:
                                    belowSNR[5][LSB_index] += 1
                        
       
-                        
-                        fp.writeWaveMessageToFile(extractMessage, 'toExtractSong.wav')
-                                                
-                        rate,toNoiseSamples = scWave.read('toExtractSong.wav')
-                        
-                        mu, sigma = 0, 0.5 # mean and standard deviation
-                        noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
-                        noisySamples = []
-                        
-                        for i in range(0,len(toNoiseSamples)):
-                              noisySamples.append(toNoiseSamples[i]+noise[i])
-                              
-                        totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)    
+#                        
+#                        fp.writeWaveMessageToFile(extractMessage, 'toExtractSong.wav')
+#                                                
+#                        rate,toNoiseSamples = scWave.read('toExtractSong.wav')
+#                        
+#                        mu, sigma = 0, 0.5 # mean and standard deviation
+#                        noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
+#                        noisySamples = []
+#                        
+#                        for i in range(0,len(toNoiseSamples)):
+#                              noisySamples.append(toNoiseSamples[i]+noise[i])
+#                              
+#                        totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)    
 
                     
       if (audioOrText == True):
@@ -421,3 +446,8 @@ for audioOrText in [False]:
                   print("# Extraction Time for LSBs = " + str(LSBs[i]),totalDecodingTime[i]/(numSongsPerGenre * 6), "seconds")   
 
 print("SCALE SNR 14",totalNoiseSNR/60)
+
+for i in range(0, len(errorSNR)):
+      if (len(errorSNR[i])!=0):
+            
+            print("ErrorSNR" + str(LSBs[i]), sum(errorSNR[i])/len(errorSNR[i]), len(errorSNR[i]),"SONGS")      

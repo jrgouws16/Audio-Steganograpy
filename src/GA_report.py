@@ -75,8 +75,7 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
 
 for audioOrText in [False]:
       
-      numSongsPerGenre = 10
-      
+      numSongsPerGenre = 1
       belowSNR  = [0, 0, 0, 0, 0, 0]
       
       totalEncodingTime = 0
@@ -291,19 +290,19 @@ for audioOrText in [False]:
                         
                   totalEncodingTime += embedTime
              
-                  
-                  fp.writeWaveMessageToFile(extractMessage, 'toExtractSong.wav')
-                                          
-                  rate,toNoiseSamples = scWave.read('toExtractSong.wav')
-                  
-                  mu, sigma = 0, 0.5 # mean and standard deviation
-                  noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
-                  noisySamples = []
-                  
-                  for i in range(0,len(toNoiseSamples)):
-                        noisySamples.append(toNoiseSamples[i]+noise[i])
-                        
-                  totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)            
+#                  if (audioOrText == False):
+#                        fp.writeWaveMessageToFile(extractMessage, 'toExtractSong.wav')
+#                                                
+#                        rate,toNoiseSamples = scWave.read('toExtractSong.wav')
+#                        
+#                        mu, sigma = 0, 0.5 # mean and standard deviation
+#                        noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
+#                        noisySamples = []
+#                        
+#                        for i in range(0,len(toNoiseSamples)):
+#                              noisySamples.append(toNoiseSamples[i]+noise[i])
+#                              
+#                        totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)            
                   
                   
       x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']

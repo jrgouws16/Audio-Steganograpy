@@ -19,9 +19,10 @@ allPaths = ['C:/Users/Johan Gouws/Desktop/GenresDatabase/Alternative',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Pop',
             'C:/Users/Johan Gouws/Desktop/GenresDatabase/Rock']
 
-numSongsPerGenre = 10
+numSongsPerGenre = 100
 
-for audioOrText in [False]:
+for audioOrText in [True]:
+      errorSNR  = []
       
       belowSNR  = [0, 0, 0, 0, 0, 0]
       
@@ -136,9 +137,36 @@ for audioOrText in [False]:
                   secretMessage, fileType = dwtEncrypt.dwtEncryptDecode(list(stegoSamples), 512)
                   totalDecodingTime += time.time() - newTime
                   
-                  
+            
                   if (originalMessage != secretMessage):
-                        messageErrors += 1      
+                        messageErrors += 1   
+                        
+                        embed = []
+                        extract = []
+                        
+                        if (audioOrText == True):
+                              for dec in range(0,len(secretMessage)):
+                                    
+                                    binSample = np.binary_repr(ord(secretMessage[dec]),8)
+                                    embed.append(fp.binaryToInt(binSample))
+                                    binSample = np.binary_repr(ord(originalMessage[dec]),8)
+                                    extract.append(fp.binaryToInt(binSample))
+                                          
+                              errorSNR.append(RT.getSNR(embed,extract))
+                        
+                        else:
+                              for dec in range(0,len(secretMessage),2):
+                                    
+                                    binSample = np.binary_repr(ord(secretMessage[dec]),8) + np.binary_repr(ord(secretMessage[dec+1]),8)
+                                    embed.append(fp.binaryToInt(binSample))
+                                    binSample = np.binary_repr(ord(originalMessage[dec]),8) + np.binary_repr(ord(originalMessage[dec+1]),8)
+                                    extract.append(fp.binaryToInt(binSample))
+                                          
+                              errorSNR.append(RT.getSNR(embed,extract))
+                              
+
+#                        
+
                         print(t)
                   
                   SNR = RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] )
@@ -222,24 +250,24 @@ for audioOrText in [False]:
                              belowSNR[5] += 1
                        
                        
-                  binMessage = ''
-                  # Convert the binary stream to a ASCII string
-                  for i in range(0, len(secretMessage)):
-                      binMessage += AES.string2bits(secretMessage[i])[4:]    
-      
-      
-                  fp.writeWaveMessageToFile(binMessage, 'toExtractSong.wav')
-                                          
-                  rate,toNoiseSamples = scWave.read('toExtractSong.wav')
-                  
-                  mu, sigma = 0, 0.5 # mean and standard deviation
-                  noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
-                  noisySamples = []
-                  
-                  for i in range(0,len(toNoiseSamples)):
-                        noisySamples.append(toNoiseSamples[i]+noise[i])
-                        
-                  totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)
+#                  binMessage = ''
+#                  # Convert the binary stream to a ASCII string
+#                  for i in range(0, len(secretMessage)):
+#                      binMessage += AES.string2bits(secretMessage[i])[4:]    
+#      
+#      
+#                  fp.writeWaveMessageToFile(binMessage, 'toExtractSong.wav')
+#                                          
+#                  rate,toNoiseSamples = scWave.read('toExtractSong.wav')
+#                  
+#                  mu, sigma = 0, 0.5 # mean and standard deviation
+#                  noise = np.random.normal(mu, sigma, size=len(toNoiseSamples))
+#                  noisySamples = []
+#                  
+#                  for i in range(0,len(toNoiseSamples)):
+#                        noisySamples.append(toNoiseSamples[i]+noise[i])
+#                        
+#                  totalNoiseSNR += RT.getSNR(noisySamples,originalDecSamples)
 
                        
       x = ['Alternative','Blues','Electronic','Jazz','Pop','Rock']
@@ -414,4 +442,7 @@ for audioOrText in [False]:
             print("--------  Number of errors made with extraction", messageErrors) 
                   
             print("# Extraction Time    ",totalDecodingTime/(numSongsPerGenre * 6), "seconds")   
-print("ENCRYPT SNR",totalNoiseSNR/60)
+                  
+if (len(errorSNR) != 0):
+      print("ENCRYPT SNR",totalNoiseSNR/60)
+      print(sum(errorSNR)/len(errorSNR))
