@@ -99,13 +99,13 @@ def threaded_client(conn, clientNum):
     authenticated = False
     
     while True:
-#        try:
+        try:
             message = sockets.recv_one_message(conn)
-            print(message)   
             if (message == None):
                   break
             
             elif (message.decode() == "Authenticate"):
+                  
                   username = sockets.recv_one_message(conn).decode()
                   password = sockets.recv_one_message(conn).decode()
                   
@@ -118,7 +118,7 @@ def threaded_client(conn, clientNum):
                   if (compUsername == username and compPassword == password and attempts[connections.index(conn)]):
                         authenticated = True
                         sockets.send_one_message(conn, "Authenticated")
-                        
+                        attempts[connections.index(conn)] = 3
                   else:
                         sockets.send_one_message(conn, "Not_authenticated")
                         
@@ -248,7 +248,7 @@ def threaded_client(conn, clientNum):
                         
                         # Encrypt the secret message
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        secretMessage = AES.encryptBinaryString(secretMessage, AESkeyEncode)
+                        secretMessage = AES.encryptBinaryCTRString(secretMessage, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
     
                         secretMessage = list(map(int, list(secretMessage)))
@@ -258,7 +258,7 @@ def threaded_client(conn, clientNum):
                         secretMessage = list(map(str, secretMessage))
                         secretMessage = ''.join(secretMessage)
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        secretMessage = AES.encryptBinaryString(secretMessage, AESkeyEncode)
+                        secretMessage = AES.encryptBinaryCTRString(secretMessage, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         secretMessage = list(map(int, list(secretMessage)))
                     
@@ -360,7 +360,7 @@ def threaded_client(conn, clientNum):
                         # Convert to integer list of bits for embedding
                         message = "".join(intSamples[0])
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkeyEncode)
+                        message = AES.encryptBinaryCTRString(message, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         
                         message = list(map(int, list(message)))
@@ -370,7 +370,7 @@ def threaded_client(conn, clientNum):
                         message = list(map(str, message))
                         message = "".join(message)
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkeyEncode)
+                        message = AES.encryptBinaryCTRString(message, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         message = list(map(int, list(message)))
                         
@@ -486,7 +486,7 @@ def threaded_client(conn, clientNum):
                         # Convert to integer list of bits for embedding
                         message = "".join(intSamples[0])
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkeyEncode)
+                        message = AES.encryptBinaryCTRString(message, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         
                         message = list(map(int, list(message)))
@@ -496,7 +496,7 @@ def threaded_client(conn, clientNum):
                         message = list(map(str, message))
                         message = "".join(message)
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkeyEncode)
+                        message = AES.encryptBinaryCTRString(message, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         message = list(map(int, list(message)))
                         
@@ -612,7 +612,7 @@ def threaded_client(conn, clientNum):
                         # Convert to integer list of bits for embedding
                         message = "".join(intSamples[0])
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkeyEncode)
+                        message = AES.encryptBinaryCTRString(message, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         
                         message = list(map(int, list(message)))
@@ -622,7 +622,7 @@ def threaded_client(conn, clientNum):
                         message = list(map(str, message))
                         message = "".join(message)
                         mainWindow.listWidget_log.addItem("AES encryption Starting: "+ str(addresses[connections.index(conn)][0]))
-                        message = AES.encryptBinaryString(message, AESkeyEncode)
+                        message = AES.encryptBinaryCTRString(message, AESkeyEncode)
                         mainWindow.listWidget_log.addItem("AES encryption completed: "+ str(addresses[connections.index(conn)][0]))
                         message = list(map(int, list(message)))
                         
@@ -860,7 +860,7 @@ def threaded_client(conn, clientNum):
                     
                     # Encrypt the secret message
                     mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                    extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
+                    extractMessage = AES.decryptBinaryCTRString(extractMessage, AESkeyDecode)
               
                     if (AES.bits2string(extractMessage) == "WRONG_KEY"):
                         fileType = '.txt'
@@ -907,7 +907,7 @@ def threaded_client(conn, clientNum):
                     
                     # Encrypt the secret message
                     mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                    extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
+                    extractMessage = AES.decryptBinaryCTRString(extractMessage, AESkeyDecode)
               
                     if (AES.bits2string(extractMessage) == "WRONG_KEY"):
                         fileType = '.txt'
@@ -953,7 +953,7 @@ def threaded_client(conn, clientNum):
                     
                     # Encrypt the secret message
                     mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
-                    extractMessage = AES.decryptBinaryString(extractMessage, AESkeyDecode)
+                    extractMessage = AES.decryptBinaryCTRString(extractMessage, AESkeyDecode)
                     
                     if (AES.bits2string(extractMessage) == "WRONG_KEY"):
                         fileType = '.txt'
@@ -1055,7 +1055,7 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("AES decoding starting: "+ str(addresses[connections.index(conn)][0]))
                   
                   
-                    secretMessage = AES.decryptBinaryString(secretMessage, AESkeyDecode)
+                    secretMessage = AES.decryptBinaryCTRString(secretMessage, AESkeyDecode)
                     if (AES.bits2string(secretMessage) == "WRONG_KEY"):
                           fileType = '.txt'
                           secretMessage = fp.messageToBinary('Unauthorised access.\n Wrong AES password provided')
@@ -1099,10 +1099,10 @@ def threaded_client(conn, clientNum):
                   mainWindow.listWidget_log.addItem("Server receiving command")
                   mainWindow.listWidget_log.addItem("Command -> " + message.decode())
                   
-#        except Exception:
-#            mainWindow.listWidget_log.addItem("[-] Client disconnected")
-#            clientsConnected -= 1
-#            mainWindow.label_num_clients.setText("Clients connected: " + str(clientsConnected))
+        except Exception:
+            mainWindow.listWidget_log.addItem("[-] Client disconnected")
+            clientsConnected -= 1
+            mainWindow.label_num_clients.setText("Clients connected: " + str(clientsConnected))
 
 def acceptClients(param):
       HOST = ""
@@ -1218,8 +1218,11 @@ def authenticateServerAccess():
       pWord = file.read()
       file.close()
             
-      uName = AES.bits2string(AES.decryptBinaryString(uName, mainWindow.lineEdit_username.text()))
-      pWord = AES.bits2string(AES.decryptBinaryString(pWord, mainWindow.lineEdit_password.text()))
+      print(uName, mainWindow.lineEdit_username.text())
+      uName = AES.bits2string(AES.decryptBinaryCBCString(uName, mainWindow.lineEdit_username.text()))
+      pWord = AES.bits2string(AES.decryptBinaryCBCString(pWord, mainWindow.lineEdit_password.text()))
+      print(uName, mainWindow.lineEdit_username.text())
+      print(pWord, mainWindow.lineEdit_password.text())
       
       if (mainWindow.lineEdit_username.text() == uName and mainWindow.lineEdit_password.text() == pWord):
             mainWindow.pushButton_start.setEnabled(True)
@@ -1241,16 +1244,16 @@ def change():
       pWord = file.read()
       file.close()
             
-      uName = AES.bits2string(AES.decryptBinaryString(uName, mainWindow.lineEdit_username.text()))
-      pWord = AES.bits2string(AES.decryptBinaryString(pWord, mainWindow.lineEdit_password.text()))
+      uName = AES.bits2string(AES.decryptBinaryCBCString(uName, mainWindow.lineEdit_username.text()))
+      pWord = AES.bits2string(AES.decryptBinaryCBCString(pWord, mainWindow.lineEdit_password.text()))
       
       if (mainWindow.lineEdit_username.text() == uName and mainWindow.lineEdit_password.text() == pWord):
             
             newName = mainWindow.lineEdit_new_username.text()
             newPwd = mainWindow.lineEdit_new_password.text()
             
-            newName = AES.AESCipher(newName).encrypt(newName)
-            newPwd = AES.AESCipher(newPwd).encrypt(newPwd)
+            newName = AES.AESCipherCBC(newName).encrypt(newName)
+            newPwd = AES.AESCipherCBC(newPwd).encrypt(newPwd)
             
             file = open('UnamePword/username.txt', 'w')
             file.write(AES.string2bits(newName))

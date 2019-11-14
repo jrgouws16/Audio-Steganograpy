@@ -50,8 +50,8 @@ def connectToServer():
         
     elif(len(server) != 0 and authenticatedByServer == False):
         sockets.send_one_message(server[-1], 'Authenticate')
-        sockets.send_one_message(server[-1], AES.encryptBinaryString(AES.string2bits(mainWindow.lineEdit_username.text()), mainWindow.lineEdit_username.text()))
-        sockets.send_one_message(server[-1], AES.encryptBinaryString(AES.string2bits(mainWindow.lineEdit_password.text()), mainWindow.lineEdit_password.text()))
+        sockets.send_one_message(server[-1], AES.encryptBinaryCBCString(AES.string2bits(mainWindow.lineEdit_username.text()), mainWindow.lineEdit_username.text()))
+        sockets.send_one_message(server[-1], AES.encryptBinaryCBCString(AES.string2bits(mainWindow.lineEdit_password.text()), mainWindow.lineEdit_password.text()))
     
     else:
         HOST = mainWindow.lineEdit_server_ip.text()
@@ -65,8 +65,8 @@ def connectToServer():
             
               # Send the encode command to the server
               sockets.send_one_message(server[-1], 'Authenticate')
-              sockets.send_one_message(server[-1], AES.encryptBinaryString(AES.string2bits(mainWindow.lineEdit_username.text()), mainWindow.lineEdit_username.text()))
-              sockets.send_one_message(server[-1], AES.encryptBinaryString(AES.string2bits(mainWindow.lineEdit_password.text()), mainWindow.lineEdit_password.text()))
+              sockets.send_one_message(server[-1], AES.encryptBinaryCBCString(AES.string2bits(mainWindow.lineEdit_username.text()), mainWindow.lineEdit_username.text()))
+              sockets.send_one_message(server[-1], AES.encryptBinaryCBCString(AES.string2bits(mainWindow.lineEdit_password.text()), mainWindow.lineEdit_password.text()))
             
               mainWindow.label_server_status.setText("Status: Connected")
               connectedToServer = True

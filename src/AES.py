@@ -20,6 +20,7 @@ Created on Mon Sep 30 23:18:51 2019
 from hashlib import md5
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
+from base64 import b64encode, b64decode
 import numpy as np
 
 def bits2string(b=None):
@@ -30,7 +31,7 @@ def string2bits(s=''):
     return "".join([bin(ord(x))[2:].zfill(8) for x in s])
 
 
-class AESCipher:
+class AESCipherCBC:
     
     def __init__(self, key):
         self.key = ''
@@ -68,20 +69,75 @@ class AESCipher:
                return pt.decode()
           except Exception:
                return "WRONG_KEY"
+    
+
+class AESCipherCTR:
+    
+    def __init__(self, key):
+        self.key = ''
+        for i in (md5(key.encode('utf8')).digest()):
+              self.key += bits2string(np.binary_repr(i,8))
+        self.key = string2bits(self.key)
+        self.key = bitstring_to_bytes(self.key)
+        self.cipher = None  
+
+    def encrypt(self, plainText):
+          
+          
+          
+          self.cipher = AES.new(self.key, AES.MODE_CTR)
+          nonce = b64encode(self.cipher.nonce).decode('utf-8')
+          plainText = plainText.encode()
+          encrypted_bytes = self.cipher.encrypt(plainText)
+          encrypted = b64encode(encrypted_bytes).decode('utf-8')
+          
+          encrypted = nonce + encrypted
+          return encrypted
+
+    def decrypt(self, encrypted):
+          
+          
+
+            
+          try:
+               
+               nonce = encrypted[0:12].encode()
+               nonce = b64decode(nonce)
+               encrypted = b64decode(encrypted[12:])
+               cipher = AES.new(self.key, AES.MODE_CTR, nonce=nonce)
+               message = cipher.decrypt(encrypted)
+               return message.decode()
+          except Exception:
+               return "WRONG_KEY"
 
 
-def encryptBinaryString(binaryString, key):
+def encryptBinaryCTRString(binaryString, key):
     plainText = bits2string(binaryString)
-    encrypted = AESCipher(key).encrypt(plainText)
+    encrypted = AESCipherCTR(key).encrypt(plainText)
     binaryEncrypted = string2bits(encrypted)
     
     return binaryEncrypted
 
-def decryptBinaryString(binaryString, key):
+def decryptBinaryCTRString(binaryString, key):
     
     encrypted = bits2string(binaryString)
     
-    decrypted = AESCipher(key).decrypt(encrypted)
+    decrypted = AESCipherCTR(key).decrypt(encrypted)
+    binaryDecrypted = string2bits(decrypted)
+    return binaryDecrypted
+
+def encryptBinaryCBCString(binaryString, key):
+    plainText = bits2string(binaryString)
+    encrypted = AESCipherCBC(key).encrypt(plainText)
+    binaryEncrypted = string2bits(encrypted)
+    
+    return binaryEncrypted
+
+def decryptBinaryCBCString(binaryString, key):
+    
+    encrypted = bits2string(binaryString)
+    
+    decrypted = AESCipherCBC(key).decrypt(encrypted)
     binaryDecrypted = string2bits(decrypted)
     return binaryDecrypted
 
