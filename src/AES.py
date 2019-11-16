@@ -141,3 +141,11 @@ def decryptBinaryCBCString(binaryString, key):
     binaryDecrypted = string2bits(decrypted)
     return binaryDecrypted
 
+plainObj = open('Media/text.txt', 'r')
+plain = plainObj.read()
+plainObj.close
+
+cipher = AESCipherCTR('AES_KEY').encrypt(plain)
+cipherO = open('Media/cipher.txt', 'w')
+cipherO.write(cipher)
+cipherO.close()

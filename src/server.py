@@ -67,13 +67,14 @@ def GA_encoding(coverSamples, secretMessage, key, frameRate, fileType):
                 stegoSamples[i] = 32767
         
         # Get the characteristics of the stego file
-        infoMessage = "Embedded " + str(round(bitsInserted/samplesUsed, 5)) + " bits per sample on average."
-        infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
-        infoMessage += ".\nCapacity of " + str(RT.getCapacity(secretMessage, samplesUsed, frameRate)) + " kbps."       
+        infoMessage = "Capacity: " + str(round(bitsInserted/samplesUsed, 2)) + " bits per sample."
+        infoMessage += "\nSNR: " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
+        SNR = str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
+        
         # Show the results of the stego quality of the stego file
         mainWindow.listWidget_log.addItem(infoMessage)
                 
-        return stegoSamples, capacityWarning, infoMessage
+        return stegoSamples, capacityWarning, infoMessage, SNR
     
 # Function to extract the message from the stego file making use of 
 # Genetic Algorithm
@@ -94,7 +95,6 @@ def threaded_client(conn, clientNum):
     global clientsConnected
     global attempts
     
-    mainWindow.listWidget_log.addItem("Client thread created successfully")  
     fileType = ''
     authenticated = False
     
@@ -177,7 +177,6 @@ def threaded_client(conn, clientNum):
                 mainWindow.listWidget_log.addItem("Client " + str(addresses[connections.index(conn)][0]) + " requested encoding.")
                 
                 # Receive the audio cover file
-                mainWindow.listWidget_log.addItem("Incoming cover: " + str(addresses[connections.index(conn)][0]) )
                 song = open(str(clientNum) + ".wav", "wb")
                 data = sockets.recv_one_message(conn)
                 song.write(data)
@@ -187,8 +186,6 @@ def threaded_client(conn, clientNum):
                 # Receive the message file
                 fileType = sockets.recv_one_message(conn)
                 fileType = fileType.decode()
-                                
-                mainWindow.listWidget_log.addItem("Incomming message: " + str(addresses[connections.index(conn)][0]))
                 
                 if (fileType == ".wav"):
                     secretMessageObj = open(str(clientNum) + "MSG" + ".wav", "wb")
@@ -218,7 +215,7 @@ def threaded_client(conn, clientNum):
         
                     # Get the string representation of the key in ASCII
                     keyString = sockets.recv_one_message(conn)
-                    mainWindow.listWidget_log.addItem("Key: " + keyString.decode() + ": " + str(addresses[connections.index(conn)][0]))
+                    mainWindow.listWidget_log.addItem("GA Key: " + keyString.decode() + ": " + str(addresses[connections.index(conn)][0]))
                     
                     # Receive the recipients to whom to send to
                     # CP = Client and Peer
@@ -266,73 +263,83 @@ def threaded_client(conn, clientNum):
                     binaryKey = fp.messageToBinary(keyString.decode())
                     binaryKey = binaryKey * int((len(secretMessage) + float(len(secretMessage))/len(binaryKey)) )
     
-                    stegoSamples, capacityWarning, infoMessage = GA_encoding(coverSamples, secretMessage, binaryKey, rate, fileType)
-                    sockets.send_one_message(conn, "Stats")
-                    sockets.send_one_message(conn, infoMessage)
-
+                    stegoSamples, capacityWarning, infoMessage, ifLowSNR = GA_encoding(coverSamples, secretMessage, binaryKey, rate, fileType)
                     
-                    mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
-                    
-                    # Write to the stego audio file in wave format and close the song
-                    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/ 32768.0
-                    scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
-                    
-        
-                    # Send to the requested receiver            
-                    mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
-                    f_send = str(clientNum) + "_StegoFile" + ".wav"
-        
-                    # Get the connections to send to
-                    connToSendTo = []
-                    
-                    if (toWhom == "P"):
-                        howMuch = sockets.recv_one_message(conn)
-                        howMuch = int(howMuch)
-                        
-                        for i in range(howMuch):
-                            ip = sockets.recv_one_message(conn)
-                            
-                            for j in range(0, len(addresses)):
-                                if (addresses[j][0] == ip.decode()):
-                                    connToSendTo.append(connections[j])
-                        
-                    elif (toWhom == "C"):
-                        connToSendTo.append(conn)
-                        
-                    elif (toWhom == "CP"):
-                        connToSendTo.append(conn)
-                        
-                        howMuch = sockets.recv_one_message(conn)
-                        howMuch = int(howMuch)
-                        
-                        for i in range(howMuch):
-                            ip = sockets.recv_one_message(conn)
-                            
-                            for j in range(0, len(addresses)):
-                                if (addresses[j][0] == ip.decode()):
-                                    connToSendTo.append(connections[j])
-                                      
-                    clients = "Client targets: \n"
-                    for i in connToSendTo:
-                        clients += "--->" + str(addresses[connections.index(i)][0]) + "\n"
-                    
-                    mainWindow.listWidget_log.addItem(clients)
-                                    
-                    for i in connToSendTo:
-                        
-                        if (capacityWarning == True):
-                                sockets.send_one_message(i, 'WARN')  
-                                                          
-                        with open(f_send, "rb") as f:
-                            data = f.read()
-                            sockets.send_one_message(i, "RECFILE")
-                            sockets.send_one_message(i, '.wav')
-                            sockets.send_one_file(i, data)
-                            f.close()
-                    mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
-                        
-                    sockets.send_one_message(conn, "SENT_SUCCESS")
-    
+                    if (float(ifLowSNR) < 20):
+                          sockets.send_one_message(conn, "SNR_WARN")
+                          sockets.send_one_message(conn, str(ifLowSNR))
+                          
+                    else:                     
+                          sockets.send_one_message(conn, "Stats")
+                          sockets.send_one_message(conn, infoMessage)
+      
+                          
+                          mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
+                          
+                          # Write to the stego audio file in wave format and close the song
+                          stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/ 32768.0
+                          scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
+                          
+              
+                          # Send to the requested receiver            
+                          mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
+                          f_send = str(clientNum) + "_StegoFile" + ".wav"
+              
+                          # Get the connections to send to
+                          connToSendTo = []
+                          
+                          if (toWhom == "P"):
+                              howMuch = sockets.recv_one_message(conn)
+                              howMuch = int(howMuch)
+                              
+                              for i in range(howMuch):
+                                  ip = sockets.recv_one_message(conn)
+                                  
+                                  for j in range(0, len(addresses)):
+                                      if (addresses[j][0] == ip.decode()):
+                                          connToSendTo.append(connections[j])
+                              
+                          elif (toWhom == "C"):
+                              connToSendTo.append(conn)
+                              
+                          elif (toWhom == "CP"):
+                              connToSendTo.append(conn)
+                              
+                              howMuch = sockets.recv_one_message(conn)
+                              howMuch = int(howMuch)
+                              
+                              for i in range(howMuch):
+                                  ip = sockets.recv_one_message(conn)
+                                  
+                                  for j in range(0, len(addresses)):
+                                      if (addresses[j][0] == ip.decode()):
+                                          connToSendTo.append(connections[j])
+                                            
+                          clients = "Client targets: \n"
+                          for i in range(0, len(connToSendTo)):
+                              if (i != len(connToSendTo) - 1):  
+                                    clients += "--->" + str(addresses[connections.index(connToSendTo[i])][0]) + "\n"
+                              else:
+                                    clients += "--->" + str(addresses[connections.index(connToSendTo[i])][0])
+                          
+                          mainWindow.listWidget_log.addItem(clients)
+                                          
+                          for i in connToSendTo:
+                              
+                              if (capacityWarning == True):
+                                      sockets.send_one_message(i, 'WARN')  
+                                                                
+                              with open(f_send, "rb") as f:
+                                  data = f.read()
+                                  sockets.send_one_message(i, "RECFILE")
+                                  sockets.send_one_message(i, '.wav')
+                                  sockets.send_one_file(i, data)
+                                  f.close()
+                          
+                          mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
+                              
+                          sockets.send_one_message(conn, "SENT_SUCCESS")
+          
                 # The DWT OBH was selected                
                 elif (method.decode() == "DWT"):
                     OBH = int(sockets.recv_one_message(conn).decode())
@@ -385,77 +392,85 @@ def threaded_client(conn, clientNum):
     
       
                     # Get the characteristics of the stego file
-                    infoMessage = "Embedded " + str(round(len(message)/samplesUsed, 5)) + " bits per sample on average."
-                    infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
-                    infoMessage += ".\nCapacity of " + str(RT.getCapacity(message, samplesUsed, rate)) + " kbps."       
-                    sockets.send_one_message(conn, "Stats")
-                    sockets.send_one_message(conn, infoMessage)
-      
-      
-                    # Write to the stego audio file in wave format and close the song
-                    mainWindow.listWidget_log.addItem("Writing stego to file")
-                    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
-                    scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
-                    mainWindow.listWidget_log.addItem("Done writing stego to file")
-        
-                    # Send to the requested receiver            
-                    mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
-                    f_send = str(clientNum) + "_StegoFile" + ".wav"
-        
-                    # Get the connections to send to
-                    connToSendTo = []
+                    infoMessage = "Capacity: " + str(round(len(message)/samplesUsed, 2)) + " bits per sample."
+                    infoMessage += "\nSNR: " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
                     
-                    if (toWhom == "P"):
-                        howMuch = sockets.recv_one_message(conn)
-                        howMuch = int(howMuch)
-                        
-                        for i in range(howMuch):
-                            ip = sockets.recv_one_message(conn)
-                            
-                            for j in range(0, len(addresses)):
-                                if (addresses[j][0] == ip.decode()):
-                                    connToSendTo.append(connections[j])
-                        
-                    elif (toWhom == "C"):
-                        connToSendTo.append(conn)
-                        
-                    elif (toWhom == "CP"):
-                        connToSendTo.append(conn)
-                        
-                        howMuch = sockets.recv_one_message(conn)
-                        howMuch = int(howMuch)
-                        
-                        for i in range(howMuch):
-                            ip = sockets.recv_one_message(conn)
-                            
-                            for j in range(0, len(addresses)):
-                                if (addresses[j][0] == ip.decode()):
-                                    connToSendTo.append(connections[j])
-                                         
-                    clients = "Client targets: \n"
-                    for i in connToSendTo:
-                        clients += "--->" + str(addresses[connections.index(i)][0]) + "\n"
-                    
-                    mainWindow.listWidget_log.addItem(clients)
-                                    
-                    for i in connToSendTo:
-                        
-                        if (capacityWarning == True):
-                                sockets.send_one_message(i, 'WARN')  
-                                continue
+                    if (RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ) < 20):
+                          sockets.send_one_message(conn, "SNR_WARN")
+                          sockets.send_one_message(conn, str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
+                                     
+                    else:
+                          sockets.send_one_message(conn, "Stats")
+                          sockets.send_one_message(conn, infoMessage)
+            
+            
+                          # Write to the stego audio file in wave format and close the song
+                          mainWindow.listWidget_log.addItem("Writing stego to file")
+                          stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
+                          scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
+                          mainWindow.listWidget_log.addItem("Done writing stego to file")
+              
+                          # Send to the requested receiver            
+                          mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
+                          f_send = str(clientNum) + "_StegoFile" + ".wav"
+              
+                          # Get the connections to send to
+                          connToSendTo = []
                           
-                        with open(f_send, "rb") as f:
-                            data = f.read()
-                            sockets.send_one_message(i, "RECFILE")
-                            sockets.send_one_message(i, '.wav')
-                            sockets.send_one_file(i, data)
-                            f.close()
-                        
-                    mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
-    
-                    sockets.send_one_message(conn, "SENT_SUCCESS")
-                    
-                    
+                          if (toWhom == "P"):
+                              howMuch = sockets.recv_one_message(conn)
+                              howMuch = int(howMuch)
+                              
+                              for i in range(howMuch):
+                                  ip = sockets.recv_one_message(conn)
+                                  
+                                  for j in range(0, len(addresses)):
+                                      if (addresses[j][0] == ip.decode()):
+                                          connToSendTo.append(connections[j])
+                              
+                          elif (toWhom == "C"):
+                              connToSendTo.append(conn)
+                              
+                          elif (toWhom == "CP"):
+                              connToSendTo.append(conn)
+                              
+                              howMuch = sockets.recv_one_message(conn)
+                              howMuch = int(howMuch)
+                              
+                              for i in range(howMuch):
+                                  ip = sockets.recv_one_message(conn)
+                                  
+                                  for j in range(0, len(addresses)):
+                                      if (addresses[j][0] == ip.decode()):
+                                          connToSendTo.append(connections[j])
+                                               
+                          clients = "Client targets: \n"
+                          for i in range(0, len(connToSendTo)):
+                              if (i != len(connToSendTo) - 1):  
+                                    clients += "--->" + str(addresses[connections.index(connToSendTo[i])][0]) + "\n"
+                              else:
+                                    clients += "--->" + str(addresses[connections.index(connToSendTo[i])][0])
+                          
+                          mainWindow.listWidget_log.addItem(clients)
+                                          
+                          for i in connToSendTo:
+                              
+                              if (capacityWarning == True):
+                                      sockets.send_one_message(i, 'WARN')  
+                                      continue
+                                
+                              with open(f_send, "rb") as f:
+                                  data = f.read()
+                                  sockets.send_one_message(i, "RECFILE")
+                                  sockets.send_one_message(i, '.wav')
+                                  sockets.send_one_file(i, data)
+                                  f.close()
+                              
+                          mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
+          
+                          sockets.send_one_message(conn, "SENT_SUCCESS")
+                          
+                          
                     
                     
                     
@@ -510,76 +525,85 @@ def threaded_client(conn, clientNum):
     
       
                     # Get the characteristics of the stego file
-                    infoMessage = "Embedded " + str(round(len(message)/samplesUsed, 5)) + " bits per sample on average."
-                    infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
-                    infoMessage += ".\nCapacity of " + str(RT.getCapacity(message, samplesUsed, rate)) + " kbps."       
-                    sockets.send_one_message(conn, "Stats")
-                    sockets.send_one_message(conn, infoMessage)
-      
-      
-      
-                    # Write to the stego audio file in wave format and close the song
-                    mainWindow.listWidget_log.addItem("Writing stego to file")
-                    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
-                    scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
-                    mainWindow.listWidget_log.addItem("Done writing stego to file")
-        
-                    # Send to the requested receiver            
-                    mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
-                    f_send = str(clientNum) + "_StegoFile" + ".wav"
-        
-                    # Get the connections to send to
-                    connToSendTo = []
+                    infoMessage = "Capacity:  " + str(round(len(message)/samplesUsed, 2)) + " bits per sample."
+                    infoMessage += "\nSNR: " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
                     
-                    if (toWhom == "P"):
-                        howMuch = sockets.recv_one_message(conn)
-                        howMuch = int(howMuch)
-                        
-                        for i in range(howMuch):
-                            ip = sockets.recv_one_message(conn)
-                            
-                            for j in range(0, len(addresses)):
-                                if (addresses[j][0] == ip.decode()):
-                                    connToSendTo.append(connections[j])
-                        
-                    elif (toWhom == "C"):
-                        connToSendTo.append(conn)
-                        
-                    elif (toWhom == "CP"):
-                        connToSendTo.append(conn)
-                        
-                        howMuch = sockets.recv_one_message(conn)
-                        howMuch = int(howMuch)
-                        
-                        for i in range(howMuch):
-                            ip = sockets.recv_one_message(conn)
-                            
-                            for j in range(0, len(addresses)):
-                                if (addresses[j][0] == ip.decode()):
-                                    connToSendTo.append(connections[j])
-                                         
-                    clients = "Client targets: \n"
-                    for i in connToSendTo:
-                        clients += "--->" + str(addresses[connections.index(i)][0]) + "\n"
                     
-                    mainWindow.listWidget_log.addItem(clients)
-                                    
-                    for i in connToSendTo:
+                    if (RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ) < 20):
+                          sockets.send_one_message(conn, "SNR_WARN")
+                          sockets.send_one_message(conn, str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
+                    else:
                           
-                          if (capacityWarning == True):
-                                sockets.send_one_message(i, 'WARN')  
-                                continue
-                        
-                          with open(f_send, "rb") as f:
-                            data = f.read()
-                            sockets.send_one_message(i, "RECFILE")
-                            sockets.send_one_message(i, '.wav')
-                            sockets.send_one_file(i, data)
-                            f.close()
-                        
-                    mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
-    
-                    sockets.send_one_message(conn, "SENT_SUCCESS")    
+                          sockets.send_one_message(conn, "Stats")
+                          sockets.send_one_message(conn, infoMessage)
+            
+            
+            
+                          # Write to the stego audio file in wave format and close the song
+                          mainWindow.listWidget_log.addItem("Writing stego to file")
+                          stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
+                          scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
+                          mainWindow.listWidget_log.addItem("Done writing stego to file")
+              
+                          # Send to the requested receiver            
+                          mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
+                          f_send = str(clientNum) + "_StegoFile" + ".wav"
+              
+                          # Get the connections to send to
+                          connToSendTo = []
+                          
+                          if (toWhom == "P"):
+                              howMuch = sockets.recv_one_message(conn)
+                              howMuch = int(howMuch)
+                              
+                              for i in range(howMuch):
+                                  ip = sockets.recv_one_message(conn)
+                                  
+                                  for j in range(0, len(addresses)):
+                                      if (addresses[j][0] == ip.decode()):
+                                          connToSendTo.append(connections[j])
+                              
+                          elif (toWhom == "C"):
+                              connToSendTo.append(conn)
+                              
+                          elif (toWhom == "CP"):
+                              connToSendTo.append(conn)
+                              
+                              howMuch = sockets.recv_one_message(conn)
+                              howMuch = int(howMuch)
+                              
+                              for i in range(howMuch):
+                                  ip = sockets.recv_one_message(conn)
+                                  
+                                  for j in range(0, len(addresses)):
+                                      if (addresses[j][0] == ip.decode()):
+                                          connToSendTo.append(connections[j])
+                                               
+                          clients = "Client targets: \n"
+                          for i in range(0, len(connToSendTo)):
+                              if (i != len(connToSendTo) - 1):  
+                                    clients += "--->" + str(addresses[connections.index(connToSendTo[i])][0]) + "\n"
+                              else:
+                                    clients += "--->" + str(addresses[connections.index(connToSendTo[i])][0])
+                          
+                          mainWindow.listWidget_log.addItem(clients)
+                                          
+                          for i in connToSendTo:
+                                
+                                if (capacityWarning == True):
+                                      sockets.send_one_message(i, 'WARN')  
+                                      continue
+                              
+                                with open(f_send, "rb") as f:
+                                  data = f.read()
+                                  sockets.send_one_message(i, "RECFILE")
+                                  sockets.send_one_message(i, '.wav')
+                                  sockets.send_one_file(i, data)
+                                  f.close()
+                              
+                          mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
+          
+                          sockets.send_one_message(conn, "SENT_SUCCESS")    
                     
                     
                     
@@ -634,75 +658,83 @@ def threaded_client(conn, clientNum):
                     
                     
                     # Get the characteristics of the stego file
-                    infoMessage = "Embedded " + str(round(len(message)/samplesUsed, 5)) + " bits per sample on average."
-                    infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
-                    infoMessage += ".\nCapacity of " + str(RT.getCapacity(message, samplesUsed, rate)) + " kbps."       
-                    sockets.send_one_message(conn, "Stats")
-                    sockets.send_one_message(conn, infoMessage)
-      
-    
-                    # Write to the stego audio file in wave format and close the song
-                    mainWindow.listWidget_log.addItem("Writing stego to file")
-                    stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
-                    scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
-                    mainWindow.listWidget_log.addItem("Done writing stego to file")
-        
-                    # Send to the requested receiver            
-                    mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
-                    f_send = str(clientNum) + "_StegoFile" + ".wav"
-        
-                    # Get the connections to send to
-                    connToSendTo = []
+                    infoMessage = "Capacity: " + str(round(len(message)/samplesUsed, 2)) + " bits per sample."
+                    infoMessage += "\nSNR: " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
                     
-                    if (toWhom == "P"):
-                        howMuch = sockets.recv_one_message(conn)
-                        howMuch = int(howMuch)
+                    if (RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ) < 20):
+                          sockets.send_one_message(conn, "SNR_WARN")
+                          sockets.send_one_message(conn, str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
                         
-                        for i in range(howMuch):
-                            ip = sockets.recv_one_message(conn)
-                            
-                            for j in range(0, len(addresses)):
-                                if (addresses[j][0] == ip.decode()):
-                                    connToSendTo.append(connections[j])
-                        
-                    elif (toWhom == "C"):
-                        connToSendTo.append(conn)
-                        
-                    elif (toWhom == "CP"):
-                        connToSendTo.append(conn)
-                        
-                        howMuch = sockets.recv_one_message(conn)
-                        howMuch = int(howMuch)
-                        
-                        for i in range(howMuch):
-                            ip = sockets.recv_one_message(conn)
-                            
-                            for j in range(0, len(addresses)):
-                                if (addresses[j][0] == ip.decode()):
-                                    connToSendTo.append(connections[j])
-                                         
-                    clients = "Client targets: \n"
-                    for i in connToSendTo:
-                        clients += "--->" + str(addresses[connections.index(i)][0]) + "\n"
-                    
-                    mainWindow.listWidget_log.addItem(clients)
-                                    
-                    for i in connToSendTo:
-                        
-                          if (capacityWarning == True):
-                                sockets.send_one_message(i, 'WARN')  
-                                continue
-                        
-                          with open(f_send, "rb") as f:
-                            data = f.read()
-                            sockets.send_one_message(i, "RECFILE")
-                            sockets.send_one_message(i, '.wav')
-                            sockets.send_one_file(i, data)
-                            f.close()
-                        
-                    mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
-    
-                    sockets.send_one_message(conn, "SENT_SUCCESS")
+                    else:
+                          sockets.send_one_message(conn, "Stats")
+                          sockets.send_one_message(conn, infoMessage)
+            
+          
+                          # Write to the stego audio file in wave format and close the song
+                          mainWindow.listWidget_log.addItem("Writing stego to file")
+                          stegoSamples = np.asarray(stegoSamples, dtype=np.float32, order = 'C')/32768.0
+                          scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
+                          mainWindow.listWidget_log.addItem("Done writing stego to file")
+              
+                          # Send to the requested receiver            
+                          mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
+                          f_send = str(clientNum) + "_StegoFile" + ".wav"
+              
+                          # Get the connections to send to
+                          connToSendTo = []
+                          
+                          if (toWhom == "P"):
+                              howMuch = sockets.recv_one_message(conn)
+                              howMuch = int(howMuch)
+                              
+                              for i in range(howMuch):
+                                  ip = sockets.recv_one_message(conn)
+                                  
+                                  for j in range(0, len(addresses)):
+                                      if (addresses[j][0] == ip.decode()):
+                                          connToSendTo.append(connections[j])
+                              
+                          elif (toWhom == "C"):
+                              connToSendTo.append(conn)
+                              
+                          elif (toWhom == "CP"):
+                              connToSendTo.append(conn)
+                              
+                              howMuch = sockets.recv_one_message(conn)
+                              howMuch = int(howMuch)
+                              
+                              for i in range(howMuch):
+                                  ip = sockets.recv_one_message(conn)
+                                  
+                                  for j in range(0, len(addresses)):
+                                      if (addresses[j][0] == ip.decode()):
+                                          connToSendTo.append(connections[j])
+                                               
+                          clients = "Client targets: \n"
+                          for i in range(0, len(connToSendTo)):
+                              if (i != len(connToSendTo) - 1):  
+                                    clients += "--->" + str(addresses[connections.index(connToSendTo[i])][0]) + "\n"
+                              else:
+                                    clients += "--->" + str(addresses[connections.index(connToSendTo[i])][0])
+                          
+                          mainWindow.listWidget_log.addItem(clients)
+                                          
+                          for i in connToSendTo:
+                              
+                                if (capacityWarning == True):
+                                      sockets.send_one_message(i, 'WARN')  
+                                      continue
+                              
+                                with open(f_send, "rb") as f:
+                                  data = f.read()
+                                  sockets.send_one_message(i, "RECFILE")
+                                  sockets.send_one_message(i, '.wav')
+                                  sockets.send_one_file(i, data)
+                                  f.close()
+                              
+                          mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
+          
+                          sockets.send_one_message(conn, "SENT_SUCCESS")
     
     
                 elif (method.decode() == "DWT_encode"):
@@ -750,77 +782,85 @@ def threaded_client(conn, clientNum):
                     mainWindow.listWidget_log.addItem("Embedding completed: " + str(addresses[connections.index(conn)][0]))
                     
                     # Get the characteristics of the stego file
-                    infoMessage = "Embedded " + str(round(len(message)/samplesUsed, 5)) + " bits per sample on average."
-                    infoMessage += "\nSNR of " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
-                    infoMessage += ".\nCapacity of " + str(RT.getCapacity(message*8, samplesUsed, rate)) + " kbps."       
-                    sockets.send_one_message(conn, "Stats")
-                    sockets.send_one_message(conn, infoMessage)
-    
-                    # Write to the stego audio file in wave format and close the song
-                    mainWindow.listWidget_log.addItem("Writing stego to file")
-
-                    stegoSamples = np.asarray(stegoSamples)
-                    stegoSamples = stegoSamples.astype(np.float32, order='C') / 32768.0
+                    infoMessage = "Capacity: " + str(round(len(message)/samplesUsed, 2)) + " bits per sample."
+                    infoMessage += "\nSNR: " + str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2))
                     
-                    scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
-                    mainWindow.listWidget_log.addItem("Done writing stego to file")
-        
-                    # Send to the requested receiver            
-                    mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
-                    f_send = str(clientNum) + "_StegoFile" + ".wav"
-        
-                    # Get the connections to send to
-                    connToSendTo = []
+                    if (RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ) < 20):
+                          sockets.send_one_message(conn, "SNR_WARN")
+                          sockets.send_one_message(conn, str(round(RT.getSNR(originalCoverSamples[0:samplesUsed], stegoSamples[0:samplesUsed] ), 2)))
                     
-                    if (toWhom == "P"):
-                        howMuch = sockets.recv_one_message(conn)
-                        howMuch = int(howMuch)
-                        
-                        for i in range(howMuch):
-                            ip = sockets.recv_one_message(conn)
-                            
-                            for j in range(0, len(addresses)):
-                                if (addresses[j][0] == ip.decode()):
-                                    connToSendTo.append(connections[j])
-                        
-                    elif (toWhom == "C"):
-                        connToSendTo.append(conn)
-                        
-                    elif (toWhom == "CP"):
-                        connToSendTo.append(conn)
-                        
-                        howMuch = sockets.recv_one_message(conn)
-                        howMuch = int(howMuch)
-                        
-                        for i in range(howMuch):
-                            ip = sockets.recv_one_message(conn)
-                            
-                            for j in range(0, len(addresses)):
-                                if (addresses[j][0] == ip.decode()):
-                                    connToSendTo.append(connections[j])
-                                         
-                    clients = "Client targets: \n"
-                    for i in connToSendTo:
-                        clients += "--->" + str(addresses[connections.index(i)][0]) + "\n"
-                    
-                    mainWindow.listWidget_log.addItem(clients)
-                                    
-                    for i in connToSendTo:
-                        
-                        if (capacityWarning == True):
-                                sockets.send_one_message(i, 'WARN')  
-                                continue
+                    else:
+                          sockets.send_one_message(conn, "Stats")
+                          sockets.send_one_message(conn, infoMessage)
+          
+                          # Write to the stego audio file in wave format and close the song
+                          mainWindow.listWidget_log.addItem("Writing stego to file")
+      
+                          stegoSamples = np.asarray(stegoSamples)
+                          stegoSamples = stegoSamples.astype(np.float32, order='C') / 32768.0
                           
-                        with open(f_send, "rb") as f:
-                            data = f.read()
-                            sockets.send_one_message(i, "RECFILE")
-                            sockets.send_one_message(i, '.wav')
-                            sockets.send_one_file(i, data)
-                            f.close()
-                        
-                    mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
-    
-                    sockets.send_one_message(conn, "SENT_SUCCESS")
+                          scWave.write(str(clientNum) + "_StegoFile" + ".wav", rate, stegoSamples)
+                          mainWindow.listWidget_log.addItem("Done writing stego to file")
+              
+                          # Send to the requested receiver            
+                          mainWindow.listWidget_log.addItem("Sending to clients: " + str(addresses[connections.index(conn)][0]))
+                          f_send = str(clientNum) + "_StegoFile" + ".wav"
+              
+                          # Get the connections to send to
+                          connToSendTo = []
+                          
+                          if (toWhom == "P"):
+                              howMuch = sockets.recv_one_message(conn)
+                              howMuch = int(howMuch)
+                              
+                              for i in range(howMuch):
+                                  ip = sockets.recv_one_message(conn)
+                                  
+                                  for j in range(0, len(addresses)):
+                                      if (addresses[j][0] == ip.decode()):
+                                          connToSendTo.append(connections[j])
+                              
+                          elif (toWhom == "C"):
+                              connToSendTo.append(conn)
+                              
+                          elif (toWhom == "CP"):
+                              connToSendTo.append(conn)
+                              
+                              howMuch = sockets.recv_one_message(conn)
+                              howMuch = int(howMuch)
+                              
+                              for i in range(howMuch):
+                                  ip = sockets.recv_one_message(conn)
+                                  
+                                  for j in range(0, len(addresses)):
+                                      if (addresses[j][0] == ip.decode()):
+                                          connToSendTo.append(connections[j])
+                                               
+                          clients = "Client targets: \n"
+                          for i in range(0, len(connToSendTo)):
+                              if (i != len(connToSendTo) - 1):  
+                                    clients += "--->" + str(addresses[connections.index(connToSendTo[i])][0]) + "\n"
+                              else:
+                                    clients += "--->" + str(addresses[connections.index(connToSendTo[i])][0])
+                          
+                          mainWindow.listWidget_log.addItem(clients)
+                                          
+                          for i in connToSendTo:
+                              
+                              if (capacityWarning == True):
+                                      sockets.send_one_message(i, 'WARN')  
+                                      continue
+                                
+                              with open(f_send, "rb") as f:
+                                  data = f.read()
+                                  sockets.send_one_message(i, "RECFILE")
+                                  sockets.send_one_message(i, '.wav')
+                                  sockets.send_one_file(i, data)
+                                  f.close()
+                              
+                          mainWindow.listWidget_log.addItem("All clients received stego: " + str(addresses[connections.index(conn)][0]))
+          
+                          sockets.send_one_message(conn, "SENT_SUCCESS")
                     
                 else:
                     mainWindow.listWidget_log.addItem("Invalid Encoding Method selected.")
@@ -1036,7 +1076,7 @@ def threaded_client(conn, clientNum):
                 elif(method.decode() == "GA"):
                     keyString = sockets.recv_one_message(conn)
                     keyString = keyString.decode()
-                    mainWindow.listWidget_log.addItem("Key: " + keyString + ": " + str(addresses[connections.index(conn)][0]))
+                    mainWindow.listWidget_log.addItem("GA Key: " + keyString + ": " + str(addresses[connections.index(conn)][0]))
     
                     binaryKey = fp.messageToBinary(keyString)
                     
@@ -1218,11 +1258,8 @@ def authenticateServerAccess():
       pWord = file.read()
       file.close()
             
-      print(uName, mainWindow.lineEdit_username.text())
       uName = AES.bits2string(AES.decryptBinaryCBCString(uName, mainWindow.lineEdit_username.text()))
       pWord = AES.bits2string(AES.decryptBinaryCBCString(pWord, mainWindow.lineEdit_password.text()))
-      print(uName, mainWindow.lineEdit_username.text())
-      print(pWord, mainWindow.lineEdit_password.text())
       
       if (mainWindow.lineEdit_username.text() == uName and mainWindow.lineEdit_password.text() == pWord):
             mainWindow.pushButton_start.setEnabled(True)

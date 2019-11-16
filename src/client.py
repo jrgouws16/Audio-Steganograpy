@@ -32,6 +32,8 @@ authenticated.info = 'Username and password entered correctly.'
 notAuthenticated = SS.showInfoSigSlot()
 notAuthenticated.title = 'Authentication unsuccessful'
 notAuthenticated.info = 'Username and password not entered correctly.'
+SNR_warning = SS.showInfoSigSlot()
+SNR_warning.title = 'Transparency warning'
 
 embeddedStats = SS.showInfoSigSlot()
 errorMsg = SS.showInfoSigSlot()
@@ -54,12 +56,11 @@ def connectToServer():
         sockets.send_one_message(server[-1], AES.encryptBinaryCBCString(AES.string2bits(mainWindow.lineEdit_password.text()), mainWindow.lineEdit_password.text()))
     
     else:
-        HOST = mainWindow.lineEdit_server_ip.text()
-        PORT = int(mainWindow.lineEdit_server_port.text())
-        
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         try:
+              HOST = mainWindow.lineEdit_server_ip.text()
+              PORT = int(mainWindow.lineEdit_server_port.text())
+              s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
               s.connect((HOST, PORT))
               server.append(s)  
             
@@ -75,19 +76,29 @@ def connectToServer():
             
         except Exception:
               SS.showErrorMessage("Error Connecting", "Server unavailable.")
-              s.close()
-              del server[:]
+              
+              try:
+                    s.close()
+                    del server[:]
+              except Exception:
+                    del server[:]      
+              
+              
 
 def disconnectFromServer():
     global connectedToServer
     global authenticatedByServer
     
-    connectedToServer = False
-    sockets.send_one_message(server[-1], "Disconnect")
-    time.sleep(0.1)
-    server[-1].close()
-    del server[:]
-    mainWindow.label_server_status.setText("Status: Disonnected")
+    if (len(server)>0):
+          connectedToServer = False
+          sockets.send_one_message(server[-1], "Disconnect")
+          time.sleep(0.1)
+          server[-1].close()
+          del server[:]
+          mainWindow.label_server_status.setText("Status: Disonnected")
+    else:
+          SS.showErrorMessage("Error disconnecting", "Disconnection invalid. Not connected to a server.")
+
 
 def fileReceiveThread():
       global authenticatedByServer
@@ -132,6 +143,11 @@ def fileReceiveThread():
                     elif (data.decode() == "WARN"):
                         capacityWarning.emit()
                         
+                    elif (data.decode() == "SNR_WARN"):
+                          SNR_warning.info = 'The SNR obtained was lower than 20 dB.\n'
+                          SNR_warning.info += "SNR value of " + sockets.recv_one_message(server[-1]).decode() + " obtained."
+                          SNR_warning.emit()
+                        
                     elif (data.decode() == "Stats"):
                         embeddedStats.title = 'Steganographic file results'
                         embeddedStats.info = sockets.recv_one_message(server[-1]).decode()
@@ -170,7 +186,7 @@ def fileReceiveThread():
                                 notAuthenticated.info = "You have no attempts left and are blocked from the server"
                           
                           else:
-                                notAuthenticated.info = 'Wrong username and password enetered.\nAttempts left:'+ str(attemptsLeft)
+                                notAuthenticated.info = 'Wrong username and password entered.\nAttempts left:'+ str(attemptsLeft)
                           
                           notAuthenticated.emit()
                 
@@ -242,35 +258,56 @@ def encode():
         sockets.send_one_message(server[-1], mainWindow.lineEdit_AES_encode.text())
     
         if(mainWindow.radioButton_DWT.isChecked()):
-            # Send that DWT method was chosen
-            sockets.send_one_message(server[-1], "DWT")
                     
             # Get the order of bits to hold in the coefficients
             OBH = mainWindow.lineEdit_OBH.text()
             
-            # Send the order of bits to hold
-            sockets.send_one_message(server[-1], OBH)
+            try:
+                  int(OBH)      
+            
+                  # Send that DWT method was chosen
+                  sockets.send_one_message(server[-1], "DWT")
+            
+                  # Send the order of bits to hold
+                  sockets.send_one_message(server[-1], OBH)
+            except Exception:
+                  SS.showErrorMessage("Invalid input", "Select an integer value for OBH.")
+
+            
+            
             
         elif(mainWindow.radioButton_DWT_hybrid_encode.isChecked()):
-            # Send that DWT method was chosen
-            sockets.send_one_message(server[-1], "DWT_hybrid")
-                    
             # Get the order of bits to hold in the coefficients
             OBH = mainWindow.lineEdit_OBH_hybrid_encode.text()
             
-            # Send the order of bits to hold
-            sockets.send_one_message(server[-1], OBH)
+            try:
+                  int(OBH)      
+            
+                  # Send that DWT method was chosen
+                  sockets.send_one_message(server[-1], "DWT_hybrid")
+            
+                  # Send the order of bits to hold
+                  sockets.send_one_message(server[-1], OBH)
+            
+            except Exception:
+                  SS.showErrorMessage("Invalid input", "Select an integer value for OBH.")
+            
             
         elif(mainWindow.radioButton_dwt_scaling_encode.isChecked()):
-            # Send that DWT method was chosen
-            sockets.send_one_message(server[-1], "DWT_scale")
-                    
             # Get the order of bits to hold in the coefficients
             LSBs = mainWindow.lineEdit_dwt_scale_encoding_LSB.text()
             
-            # Send the order of bits to hold
-            sockets.send_one_message(server[-1], LSBs)
+            try:
+                  int(LSBs)
             
+                  # Send that DWT method was chosen
+                  sockets.send_one_message(server[-1], "DWT_scale")
+                  
+                  # Send the order of bits to hold
+                  sockets.send_one_message(server[-1], LSBs)
+           
+            except Exception:
+                  SS.showErrorMessage("Invalid input", "Select an integer value for LSBs.")
                 
         # Second method = Genetic Algorithm
         elif(mainWindow.radioButton_GA.isChecked()):
@@ -388,34 +425,56 @@ def decode():
         
         # Discrete haar wavelet transform decoding
         if (mainWindow.radioButton_DWT_3.isChecked()):
-            # Send the DWT method
-            sockets.send_one_message(server[-1], "DWT") 
             
             # Get the order of bits to hold in the coefficients
             OBH = mainWindow.lineEdit_OBH_nr_3.text()
             
-            # Send the order of bits to hold
-            sockets.send_one_message(server[-1], OBH)
+            try:
+                  int(OBH)
+                  
+                  # Send the DWT method
+                  sockets.send_one_message(server[-1], "DWT")       
+            
+                  # Send the order of bits to hold
+                  sockets.send_one_message(server[-1], OBH)
         
+            except Exception:
+                  SS.showErrorMessage("Invalid input", "Select an integer value for OBH.")
+            
         elif (mainWindow.radioButton_DWT_hybrid_decode.isChecked()):
-            # Send the DWT method
-            sockets.send_one_message(server[-1], "DWT_hybrid") 
+            
             
             # Get the order of bits to hold in the coefficients
             OBH = mainWindow.lineEdit_OBH_hybrid_decode.text()
             
-            # Send the order of bits to hold
-            sockets.send_one_message(server[-1], OBH) 
+            try:
+                  int(OBH)
+            
+                  # Send the DWT method
+                  sockets.send_one_message(server[-1], "DWT_hybrid") 
+            
+                  # Send the order of bits to hold
+                  sockets.send_one_message(server[-1], OBH) 
+                  
+            except Exception:
+                  SS.showErrorMessage("Invalid input", "Select an integer value for OBH.")
             
         elif (mainWindow.radioButton_dwt_scaling_decode.isChecked()):
-            # Send the DWT method
-            sockets.send_one_message(server[-1], "DWT_scale") 
             
             # Get the order of bits to hold in the coefficients
             LSBs = mainWindow.lineEdit_dwt_scale_decoding_LSB.text()
             
-            # Send the order of bits to hold
-            sockets.send_one_message(server[-1], LSBs)
+            try:
+                  int(LSBs)
+                  
+                  # Send the DWT method
+                  sockets.send_one_message(server[-1], "DWT_scale") 
+                  
+                  # Send the order of bits to hold
+                  sockets.send_one_message(server[-1], LSBs)
+                  
+            except Exception:
+                  SS.showErrorMessage("Invalid input", "Select an integer value for OBH.")
             
         # Genetic Algorithm decoding
         elif(mainWindow.radioButton_GA_3.isChecked()):
@@ -503,25 +562,38 @@ def setStegoPath():
       mainWindow.lineEdit_stego.setText(fp.openFile())
       
 def setEncryptionKeyAES():
-    fileName = fp.openFile()
-    fileContent = open(fileName, 'r', encoding = 'utf-8')
-    mainWindow.lineEdit_AES_encode.setText(fileContent.read())
+    try:
+          fileName = fp.openFile()
+          fileContent = open(fileName, 'r', encoding = 'utf-8')
+          mainWindow.lineEdit_AES_encode.setText(fileContent.read())
+    except Exception:
+          SS.showErrorMessage("Invalid file", "Select a valid text file.")
 
 def setDecryptionKeyAES():
-    fileName = fp.openFile()
-    fileContent = open(fileName, 'r', encoding = 'utf-8')
-    mainWindow.lineEdit_AES_decode.setText(fileContent.read())
-      
+    try:
+          fileName = fp.openFile()
+          fileContent = open(fileName, 'r', encoding = 'utf-8')
+          mainWindow.lineEdit_AES_decode.setText(fileContent.read())
+    except Exception:
+          SS.showErrorMessage("Invalid file", "Select a valid text file.")
+  
 def setKey():
-    fileName = fp.openFile()
-    fileContent = open(fileName, 'r', encoding = 'utf-8')
-    mainWindow.lineEdit_GA_key.setText(fileContent.read())   
+    try:
+          fileName = fp.openFile()
+          fileContent = open(fileName, 'r', encoding = 'utf-8')
+          mainWindow.lineEdit_GA_key.setText(fileContent.read())   
+    except Exception:
+          SS.showErrorMessage("Invalid file", "Select a valid text file.")
+
     
 def setKeyDecode():
-    fileName = fp.openFile()
-    fileContent = open(fileName, 'r', encoding = 'utf-8')
-    mainWindow.lineEdit_GA_key_3.setText(fileContent.read())   
-    
+    try:
+          fileName = fp.openFile()
+          fileContent = open(fileName, 'r', encoding = 'utf-8')
+          mainWindow.lineEdit_GA_key_3.setText(fileContent.read())   
+    except Exception:
+          SS.showErrorMessage("Invalid file", "Select a valid text file.")
+
 
 if __name__ == "__main__":
     # Create a QtWidget application
@@ -596,6 +668,7 @@ if __name__ == "__main__":
     embeddedStats.connect()
     authenticated.connect()
     notAuthenticated.connect()
+    SNR_warning.connect()
 
     # Guide user to provide values 1, 2, 3 or 4
     mainWindow.lineEdit_OBH.setPlaceholderText("OBH")
