@@ -1,25 +1,54 @@
-import AES
+import numpy as np
+from scipy.io import wavfile
+import scipy.signal as sps
 
-username = open('UnamePword/username.txt', 'w')
-password = open('UnamePword/password.txt', 'w')
+
+
+
+new_rate = 8192
+
+    
+sampling_rate, data = wavfile.read('C:/Users/Johan Gouws/Desktop/GenresDatabase - Copy/Rock/Dopamine-Blind_to_me.wav')
+print(data.dtype)
+number_of_samples = round(len(data) * float(new_rate) / sampling_rate)
+data = sps.resample(data, number_of_samples)
+data = data.astype(np.int16, order='C')
+data = data[0:15000]
+
+wavfile.write('Media/messageAudioDemo.wav',new_rate,data)
+rate,samples = wavfile.read('Media/messageAudioDemo.wav')
+print(max(samples))
+#y,s = librosa.load('C:/Users/Johan Gouws/Desktop/GenresDatabase - Copy/Rock/__Copper__-Turn.wav', sr =8192) 
+#y = y * 32768.0
+#for i in range(0,len(y)):
+#      y[i] = int(y[i])
+#      
+#scWave.write('Media/messageAudioDemo.wav',8192,y[50000:100000])
+#rate,samples=scWave.read('Media/messageAudioDemo.wav')
 #
-username.write(AES.string2bits(AES.AESCipherCBC('admin').encrypt('admin')))
-password.write(AES.string2bits(AES.AESCipherCBC('admin').encrypt('admin')))
-username.close()
-password.close()
+#print(max(samples))
 
 
-
-username = open('UnamePword/username.txt', 'r')
-password = open('UnamePword/password.txt', 'r')
+#username = open('UnamePword/username.txt', 'w')
+#password = open('UnamePword/password.txt', 'w')
+##
+#username.write(AES.string2bits(AES.AESCipherCBC('admin').encrypt('admin')))
+#password.write(AES.string2bits(AES.AESCipherCBC('admin').encrypt('admin')))
+#username.close()
+#password.close()
 #
-userBits = username.read()
-pwdBits =  password.read()
-print(userBits)
-print(AES.bits2string(AES.decryptBinaryCBCString('0101100001101011011010100100100001010101010001100011011001001111011000110111101001000001001111010101011001010100011011110100101101110010011100100110011100111101', 'admin')))
-print((AES.AESCipherCBC('admin').decrypt(AES.bits2string(pwdBits))))
-username.close()
-password.close()
+#
+#
+#username = open('UnamePword/username.txt', 'r')
+#password = open('UnamePword/password.txt', 'r')
+##
+#userBits = username.read()
+#pwdBits =  password.read()
+#print(userBits)
+#print(AES.bits2string(AES.decryptBinaryCBCString('0101100001101011011010100100100001010101010001100011011001001111011000110111101001000001001111010101011001010100011011110100101101110010011100100110011100111101', 'admin')))
+#print((AES.AESCipherCBC('admin').decrypt(AES.bits2string(pwdBits))))
+#username.close()
+#password.close()
 
 #import json
 #from base64 import b64encode, b64decode

@@ -99,7 +99,7 @@ def threaded_client(conn, clientNum):
     authenticated = False
     
     while True:
-        try:
+#        try:
             message = sockets.recv_one_message(conn)
             if (message == None):
                   break
@@ -239,7 +239,7 @@ def threaded_client(conn, clientNum):
      
                         # Get the audio samples in integer form converted to binary
                         intSamples = fp.extractWaveMessage(str(clientNum) + "MSG" + fileType)
-    
+
                         # Convert to integer list of bits for embedding
                         secretMessage = "".join(intSamples[0])
                         
@@ -1139,10 +1139,10 @@ def threaded_client(conn, clientNum):
                   mainWindow.listWidget_log.addItem("Server receiving command")
                   mainWindow.listWidget_log.addItem("Command -> " + message.decode())
                   
-        except Exception:
-            mainWindow.listWidget_log.addItem("[-] Client disconnected")
-            clientsConnected -= 1
-            mainWindow.label_num_clients.setText("Clients connected: " + str(clientsConnected))
+#        except Exception:
+#            mainWindow.listWidget_log.addItem("[-] Client disconnected")
+#            clientsConnected -= 1
+#            mainWindow.label_num_clients.setText("Clients connected: " + str(clientsConnected))
 
 def acceptClients(param):
       HOST = ""
