@@ -275,7 +275,7 @@ for path in allPaths:
                   
             
             
-            LSBs= 6
+            LSBs= 1
                   
             message = "".join(list(map(str, message)))
             originalCoverSamples = deepcopy(samplesOne)
