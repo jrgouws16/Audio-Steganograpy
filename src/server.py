@@ -1283,6 +1283,9 @@ def change():
             
       uName = AES.bits2string(AES.decryptBinaryCBCString(uName, mainWindow.lineEdit_username.text()))
       pWord = AES.bits2string(AES.decryptBinaryCBCString(pWord, mainWindow.lineEdit_password.text()))
+
+      print(uName)
+      print(pWord)
       
       if (mainWindow.lineEdit_username.text() == uName and mainWindow.lineEdit_password.text() == pWord):
             
